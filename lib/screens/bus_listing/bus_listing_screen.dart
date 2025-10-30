@@ -11,301 +11,273 @@ class BusListingScreen extends StatefulWidget {
   State<BusListingScreen> createState() => _BusListingScreenState();
 }
 
-class _BusListingScreenState extends State<BusListingScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  final List<Map<String, dynamic>> busList = [
+class _BusListingScreenState extends State<BusListingScreen> {
+  // List of bus data
+  final List<Map<String, dynamic>> buses = [
     {
-      "departure": "14:15",
-      "arrival": "Starting",
-      "duration": "19:30",
-      "seats": "8 seats",
-      "time": "4h 33m",
-      "price": "1200.00",
-
+      "date": "Thu, 12 Apr 2025",
+      "startTime": "07:15",
+      "endTime": "11:00",
+      "from": "Pune",
+      "to": "Mumbai",
+      "price": "₹16.25",
+      "seatsLeft": "15 Seats left",
+      "expanded": false,
     },
     {
-      "departure": "16:45",
-      "arrival": "Starting",
-      "duration": "30:30",
-      "seats": "12 seats ",
-      "time": "7h 40m",
-      "price": "950.00",
+      "date": "Thu, 15 Apr 2025",
+      "startTime": "13:00",
+      "endTime": "16:45",
+      "from": "Delhi",
+      "to": "Agra",
+      "price": "₹11.55",
+      "seatsLeft": "12 Seats left",
+      "expanded": false,
     },
     {
-      "departure": "18:00",
-      "arrival": "Starting",
-      "duration": "10:15",
-      "seats": "5 seats ",
-      "time": "12h 3m",
-      "price": "1000.00",
-    },
-    {
-      "departure": "20:15",
-      "arrival": "Starting",
-      "duration": "23:45",
-      "seats": "3 seats",
-      "time": "4h 33m",
-      "price": "1800.00",
+      "date": "Fri, 15 Apr 2025",
+      "startTime": "16:00",
+      "endTime": "19:45",
+      "from": "Jaipur",
+      "to": "Udaipur",
+      "price": "₹13.55",
+      "seatsLeft": "8 Seats left",
+      "expanded": false,
     },
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this); // ✅ FIXED
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Color(0xFFF5F7FA),
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        titleSpacing: 0,
-
-        elevation: 0,
         backgroundColor: Colors.white,
-
-        title: Container(
-          margin: EdgeInsets.only(right: 10),
-          height: 40,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.indigo.shade900, width: 2),
-          ),
-
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Colombo → Kandy , 23 Sep 2019",
-              style: GoogleFonts.poppins(
-                color: Colors.indigo.shade900,
-                fontWeight: FontWeight.w600,
-                fontSize: 14.5,
-              ),
-            ),
+        elevation: 1,
+        title: Text(
+          "Available Buses",
+          style: GoogleFonts.poppins(
+            color: Colors.indigo.shade900,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.indigo.shade900),
-          onPressed: () => Navigator.pop(context),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: TabBar(
-            indicatorColor: Colors.indigo.shade900,
-            controller: _tabController,
-            labelColor: Colors.indigo.shade900,
-            unselectedLabelColor: Colors.grey,
-            dividerColor: Colors.transparent,
-
-            labelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-            unselectedLabelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
-            tabs: const [
-              Tab(text: "STANDARD"),
-              Tab(text: "SEMI LUXURY"),
-              Tab(text: "SUPER LUXURY"),
-            ],
-          ),
-        ),
+        centerTitle: true,
       ),
-
-      // ---------- Body ----------
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildBusList(),
-                  _buildBusList(),
-                  _buildBusList(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ---------- Reusable Bus List Builder ----------
-  Widget _buildBusList() {
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 4),
-      itemCount: busList.length,
-      itemBuilder: (context, index) {
-        final bus = busList[index];
-        return GestureDetector(
-          onTap: (){
-            Get.to(SelectSeatsScreen());
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 14),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: buses.length,
+        itemBuilder: (context, index) {
+          final bus = buses[index];
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 6,
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
               ],
             ),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bus["departure"],
-                        style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                // 🔹 Top Row - Date
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      bus["date"],
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
                       ),
-                      Text(
-                        bus["arrival"],
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Container(
-                        height: 26,
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.yellow.shade900,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.settings, color: Colors.white, size: 16),
-                            SizedBox(width: 4),
-                            Text(
-                              "8.9",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Icon(Icons.directions_bus, color: Colors.indigo.shade900),
+                  ],
                 ),
+                const SizedBox(height: 15),
 
-                Center(child: Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: Icon(Icons.arrow_forward, color: Colors.grey, size: 24),
-                )),
-
-                // Middle section
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bus["duration"],
-                        style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        bus["seats"],
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        "*****",
-                        style: GoogleFonts.poppins(
-                          color: Colors.indigo,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+                // 🔹 Time & Route
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _timeColumn(bus["startTime"], bus["from"]),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 80,bottom: 25),
+                      child: Text("3h 33m",style: GoogleFonts.poppins(
+                        color: Colors.grey,fontSize: 14,fontWeight: FontWeight.w500
+                      ),),
+                    ),
+                    _timeColumn(bus["endTime"], bus["to"]),
+                  ],
                 ),
+                const SizedBox(height: 10),
 
-                // Right section
-                Expanded(
-                  flex: 2,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Column(
-
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                // 🔹 Bottom Row Info
+                SizedBox(height: 15,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
+                        Icon(Icons.event_seat, size: 19, color: Colors.indigo.shade900),
+                        const SizedBox(width: 5),
                         Text(
-                          bus["time"],
+                          bus["seatsLeft"],
                           style: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          bus["price"],
-                          style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontSize: 19,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          "Last 10 min",
-                          style: GoogleFonts.poppins(
-                            color: Colors.red.shade800,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.indigo.shade900,
                           ),
                         ),
                       ],
                     ),
+                    Text(
+                      bus["price"],
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.indigo.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.yellow.shade800,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        bus["expanded"] = !bus["expanded"];
+                      });
+                    },
+                    child: Text(
+                      bus["expanded"] ? "View Less" : "View More",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ),
+
+                // 🔹 Expanded Section
+                if (bus["expanded"]) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 10),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              children: [
+                              _iconInfo(Icons.wifi, "Wi-Fi"),
+                                SizedBox(height: 20,),
+                              _iconInfo(Icons.ac_unit, "AC"),
+                            ],),
+                          SizedBox(height: 30,),
+                          Column(
+                            children: [
+                            _iconInfo(Icons.chair_alt, "Sleeper"),
+                              SizedBox(height: 20,),
+                            _iconInfo(Icons.usb, "Charging"),
+                          ],)
+
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.yellow.shade800,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.to(SelectSeatsScreen());
+                      },
+                      child: Text(
+                        "Select Seats",
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  // Helper: time column
+  Widget _timeColumn(String time, String city) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          time,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 3),
+        Text(
+          city,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: Colors.grey[700],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper: amenities icons
+  Widget _iconInfo(IconData icon, String label) {
+    return Column(
+      children: [
+        Icon(icon, size: 26, color: Colors.indigo.shade900),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+              fontSize: 14, color: Colors.black87),
+        ),
+      ],
     );
   }
 }

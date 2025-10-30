@@ -1,5 +1,11 @@
+import 'package:bus_booking_app/routes/bus_routes_screen.dart';
+import 'package:bus_booking_app/screens/bus_listing/bus_list_screen.dart';
 import 'package:bus_booking_app/screens/bus_listing/bus_listing_screen.dart';
+import 'package:bus_booking_app/screens/driver/driver_screen.dart';
+import 'package:bus_booking_app/screens/privacy_policy/privacy_policy_screen.dart';
+import 'package:bus_booking_app/screens/terms_condition/terms_condition_screen.dart';
 import 'package:bus_booking_app/widgets/custom_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,9 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectedOption = "Today";
   DateTime? selectedDate;
 
-  // ✅ Added controllers for From and To fields
-  final TextEditingController fromController = TextEditingController(text: "Madara");
-  final TextEditingController toController = TextEditingController(text: "Colombo");
+  final TextEditingController fromController = TextEditingController();
+  final TextEditingController toController = TextEditingController();
 
   Future<void> _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -37,15 +42,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(backgroundColor: Colors.white, child: _drawer()),
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.menu_rounded, color: Colors.indigo),
+        leading: Builder(
+          builder: (context) => IconButton(
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+            icon: const Icon(Icons.menu_rounded, color: Colors.indigo),
+          ),
         ),
         title: Text(
           "SLTB EXPRESS",
@@ -56,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
@@ -69,9 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.indigo[900],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 26),
 
-            // ---- Top Date Cards ----
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -86,61 +96,59 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            const SizedBox(height: 32),
-
-            // ---- Payment Section ----
-            Container(
-              padding: const EdgeInsets.only(left: 10, right: 10, top: 7),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              height: 60,
-              width: double.infinity,
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Awaiting payment",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "1350.00 LKR",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+             const SizedBox(height: 32),
+            // Container(
+            //   padding: const EdgeInsets.only(left: 10, right: 10, top: 7),
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(5),
+            //     color: Colors.white,
+            //     boxShadow: [
+            //       BoxShadow(
+            //         color: Colors.grey.withOpacity(0.2),
+            //         spreadRadius: 1,
+            //         blurRadius: 2,
+            //         offset: const Offset(0, 1),
+            //       ),
+            //     ],
+            //   ),
+            //   height: 60,
+            //   width: double.infinity,
+            //   child: Center(
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //       children: [
+            //         Column(
+            //           crossAxisAlignment: CrossAxisAlignment.start,
+            //           children: [
+            //             Text(
+            //               "Awaiting payment",
+            //               style: GoogleFonts.poppins(
+            //                 fontSize: 14,
+            //                 color: Colors.black,
+            //               ),
+            //             ),
+            //             const SizedBox(height: 4),
+            //             Text(
+            //               "1350.00 LKR",
+            //               style: GoogleFonts.poppins(
+            //                 fontSize: 16,
+            //                 fontWeight: FontWeight.w600,
+            //                 color: Colors.redAccent,
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
 
             const SizedBox(height: 45),
 
             // ---- Find a bus ----
             Container(
               padding: const EdgeInsets.only(top: 10),
-              height: 450,
+              height: 380,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
@@ -178,7 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: _customTextField(
                                 "From",
-                                "Madara",
                                 controller: fromController,
                               ),
                             ),
@@ -215,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: _customTextField(
                                 "To",
-                                "Colombo",
+
                                 controller: toController,
                               ),
                             ),
@@ -246,26 +253,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                      color: Colors.indigo.shade900),
+                                    color: Colors.indigo.shade900,
+                                  ),
                                   borderRadius: BorderRadius.circular(0),
                                   color: Colors.white,
                                 ),
                                 child: Center(
                                   child: selectedDate == null
                                       ? Icon(
-                                    Icons.calendar_today_outlined,
-                                    color: Colors.indigo.shade900,
-                                    size: 22,
-                                  )
+                                          Icons.calendar_today_outlined,
+                                          color: Colors.indigo.shade900,
+                                          size: 22,
+                                        )
                                       : Text(
-                                    "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
-                                    ),
-                                  ),
+                                          "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 13,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ),
@@ -279,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Colors.yellow.shade800,
                     text: "Let's check!",
                     onPressed: () {
-                      Get.to(BusListingScreen());
+                      Get.to(BusListScreen());
                     },
                   ),
                 ],
@@ -307,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
             spreadRadius: 4,
             blurRadius: 6,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -354,19 +362,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ✅ Updated to include controller
-  Widget _customTextField(String label, String hint,
-      {TextEditingController? controller}) {
+  Widget _customTextField(
+    String hint, {
+    TextEditingController? controller,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: Colors.indigo.shade900,
-          ),
-        ),
+
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
@@ -377,12 +380,12 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: controller,
             textAlign: TextAlign.start,
             keyboardType: TextInputType.text,
-            style: GoogleFonts.poppins(
-              color: Colors.indigo.shade900,
-            ),
+            style: GoogleFonts.poppins(color: Colors.indigo.shade900),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 12),
+                horizontal: 16,
+                vertical: 12,
+              ),
               border: InputBorder.none,
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
@@ -423,6 +426,221 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _drawer() {
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(top: 70),
+          height: 260,
+          width: double.infinity,
+          color: Colors.yellow.shade800,
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 46,
+                backgroundImage: NetworkImage(
+                  "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80",
+                ),
+              ),
+              SizedBox(height: 10),
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Yadvendra Sharma",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              SizedBox(height: 3),
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "New delhi",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(Icons.home),
+                  SizedBox(width: 10),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Home Screen",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 26),
+              GestureDetector(
+                onTap: () {
+                  Get.to(PrivacyPolicyScreen());
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.policy_outlined),
+                    SizedBox(width: 10),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Privacy policy",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 26),
+              GestureDetector(
+                onTap: () {
+                  Get.to(TermsConditionScreen());
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.sports_tennis),
+                    SizedBox(width: 10),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Terms & Condition",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 26),
+              GestureDetector(
+                onTap: () {
+                  Get.to(DriverScreen());
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.drive_eta),
+                    SizedBox(width: 10),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Driver",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 26),
+              GestureDetector(
+                onTap: () {
+                  Get.to(BusListScreen());
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.bus_alert_rounded),
+                    SizedBox(width: 10),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Bus",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 26),
+              GestureDetector(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(CupertinoIcons.person_alt_circle),
+                    SizedBox(width: 10),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Contact support",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 60),
+              Container(
+                height: 45,
+                width: 150,
+                decoration: BoxDecoration(
+                  color: Colors.yellow.shade800,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Log Out",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

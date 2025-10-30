@@ -1,5 +1,12 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../core/constant/app_colors.dart';
+import '../../../core/constant/app_style.dart';
+import '../../../widgets/custom_button.dart';
+import '../../../widgets/custom_textfield.dart';
+import '../otp/otp_screen.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({super.key});
@@ -9,147 +16,123 @@ class ForgetPasswordScreen extends StatefulWidget {
 }
 
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
-  final TextEditingController _password = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>(); // ✅ Added form key
 
+  bool isInputNotEmpty = false;
 
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.info_outline, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
-              ),
-            ),
-          ],
-        ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red.shade800,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    emailController.addListener(_checkInput);
   }
 
-  void _onLogin() {
-    String password = _password.text.trim();
+  void _checkInput() {
+    setState(() {
+      isInputNotEmpty = emailController.text.isNotEmpty;
+    });
+  }
 
-    if (password.isEmpty) {
-      _showSnackBar(context, "Please enter your email or username");
-      return;
-    } else {
-      _showSnackBar(context, "Send link to reset password");
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
 
+  // ✅ Email validation logic
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Email is required";
     }
+
+    // Regular expression for email format validation
+    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+    if (!emailRegExp.hasMatch(value.trim())) {
+      return "Please enter a valid email address";
+    }
+
+    return null; // Valid
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(onPressed: (){
-          Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back)),
+        automaticallyImplyLeading: false,
+        backgroundColor: AppColors.background,
+        title: Text(
+          "Forget Password",
+          style: AppStyle.appBarText(),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.back();
+            },
+            icon: const Icon(Icons.close),
+          ),
+        ],
       ),
-      backgroundColor: Colors.white,
-      body: Center(
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Form(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Form( // ✅ Wrapped with Form widget
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header Text
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: 300,
                     child: Text(
-                      "Forget password",
-                      style: TextStyle(
-                        color: Colors.blue.shade800,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                      "Forget password\nSLTB Express account",
+                      style: AppStyle.userText1(),
+                      maxLines: 2,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
 
-
-
-
-
-
-
-                SizedBox(
-                  width: double.infinity,
-                  child: TextFormField(
-                    controller: _password,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: "Enter email to reset password",
-                      hintStyle: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
+                // Input Field
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 21.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextField(
+                        label: "Enter your email address",
+                        hint: "Enter your email address",
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        isPassword: false,
+                        validator: _validateEmail, // ✅ added validator
                       ),
-                    ),
+                      const SizedBox(height: 30),
+
+                      // Submit Button
+                      CustomButton(
+                        text: "Continue",
+                        backgroundColor: isInputNotEmpty
+                            ? Colors.yellow.shade800
+                            : Colors.yellow.shade800,
+                        textColor: Colors.black,
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // ✅ Only go to next screen if valid
+                            Get.offAll(const OtpScreen());
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 30),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 45),
-
-                // Login button
-                GestureDetector(
-                  onTap: _onLogin,
-                  child: Container(
-                    height: 50,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-
-                        colors: [Colors.blue.shade700, Colors.blue.shade900],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(26),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.shade200,
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Forget Password",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ),
-
-
               ],
             ),
           ),

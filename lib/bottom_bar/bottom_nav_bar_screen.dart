@@ -61,8 +61,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 26,
-                  vertical: 9,
+                  horizontal: 28,
+                  vertical: 11,
                 ),
                 decoration: BoxDecoration(
                   color: isSelected ? Colors.white : Colors.transparent,

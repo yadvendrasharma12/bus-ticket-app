@@ -339,19 +339,24 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                 ],),
             ),
           ),
-          Container(
-            height: 80,
-            width: 140,
-            decoration: BoxDecoration(
-              color: Colors.yellow.shade800
-            ),
-            child: Center(
-              child:    Text(
-                "Pay",
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
+          GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              height: 80,
+              width: 140,
+              decoration: BoxDecoration(
+                color: Colors.yellow.shade800
+              ),
+              child: Center(
+                child:    Text(
+                  "Verify",
+                  style: GoogleFonts.poppins(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),

@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:bus_booking_app/screens/auth/welcome/welcome_screen.dart';
+import 'package:bus_booking_app/screens/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(Duration(seconds: 3), () {
-     Get.to(WelcomeScreen());
+     Get.to(OnboardingScreen());
     });
   }
 

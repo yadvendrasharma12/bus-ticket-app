@@ -15,7 +15,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _imageFile;
   DateTime? _selectedDate;
   String _selectedGender = "Female";
-  bool _isPasswordVisible = false; // 👁 Password visibility toggle
+  bool _isPasswordVisible = false;
+
+  // Editable controllers
+  final TextEditingController _nameController =
+  TextEditingController(text: "Anna Miller");
+  final TextEditingController _mobileController =
+  TextEditingController(text: "+91 9876543210");
+  final TextEditingController _addressController =
+  TextEditingController(text: "Colombo, Sri Lanka");
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
@@ -72,16 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        leading: IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.arrow_back_ios, color: Colors.indigo.shade800),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.more_horiz, color: Colors.indigo.shade800, size: 30),
-          ),
-        ],
+
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
@@ -90,6 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           children: [
+
             Center(
               child: Stack(
                 alignment: Alignment.bottomRight,
@@ -112,8 +112,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shape: BoxShape.circle,
                         color: Colors.indigo.shade800,
                       ),
-                      child:
-                      const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                      child: const Icon(Icons.camera_alt,
+                          color: Colors.white, size: 20),
                     ),
                   ),
                 ],
@@ -135,10 +135,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 15),
 
-            _buildStaticField("Anna Miller"),
+            _buildEditableNameField(),
             const SizedBox(height: 12),
 
-            // --- Gender + Date of Birth ---
             Row(
               children: [
                 Expanded(child: _buildGenderField()),
@@ -146,12 +145,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Expanded(child: _buildDatePickerField(context)),
               ],
             ),
+
             const SizedBox(height: 25),
 
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Email and password",
+                "Profile Information",
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   color: Colors.black,
@@ -161,12 +161,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
 
-            _buildTextField("Email", "anna@profile.com"),
-            const SizedBox(height: 12),
-            _buildPasswordField(),
+            _buildTextField("Name", _nameController),
+            const SizedBox(height: 22),
+            _buildTextField("Mobile Number", _mobileController),
+            const SizedBox(height: 22),
+            _buildTextField("Address", _addressController),
             const SizedBox(height: 25),
 
-            // --- Save Button ---
             CustomButton(
               text: "Save",
               onPressed: () {
@@ -174,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SnackBar(
                     backgroundColor: Colors.indigo,
                     content: Text(
-                      "Saved!\nGender: $_selectedGender\nDOB: ${_selectedDate != null ? "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}" : "Not selected"}",
+                      "Saved!\nName: ${_nameController.text}\nGender: $_selectedGender\nDOB: ${_selectedDate != null ? "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}" : "Not selected"}",
                       style: GoogleFonts.poppins(color: Colors.white),
                     ),
                   ),
@@ -189,30 +190,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ---------------- Helper Widgets ----------------
-
-  Widget _buildStaticField(String value) {
-    return Container(
-      height: 50,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.only(left: 13),
-      child: Text(
-        value,
-        style: GoogleFonts.poppins(
-          fontSize: 16,
-          color: Colors.black,
+  // --- Editable Name Field (Top) ---
+  Widget _buildEditableNameField() {
+    return TextField(
+      controller: _nameController,
+      decoration: InputDecoration(
+        labelText: "Full Name",
+        labelStyle: GoogleFonts.poppins(
+          fontSize: 15,
           fontWeight: FontWeight.w600,
+          color: Colors.black,
         ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        filled: true,
+        fillColor: Colors.grey.shade100,
       ),
     );
   }
 
-  /// Gender dropdown
+  // --- Gender Dropdown ---
   Widget _buildGenderField() {
     return Container(
       height: 60,
@@ -250,7 +246,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// Date picker
+  // --- Date Picker ---
   Widget _buildDatePickerField(BuildContext context) {
     return GestureDetector(
       onTap: () async {
@@ -275,11 +271,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : "${_selectedDate!.day.toString().padLeft(2, '0')}/"
                 "${_selectedDate!.month.toString().padLeft(2, '0')}/"
                 "${_selectedDate!.year}",
-            suffixIcon: const Icon(
-              Icons.date_range_rounded, // ✅ New modern icon
-              color: Colors.indigo,
-              size: 24,
-            ),
+            suffixIcon: const Icon(Icons.date_range_rounded,
+                color: Colors.indigo, size: 24),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -291,11 +284,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// Email & Password field
-  Widget _buildTextField(String label, String hint,
-      {bool obscureText = false, IconData? suffixIcon}) {
+  // --- Editable Text Field (Profile Info) ---
+  Widget _buildTextField(String label, TextEditingController controller) {
     return TextField(
-      obscureText: obscureText,
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.poppins(
@@ -303,47 +295,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: Colors.black,
           fontWeight: FontWeight.w600,
         ),
-        hintText: hint,
-        suffixIcon:
-        suffixIcon != null ? Icon(suffixIcon, color: Colors.grey) : null,
-        hintStyle: GoogleFonts.poppins(
-          fontSize: 14,
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
         fillColor: Colors.white,
-      ),
-    );
-  }
 
-  /// Password with visibility toggle 👁
-  Widget _buildPasswordField() {
-    return TextField(
-      obscureText: !_isPasswordVisible,
-      decoration: InputDecoration(
-        labelText: "Password",
-        labelStyle: GoogleFonts.poppins(
-          fontSize: 14,
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-        ),
-        hintText: "********",
-        suffixIcon: IconButton(
-          icon: Icon(
-            _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-            color: Colors.indigo,
-          ),
-          onPressed: () {
-            setState(() {
-              _isPasswordVisible = !_isPasswordVisible;
-            });
-          },
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        filled: true,
-        fillColor: Colors.white,
       ),
     );
   }
