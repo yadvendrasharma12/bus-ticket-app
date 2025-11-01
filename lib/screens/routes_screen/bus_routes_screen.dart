@@ -1,4 +1,7 @@
+import 'package:bus_booking_app/screens/select_seats/select_seats_screen.dart';
+import 'package:bus_booking_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class BusRoutesScreen extends StatefulWidget {
@@ -10,11 +13,11 @@ class BusRoutesScreen extends StatefulWidget {
 
 class _BusRoutesScreenState extends State<BusRoutesScreen> {
   final List<Map<String, dynamic>> busStops = [
-    {"stop": "Pune Station", "time": "07:00 AM", "distance": "0 km", "reached": true},
-    {"stop": "Wakad Bridge", "time": "07:30 AM", "distance": "15 km", "reached": true},
-    {"stop": "Lonavala", "time": "08:15 AM", "distance": "60 km", "reached": false},
-    {"stop": "Panvel", "time": "09:10 AM", "distance": "100 km", "reached": false},
-    {"stop": "Mumbai Central", "time": "10:00 AM", "distance": "120 km", "reached": false},
+    {"stop": "Pune Station", "time": "07:00 AM", "distance": "0 km"},
+    {"stop": "Wakad Bridge", "time": "07:30 AM", "distance": "15 km"},
+    {"stop": "Lonavala", "time": "08:15 AM", "distance": "60 km"},
+    {"stop": "Panvel", "time": "09:10 AM", "distance": "100 km"},
+    {"stop": "Mumbai Central", "time": "10:00 AM", "distance": "120 km"},
   ];
 
   @override
@@ -23,9 +26,10 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        leading: IconButton(onPressed: (){
-          Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back_ios,color: Colors.indigo.shade800,)),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.indigo.shade800),
+        ),
         backgroundColor: Colors.white,
         centerTitle: true,
         title: Text(
@@ -37,78 +41,72 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 Header Info
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade800,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                "Where is my Bus? Track and view your route details below 👇",
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+
+              // 🔹 Route Title
+              Text(
+                "Bus Route Details",
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.indigo.shade900,
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
 
+              const SizedBox(height: 20),
 
-            Expanded(
-              child: ListView.builder(
+              // 🔹 Bus Stops
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
                 itemCount: busStops.length,
                 itemBuilder: (context, index) {
                   final stop = busStops[index];
                   final isLast = index == busStops.length - 1;
-                  final reached = stop["reached"] as bool;
 
                   return Stack(
                     children: [
-
+                      // Route line
                       if (!isLast)
                         Positioned(
                           left: 27,
-                          top: 40,
+                          top: 30,
                           bottom: 0,
                           child: Container(
                             width: 2,
-                            color: reached ? Colors.green : Colors.grey.shade400,
+                            color: Colors.indigo.shade300,
                           ),
                         ),
+
                       Container(
                         margin: const EdgeInsets.only(bottom: 20),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 🔸 Circle Indicator
+                            // Circle indicator (same color)
                             Column(
                               children: [
                                 Container(
                                   width: 18,
                                   height: 18,
                                   decoration: BoxDecoration(
-                                    color: reached
-                                        ? Colors.green
-                                        : Colors.grey.shade400,
+                                    color: Colors.indigo.shade400,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: reached
-                                      ? const Icon(Icons.check,
-                                      size: 12, color: Colors.white)
-                                      : null,
                                 ),
                               ],
                             ),
                             const SizedBox(width: 20),
 
-                            // 🔹 Stop Details
+                            // Stop details
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.all(14),
@@ -136,17 +134,10 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
                                     ),
                                     const SizedBox(height: 6),
                                     Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        _infoText(
-                                          "🕒 Time: ",
-                                          stop["time"],
-                                        ),
-                                        _infoText(
-                                          "📍 Distance: ",
-                                          stop["distance"],
-                                        ),
+                                        _infoText("🕒 Time: ", stop["time"]),
+                                        _infoText("📍 Distance: ", stop["distance"]),
                                       ],
                                     ),
                                   ],
@@ -160,8 +151,23 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
                   );
                 },
               ),
-            ),
-          ],
+
+              const SizedBox(height: 25),
+
+              // ✅ Book Button
+              Center(
+                child: CustomButton(
+                  backgroundColor: Colors.yellow.shade800,
+                  textColor: Colors.white,
+                  text: "Book Tickets!",
+                  onPressed: () {
+                    Get.to(() => const SelectSeatsScreen());
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

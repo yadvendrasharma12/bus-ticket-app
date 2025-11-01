@@ -20,6 +20,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Editable controllers
   final TextEditingController _nameController =
   TextEditingController(text: "Anna Miller");
+  final TextEditingController _emailController =
+  TextEditingController(text: "annamiller@gmail.com");
   final TextEditingController _mobileController =
   TextEditingController(text: "+91 9876543210");
   final TextEditingController _addressController =
@@ -161,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
 
-            _buildTextField("Name", _nameController),
+            _buildTextField("Email address", _emailController),
             const SizedBox(height: 22),
             _buildTextField("Mobile Number", _mobileController),
             const SizedBox(height: 22),

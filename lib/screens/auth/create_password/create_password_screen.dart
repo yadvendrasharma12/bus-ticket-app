@@ -41,12 +41,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     super.dispose();
   }
 
-  // 🔹 Password validation logic
-  bool _isValidPassword(String password) {
-    final passwordRegex = RegExp(
-        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-    return passwordRegex.hasMatch(password);
-  }
 
   void _validateAndReset() {
     FocusScope.of(context).unfocus();
@@ -65,18 +59,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       return;
     }
 
-    // ✅ Weak password check
-    if (!_isValidPassword(password)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text(
-            "Password must be at least 8 characters long and include:\n• 1 uppercase\n• 1 lowercase\n• 1 number\n• 1 special character",
-          ),
-        ),
-      );
-      return;
-    }
+
 
     // ✅ Match check
     if (password != confirmPassword) {

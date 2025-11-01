@@ -1,12 +1,10 @@
-
-
 import 'dart:async';
-
 import 'package:bus_booking_app/screens/auth/welcome/welcome_screen.dart';
 import 'package:bus_booking_app/screens/onboarding/onboarding_screen.dart';
+import 'package:bus_booking_app/bottom_bar/bottom_nav_bar_screen.dart';
+import 'package:bus_booking_app/utils/shared_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../core/constant/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,12 +15,25 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 3), () {
-     Get.to(OnboardingScreen());
-    });
+    _checkLoginStatus();
+  }
+
+  /// ✅ Check if user already logged in
+  Future<void> _checkLoginStatus() async {
+    await Future.delayed(const Duration(seconds: 2)); // splash delay
+    final token = await MySharedPref.getToken();
+
+    if (token != null && token.isNotEmpty) {
+      // 🔹 Token exists → go to Home
+      Get.offAll(() => const BottomNavBarScreen());
+    } else {
+      // 🔹 No token → go to Onboarding (or Welcome)
+      Get.offAll(() => const OnboardingScreen());
+    }
   }
 
   @override
@@ -36,7 +47,8 @@ class _SplashScreenState extends State<SplashScreen> {
           child: SizedBox(
             width: 154,
             height: 123,
-            child: Image.asset("assets/logo/bus-logo.jpg",
+            child: Image.asset(
+              "assets/logo/bus-logo.jpg",
               filterQuality: FilterQuality.high,
             ),
           ),

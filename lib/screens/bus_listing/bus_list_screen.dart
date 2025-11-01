@@ -1,10 +1,15 @@
-import 'package:bus_booking_app/routes/bus_routes_screen.dart';
+
+import 'package:bus_booking_app/screens/all_bus/all_busses_screen.dart';
 import 'package:bus_booking_app/screens/bus_listing/bus_listing_screen.dart';
 import 'package:bus_booking_app/screens/driver/driver_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../routes_screen/bus_routes_screen.dart';
+
+
 
 class BusListScreen extends StatefulWidget {
   const BusListScreen({super.key});
@@ -78,7 +83,7 @@ class _BusListScreenState extends State<BusListScreen>
           ),
 
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 7),
             child: Text(
               "Colombo → Kandy , 30 Oct 2025",
               style: GoogleFonts.poppins(
@@ -163,7 +168,11 @@ class _BusListScreenState extends State<BusListScreen>
                         color: Colors.indigo[900],
                       ),
                     ),
-                    Icon(Icons.directions_bus, color: Colors.indigo[800]),
+                    InkWell(
+                      onTap: (){
+                        Get.to(AllBussesScreen());
+                      },
+                        child: Icon(Icons.directions_bus, color: Colors.indigo[800])),
                   ],
                 ),
                 const SizedBox(height: 10),

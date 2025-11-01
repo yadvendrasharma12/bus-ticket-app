@@ -1,6 +1,8 @@
-import 'package:bus_booking_app/routes/bus_routes_screen.dart';
+import 'package:bus_booking_app/controllers/auth_controllers.dart';
+import 'package:bus_booking_app/screens/auth/login/login_screen.dart';
 import 'package:bus_booking_app/screens/bus_listing/bus_list_screen.dart';
 import 'package:bus_booking_app/screens/bus_listing/bus_listing_screen.dart';
+import 'package:bus_booking_app/screens/contect_support/contact_support_screen.dart';
 import 'package:bus_booking_app/screens/driver/driver_screen.dart';
 import 'package:bus_booking_app/screens/privacy_policy/privacy_policy_screen.dart';
 import 'package:bus_booking_app/screens/terms_condition/terms_condition_screen.dart';
@@ -38,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
+final AuthController authController = Get.put(AuthController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,58 +99,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
              const SizedBox(height: 32),
-            // Container(
-            //   padding: const EdgeInsets.only(left: 10, right: 10, top: 7),
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(5),
-            //     color: Colors.white,
-            //     boxShadow: [
-            //       BoxShadow(
-            //         color: Colors.grey.withOpacity(0.2),
-            //         spreadRadius: 1,
-            //         blurRadius: 2,
-            //         offset: const Offset(0, 1),
-            //       ),
-            //     ],
-            //   ),
-            //   height: 60,
-            //   width: double.infinity,
-            //   child: Center(
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //       children: [
-            //         Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           children: [
-            //             Text(
-            //               "Awaiting payment",
-            //               style: GoogleFonts.poppins(
-            //                 fontSize: 14,
-            //                 color: Colors.black,
-            //               ),
-            //             ),
-            //             const SizedBox(height: 4),
-            //             Text(
-            //               "1350.00 LKR",
-            //               style: GoogleFonts.poppins(
-            //                 fontSize: 16,
-            //                 fontWeight: FontWeight.w600,
-            //                 color: Colors.redAccent,
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
 
-            const SizedBox(height: 45),
+
 
             // ---- Find a bus ----
             Container(
               padding: const EdgeInsets.only(top: 10),
-              height: 380,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
@@ -163,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min, // ✅ auto height
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -222,7 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: _customTextField(
                                 "To",
-
                                 controller: toController,
                               ),
                             ),
@@ -241,48 +197,51 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildSelectableChip("Today"),
-                            _buildSelectableChip("Tomorrow"),
-                            GestureDetector(
-                              onTap: () => _pickDate(context),
-                              child: Container(
-                                height: 50,
-                                width: 125,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.indigo.shade900,
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _buildSelectableChip("Today"),
+                              _buildSelectableChip("Tomorrow"),
+
+                              GestureDetector(
+                                onTap: () => _pickDate(context),
+                                child: Container(
+                                  height: 50,
+                                  width: 100,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.indigo.shade900),
+                                    borderRadius: BorderRadius.circular(0),
+                                    color: Colors.white,
                                   ),
-                                  borderRadius: BorderRadius.circular(0),
-                                  color: Colors.white,
-                                ),
-                                child: Center(
-                                  child: selectedDate == null
-                                      ? Icon(
-                                          Icons.calendar_today_outlined,
-                                          color: Colors.indigo.shade900,
-                                          size: 22,
-                                        )
-                                      : Text(
-                                          "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 13,
-                                          ),
-                                        ),
+                                  child: Center(
+                                    child: selectedDate == null
+                                        ? Icon(
+                                      Icons.calendar_today_outlined,
+                                      color: Colors.indigo.shade900,
+                                      size: 22,
+                                    )
+                                        : Text(
+                                      "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                   CustomButton(
                     backgroundColor: Colors.yellow.shade800,
                     text: "Let's check!",
@@ -290,9 +249,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(BusListScreen());
                     },
                   ),
+                  SizedBox(height: 10,),
                 ],
               ),
-            ),
+            )
+
           ],
         ),
       ),
@@ -476,26 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 25),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.home),
-                  SizedBox(width: 10),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Home Screen",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 26),
+
               GestureDetector(
                 onTap: () {
                   Get.to(PrivacyPolicyScreen());
@@ -597,6 +539,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 26),
               GestureDetector(
+                onTap: (){
+                  Get.to(ContactSupportScreen());
+                },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -617,22 +562,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 60),
-              Container(
-                height: 45,
-                width: 150,
-                decoration: BoxDecoration(
-                  color: Colors.yellow.shade800,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Log Out",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+              SizedBox(height: 30),
+              GestureDetector(
+                onTap: (){
+                 authController.logout();
+                },
+                child: Container(
+                  height: 45,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.yellow.shade800,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Log Out",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),

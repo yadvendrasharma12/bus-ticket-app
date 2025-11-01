@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../pesenger_details/pasenger_details_screen.dart';
+
 class SelectSeatsScreen extends StatefulWidget {
   const SelectSeatsScreen({super.key});
 
@@ -150,7 +152,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
               const SizedBox(height: 33),
 
               Container(
-                height: 600,
+                height: 540,
                 margin: EdgeInsets.symmetric(horizontal: 40),
                 padding: const EdgeInsets.symmetric(
                     horizontal: 0, vertical: 0),
@@ -341,7 +343,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
           ),
           GestureDetector(
             onTap: (){
-              Navigator.pop(context);
+             Get.to(PassengerDetailsScreen());
             },
             child: Container(
               height: 80,
@@ -351,7 +353,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
               ),
               child: Center(
                 child:    Text(
-                  "Verify",
+                  "Book Now",
                   style: GoogleFonts.poppins(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
