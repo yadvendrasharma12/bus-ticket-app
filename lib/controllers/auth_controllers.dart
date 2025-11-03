@@ -26,7 +26,6 @@ class AuthController extends GetxController {
         Uri.parse(ApiUrls.register),
         headers: {
           'Content-Type': 'application/json'
-
         },
         body: jsonEncode({
           "name": name,
@@ -133,9 +132,209 @@ class AuthController extends GetxController {
       isLoading(false);
     }
   }
+
   Future<void> logout() async {
     await MySharedPref.clearToken();
     Get.offAll(() => const WelcomeScreen()); // or LoginScreen
   }
 
-}
+
+  Future<void> forgetPassword({
+    required String email,
+    required VoidCallback onSuccess, required Null Function(dynamic error) onError,
+  }) async {
+    isLoading(true);
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiUrls.forgetPassword),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode({
+          "email": email,
+        }),
+
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print(response.statusCode);
+        print(response.body);
+        print(response.request);
+        final data = jsonDecode(response.body);
+        print("📩 API Response: $data");
+
+
+        Get.snackbar(
+          "Success",
+          data["message"] ?? "  OTP Send successfully",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        onSuccess();
+      } else {
+        Get.snackbar(
+          "Error",
+          data["message"] ?? "OTP Not Send",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Something went wrong: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading(false);
+    }
+
+
+
+    }
+
+
+  Future<void> verifyOtp({
+    required String email,
+    required int otp,
+    required VoidCallback onSuccess,
+    required Function(dynamic error) onError,
+  }) async {
+    isLoading(true);
+    try {
+      final response = await http.post(
+        Uri.parse(ApiUrls.veryFyOtp),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email.trim(),
+          "otp": otp,
+        }),
+      );
+
+      print("🔹 Response Code: ${response.statusCode}");
+      print("🔹 Response Body: ${response.body}");
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (data["success"] == true) {
+          Get.snackbar(
+            "Success",
+            data["message"] ?? "OTP verified successfully",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+          onSuccess();
+        } else {
+          final errorMsg = data["message"] ?? "Invalid OTP. Please try again.";
+          Get.snackbar(
+            "Error",
+            errorMsg,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          onError(errorMsg);
+        }
+      } else {
+        final errorMsg =
+            data["message"] ?? "Server error: ${response.statusCode}";
+        Get.snackbar(
+          "Error",
+          errorMsg,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        onError(errorMsg);
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Something went wrong: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      onError(e);
+    } finally {
+      isLoading(false);
+    }
+  }
+
+
+
+
+  Future<void> resetPassword({
+      required String email,
+      required String password,
+      required VoidCallback onSuccess,
+      required Function(dynamic error) onError,
+    }) async {
+      isLoading(true);
+
+      try {
+        final response = await http.post(
+          Uri.parse(ApiUrls.resetPassword),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            "email": email,
+             "password": password,
+          }),
+        );
+
+        final data = jsonDecode(response.body);
+        print("🔹 Response: ${response.body}");
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+
+          Get.snackbar(
+            "Success",
+            data["message"] ?? "Password Reset successfully",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+
+          onSuccess();
+        } else {
+          // ❌ Server returned error
+          final errorMsg = data["message"] ?? "Invalid Password, please try again";
+          Get.snackbar(
+            "Error",
+            errorMsg,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          onError(errorMsg);
+        }
+      } catch (e) {
+        // ❌ Network or parsing error
+        Get.snackbar(
+          "Error",
+          "Something went wrong: $e",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        onError(e);
+      } finally {
+        isLoading(false);
+      }
+    }
+  }
+
+
+

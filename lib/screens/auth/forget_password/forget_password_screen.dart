@@ -1,7 +1,8 @@
-
+import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../bottom_bar/bottom_nav_bar_screen.dart';
 import '../../../core/constant/app_colors.dart';
 import '../../../core/constant/app_style.dart';
 import '../../../widgets/custom_button.dart';
@@ -17,7 +18,8 @@ class ForgetPasswordScreen extends StatefulWidget {
 
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   final TextEditingController emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>(); // ✅ Added form key
+  final _formKey = GlobalKey<FormState>();
+  late final AuthController authController = Get.put(AuthController());
 
   bool isInputNotEmpty = false;
 
@@ -39,20 +41,38 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
     super.dispose();
   }
 
-  // ✅ Email validation logic
+  // ✅ Email validation logic only
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return "Email is required";
     }
-
-    // Regular expression for email format validation
     final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-
     if (!emailRegExp.hasMatch(value.trim())) {
       return "Please enter a valid email address";
     }
+    return null;
+  }
 
-    return null; // Valid
+  // ✅ API call logic separated from validator
+  void _handleForgetPassword() {
+    if (_formKey.currentState!.validate()) {
+      final email = emailController.text.trim();
+
+      authController.forgetPassword(
+        email: email,
+        onSuccess: () {
+          Get.offAll(() => const OtpScreen());
+        },
+        onError: (error) {
+          Get.snackbar(
+            "Error",
+            error,
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white,
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -61,10 +81,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
-        title: Text(
-          "Forget Password",
-          style: AppStyle.appBarText(),
-        ),
+        title: Text("Forget Password", style: AppStyle.appBarText()),
         actions: [
           IconButton(
             onPressed: () {
@@ -78,12 +95,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(top: 16.0),
-          child: Form( // ✅ Wrapped with Form widget
+          child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Text
+                // Header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: SizedBox(
@@ -98,7 +115,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Input Field
+                // Input field
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 21.0),
                   child: Column(
@@ -110,24 +127,22 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         isPassword: false,
-                        validator: _validateEmail, // ✅ added validator
+                        validator: _validateEmail,
                       ),
                       const SizedBox(height: 30),
 
-                      // Submit Button
-                      CustomButton(
-                        text: "Continue",
-                        backgroundColor: isInputNotEmpty
-                            ? Colors.yellow.shade800
-                            : Colors.yellow.shade800,
+                      // Submit button
+                      Obx(() => CustomButton(
+                        text: authController.isLoading.value
+                            ? "Please wait..."
+                            : "Sign In",
+                        backgroundColor: Colors.yellow.shade800,
                         textColor: Colors.black,
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // ✅ Only go to next screen if valid
-                            Get.offAll(const OtpScreen());
-                          }
-                        },
-                      ),
+                        onPressed: authController.isLoading.value
+                            ? (){}
+                            : _handleForgetPassword,
+                      )),
+
 
                       const SizedBox(height: 30),
                     ],

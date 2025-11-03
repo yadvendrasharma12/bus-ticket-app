@@ -1,7 +1,7 @@
+import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pin_code_fields/flutter_pin_code_fields.dart';
 import 'package:get/get.dart';
-
 import '../../../core/constant/app_colors.dart';
 import '../../../core/constant/app_style.dart';
 import '../../../widgets/custom_button.dart';
@@ -15,46 +15,41 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  bool isInputNotEmpty = false;
+  final AuthController authController = Get.put(AuthController());
   String otpCode = '';
+  bool isInputNotEmpty = false;
 
-  // ✅ Dummy correct OTP (optional – for testing)
-  final String correctOtp = "1234";
+  // ⚡ Pass email from previous screen via Get.arguments or constructor
+  final String email = Get.arguments?['email'] ?? '';
 
   void _validateAndProceed() {
-    if (otpCode.isEmpty) {
+    if (otpCode.isEmpty || otpCode.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please enter OTP"),
+          content: Text("Please enter a valid 6-digit OTP"),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
 
-    if (otpCode.length != 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("OTP must be 4 digits"),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    // ✅ Optional match check (you can remove this if OTP comes from backend)
-    if (otpCode != correctOtp) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Invalid OTP, please try again"),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    // ✅ Navigate if OTP is valid
-    Get.to(const CreatePasswordScreen());
+    // ✅ Backend OTP verify API call
+    authController.verifyOtp(
+      email: email,
+      otp: int.parse(otpCode),
+      onSuccess: () {
+        Get.to(() => const CreatePasswordScreen());
+      },
+      onError: (error) {
+        Get.snackbar(
+          "Error",
+          error.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      },
+    );
   }
 
   @override
@@ -64,10 +59,7 @@ class _OtpScreenState extends State<OtpScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
-        title: Text(
-          "OTP Verification",
-          style: AppStyle.appBarText(),
-        ),
+        title: Text("OTP Verification", style: AppStyle.appBarText()),
         actions: [
           IconButton(
             onPressed: () => Get.back(),
@@ -81,10 +73,7 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Verify OTP\nSLTB Express account",
-              style: AppStyle.userText1(),
-            ),
+            Text("Verify OTP\nSLTB Express account", style: AppStyle.userText1()),
             const SizedBox(height: 30),
 
             // 🔹 OTP Input Field
@@ -92,7 +81,7 @@ class _OtpScreenState extends State<OtpScreen> {
               onChange: (value) {
                 setState(() {
                   otpCode = value;
-                  isInputNotEmpty = value.length == 4;
+                  isInputNotEmpty = value.length == 6;
                 });
               },
               onComplete: (code) {
@@ -101,31 +90,27 @@ class _OtpScreenState extends State<OtpScreen> {
                   isInputNotEmpty = true;
                 });
               },
-              length: 4,
-              fieldHeight: 60,
+              length: 6,
+              fieldHeight: 30,
               fieldWidth: 55,
               keyboardType: TextInputType.number,
-              obscureText: false,
-
-
-              responsive: false,
               activeBorderColor: Colors.yellow.shade800,
-              textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              textStyle:
+              const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 40),
 
             // 🔹 Verify Button
-            CustomButton(
-              text: "Verify OTP",
-              backgroundColor: isInputNotEmpty
-                  ? Colors.yellow.shade800
-                  : Colors.yellow.shade800,
-              textColor: Colors.white,
-              onPressed: _validateAndProceed, // ✅ Call validation
-            ),
-
             const SizedBox(height: 10),
+            Obx(() => CustomButton(
+              text: authController.isLoading.value ? "Please wait..." : "Verify OTP",
+              backgroundColor: Colors.yellow.shade800,
+              textColor: Colors.black,
+              onPressed: authController.isLoading.value
+                  ? () {}
+                  : _validateAndProceed,
+            )),
 
             // 🔹 Resend OTP
             Center(
