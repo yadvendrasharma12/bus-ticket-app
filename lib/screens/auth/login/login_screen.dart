@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // 🔹 Header
               Text(
-                "Sign in to your\nSLTB Express account",
+                "Sign in to your\nGR Tour & Travel",
                 style: AppStyle.userText1(),
                 maxLines: 2,
               ),

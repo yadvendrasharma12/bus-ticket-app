@@ -151,136 +151,117 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
 
               const SizedBox(height: 33),
 
-              Container(
-                height: 540,
-                margin: EdgeInsets.symmetric(horizontal: 40),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 0, vertical: 0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.indigo.shade800,width: 1.5),
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade300,
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15,right: 10),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(Icons.car_crash,
-                            color: Colors.indigo.shade800, size: 30),
-                      ),
-                    ),
-
-                    Expanded(
-                      child: Container(
-                        height: 500,
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                        decoration: BoxDecoration(
-
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 30),
+                    padding: const EdgeInsets.only(left: 15, right: 10,bottom: 18),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.indigo.shade800, width: 1),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade300,
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
-                        child: Column(
-                          children: [
-
-                            const SizedBox(height: 10),
-
-                            SingleChildScrollView(
-                              child: GridView.builder(
-                                shrinkWrap: true,
-                                physics:
-                                const NeverScrollableScrollPhysics(), // scroll handled by parent
-                                gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  childAspectRatio:
-                                  0.9, // 👈 controls seat rectangle proportion
-                                ),
-                                itemCount: rows * columns,
-                                itemBuilder: (context, index) {
-                                  int row = (index ~/ columns) + 1;
-                                  String seatLetter =
-                                  String.fromCharCode(65 + (index % columns));
-                                  String seatId = "$row$seatLetter";
-
-                                  bool isBooked = bookedSeats.contains(seatId);
-                                  bool isSelected = selectedSeats.contains(seatId);
-
-                                  Color seatColor;
-                                  if (isBooked) {
-                                    seatColor = Colors.grey.shade400;
-                                  } else if (isSelected) {
-                                    seatColor = Colors.yellow.shade700;
-                                  } else {
-                                    seatColor = Colors.white;
-                                  }
-
-                                  return GestureDetector(
-                                    onTap: isBooked
-                                        ? null
-                                        : () {
-                                      setState(() {
-                                        if (isSelected) {
-                                          selectedSeats.remove(seatId);
-                                        } else {
-                                          selectedSeats.add(seatId);
-                                        }
-                                      });
-                                    },
-                                    child: Container(
-                                      width: 28, // 👈 smaller width
-                                      height: 28, // 👈 smaller height
-                                      decoration: BoxDecoration(
-                                        color: seatColor,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: Colors.indigo.shade900,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          seatId,
-                                          style: GoogleFonts.poppins(
-                                            color: isBooked
-                                                ? Colors.white
-                                                : Colors.indigo.shade900,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 10, // 👈 smaller font
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15, right: 10),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Icon(
+                              Icons.car_crash,
+                              color: Colors.indigo.shade800,
+                              size: 30,
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                        const SizedBox(height: 10),
 
-                  ],
+                        // ✅ Grid auto expands inside SingleChildScrollView
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 1.1,
+                          ),
+                          itemCount: rows * columns,
+                          itemBuilder: (context, index) {
+                            int row = (index ~/ columns) + 1;
+                            String seatLetter = String.fromCharCode(65 + (index % columns));
+                            String seatId = "$row$seatLetter";
+
+                            bool isBooked = bookedSeats.contains(seatId);
+                            bool isSelected = selectedSeats.contains(seatId);
+
+                            Color seatColor;
+                            if (isBooked) {
+                              seatColor = Colors.grey.shade400;
+                            } else if (isSelected) {
+                              seatColor = Colors.yellow.shade700;
+                            } else {
+                              seatColor = Colors.white;
+                            }
+
+                            return GestureDetector(
+                              onTap: isBooked
+                                  ? null
+                                  : () {
+                                setState(() {
+                                  if (isSelected) {
+                                    selectedSeats.remove(seatId);
+                                  } else {
+                                    selectedSeats.add(seatId);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: seatColor,
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: Colors.indigo.shade900,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    seatId,
+                                    style: GoogleFonts.poppins(
+                                      color: isBooked
+                                          ? Colors.white
+                                          : Colors.indigo.shade900,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
+
 
             ],
           ),
         ),
       ),
+
       bottomSheet: Container(
         padding: EdgeInsets.only(left: 20,top: 0,right: 0),
         height: 80,

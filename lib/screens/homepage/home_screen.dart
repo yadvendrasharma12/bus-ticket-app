@@ -1,9 +1,8 @@
 import 'package:bus_booking_app/controllers/auth_controllers.dart';
-import 'package:bus_booking_app/screens/auth/login/login_screen.dart';
 import 'package:bus_booking_app/screens/bus_listing/bus_list_screen.dart';
-import 'package:bus_booking_app/screens/bus_listing/bus_listing_screen.dart';
 import 'package:bus_booking_app/screens/contect_support/contact_support_screen.dart';
 import 'package:bus_booking_app/screens/driver/driver_screen.dart';
+import 'package:bus_booking_app/screens/homepage/widgets/custom_drawer.dart';
 import 'package:bus_booking_app/screens/privacy_policy/privacy_policy_screen.dart';
 import 'package:bus_booking_app/screens/terms_condition/terms_condition_screen.dart';
 import 'package:bus_booking_app/widgets/custom_button.dart';
@@ -11,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../controllers/bus_search_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,11 +20,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+
+  final _nameController = TextEditingController();
+
+
+  @override
+  void initState() {
+    super.initState();
+
+  }
+  bool _loading = true;
+
   String selectedOption = "Today";
   DateTime? selectedDate;
 
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
+  final BusSearchController busController = Get.put(BusSearchController());
+  final AuthController authController = Get.put(AuthController());
 
   Future<void> _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -40,11 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-final AuthController authController = Get.put(AuthController());
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size; // Responsive base
+    final width = size.width;
+    final height = size.height;
+
     return Scaffold(
-      drawer: Drawer(backgroundColor: Colors.white, child: _drawer()),
+      drawer: const CustomDrawer(),
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
@@ -53,54 +71,53 @@ final AuthController authController = Get.put(AuthController());
         backgroundColor: Colors.white,
         leading: Builder(
           builder: (context) => IconButton(
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+            onPressed: () => Scaffold.of(context).openDrawer(),
             icon: const Icon(Icons.menu_rounded, color: Colors.indigo),
           ),
         ),
         title: Text(
-          "SLTB EXPRESS",
+          "GR Tour & Travel",
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: width * 0.045,
             fontWeight: FontWeight.w700,
             color: Colors.indigo[900],
           ),
         ),
       ),
-
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: width * 0.05,
+          vertical: height * 0.015,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "Previous booking",
               style: GoogleFonts.poppins(
-                fontSize: 18,
+                fontSize: width * 0.045,
                 fontWeight: FontWeight.w600,
                 color: Colors.indigo[900],
               ),
             ),
-            const SizedBox(height: 26),
+            SizedBox(height: height * 0.02),
 
+            // ---- Previous booking cards ----
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
                 children: [
-                  _dateCard("February", "12"),
-                  _dateCard("January", "03"),
-                  _dateCard("December", "24"),
-                  _dateCard("November", "18"),
-                  _dateCard("October", "05"),
+                  _dateCard("February", "12", width),
+                  _dateCard("January", "03", width),
+                  _dateCard("December", "24", width),
+                  _dateCard("November", "18", width),
+                  _dateCard("October", "05", width),
                 ],
               ),
             ),
 
-             const SizedBox(height: 32),
-
-
+            SizedBox(height: height * 0.04),
 
             // ---- Find a bus ----
             Container(
@@ -119,34 +136,36 @@ final AuthController authController = Get.put(AuthController());
                 ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // ✅ auto height
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding:
+                    EdgeInsets.symmetric(horizontal: width * 0.05),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Let’s find a bus",
                           style: GoogleFonts.poppins(
-                            fontSize: 18,
+                            fontSize: width * 0.045,
                             fontWeight: FontWeight.w600,
                             color: Colors.indigo.shade900,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: height * 0.02),
 
-                        // ✅ From and To Fields with Swap Button
+                        // ✅ From - To Fields
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Expanded(
+                              flex: 2,
                               child: _customTextField(
                                 "From",
                                 controller: fromController,
+                                width: width,
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: width * 0.02),
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.indigo.shade50,
@@ -175,85 +194,128 @@ final AuthController authController = Get.put(AuthController());
                                 },
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: width * 0.02),
                             Expanded(
+                              flex: 2,
                               child: _customTextField(
                                 "To",
                                 controller: toController,
+                                width: width,
                               ),
                             ),
                           ],
                         ),
+                        SizedBox(height: height * 0.025),
 
-                        const SizedBox(height: 20),
-
-                        // ✅ Custom Selectable Date Row
+                        // ✅ Date selector
                         Text(
                           "Date",
                           style: GoogleFonts.poppins(
-                            fontSize: 15,
+                            fontSize: width * 0.04,
                             fontWeight: FontWeight.w500,
                             color: Colors.indigo.shade900,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              _buildSelectableChip("Today"),
-                              _buildSelectableChip("Tomorrow"),
-
-                              GestureDetector(
+                        SizedBox(height: height * 0.01),
+                        Row(
+                          children: [
+                            Expanded(child: _buildSelectableChip("Today")),
+                            SizedBox(width: width * 0.015),
+                            Expanded(child: _buildSelectableChip("Tomorrow")),
+                            SizedBox(width: width * 0.015),
+                            Expanded(
+                              child: GestureDetector(
                                 onTap: () => _pickDate(context),
                                 child: Container(
-                                  height: 50,
-                                  width: 100,
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: height * 0.013,
+                                  ),
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.indigo.shade900),
-                                    borderRadius: BorderRadius.circular(0),
+                                    border: Border.all(
+                                        color: Colors.indigo.shade900),
+                                    borderRadius: BorderRadius.circular(6),
                                     color: Colors.white,
                                   ),
-                                  child: Center(
-                                    child: selectedDate == null
-                                        ? Icon(
-                                      Icons.calendar_today_outlined,
-                                      color: Colors.indigo.shade900,
-                                      size: 22,
-                                    )
-                                        : Text(
-                                      "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 13,
-                                      ),
+                                  child: selectedDate == null
+                                      ? Icon(
+                                    Icons.calendar_today_outlined,
+                                    color: Colors.indigo.shade900,
+                                    size: width * 0.05,
+                                  )
+                                      : Text(
+                                    "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: width * 0.032,
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-
                       ],
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: height * 0.035),
+
+                  // ✅ Button
                   CustomButton(
                     backgroundColor: Colors.yellow.shade800,
                     text: "Let's check!",
-                    onPressed: () {
-                      Get.to(BusListScreen());
+                    onPressed: () async {
+                      if (fromController.text.isEmpty ||
+                          toController.text.isEmpty) {
+                        Get.snackbar("Error",
+                            "Please fill both From and To fields");
+                        return;
+                      }
+
+                      String date;
+                      final now = DateTime.now();
+
+                      if (selectedOption == "Today") {
+                        date =
+                        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+                      } else if (selectedOption == "Tomorrow") {
+                        final tomorrow = now.add(Duration(days: 1));
+                        date =
+                        "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+                      } else if (selectedDate != null) {
+                        date =
+                        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+                      } else {
+                        Get.snackbar("Error", "Please select a date",
+                            snackPosition: SnackPosition.BOTTOM);
+                        return;
+                      }
+
+                      final token = authController.token.value;
+
+                      await busController.searchBuses(
+                        origin: fromController.text,
+                        destination: toController.text,
+                        date: date,
+                        token: token,
+                      );
+
+                      if (busController.busList.isNotEmpty) {
+                        Get.to(() =>
+                            BusListScreen(busList: busController.busList));
+                      } else {
+                        Get.snackbar("No Buses",
+                            "No buses found for this route",
+                            snackPosition: SnackPosition.BOTTOM);
+                      }
                     },
                   ),
-                  SizedBox(height: 10,),
+                  SizedBox(height: height * 0.02),
                 ],
               ),
             )
-
           ],
         ),
       ),
@@ -262,100 +324,70 @@ final AuthController authController = Get.put(AuthController());
 
   // ---- Reusable Widgets ----
 
-  Widget _dateCard(String month, String day) {
+  Widget _dateCard(String month, String day, double width) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      padding: const EdgeInsets.only(left: 12, top: 6),
-      width: 100,
+      margin: EdgeInsets.symmetric(horizontal: width * 0.02),
+      padding: const EdgeInsets.all(10),
+      width: width * 0.3,
       height: 125,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.indigo.shade800),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.5),
-            spreadRadius: 4,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        color: Colors.white,
         borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            month,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.indigo[900],
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            day,
-            style: GoogleFonts.poppins(
-              fontSize: 25,
-              fontWeight: FontWeight.w600,
-              color: Colors.indigo[900],
-            ),
-          ),
-          Text(
-            "Maharashtra",
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Delhi",
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
+          Text(month,
+              style: GoogleFonts.poppins(
+                fontSize: width * 0.035,
+                fontWeight: FontWeight.w700,
+                color: Colors.indigo[900],
+              )),
+          Text(day,
+              style: GoogleFonts.poppins(
+                fontSize: width * 0.07,
+                fontWeight: FontWeight.w600,
+                color: Colors.indigo[900],
+              )),
+          Text("Maharashtra",
+              style: GoogleFonts.poppins(
+                fontSize: width * 0.03,
+                fontWeight: FontWeight.w600,
+              )),
+          const SizedBox(height: 4),
+          Text("Delhi",
+              style: GoogleFonts.poppins(
+                fontSize: width * 0.03,
+                fontWeight: FontWeight.w600,
+              )),
         ],
       ),
     );
   }
 
-  // ✅ Updated to include controller
-  Widget _customTextField(
-    String hint, {
-    TextEditingController? controller,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-
-        const SizedBox(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.grey.shade300),
+  Widget _customTextField(String hint,
+      {TextEditingController? controller, required double width}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: TextField(
+        controller: controller,
+        style: GoogleFonts.poppins(color: Colors.indigo.shade900),
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: width * 0.04,
+            vertical: width * 0.03,
           ),
-          child: TextField(
-            controller: controller,
-            textAlign: TextAlign.start,
-            keyboardType: TextInputType.text,
-            style: GoogleFonts.poppins(color: Colors.indigo.shade900),
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: GoogleFonts.poppins(
-                color: Colors.indigo.shade900.withOpacity(0.6),
-              ),
-            ),
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: GoogleFonts.poppins(
+            color: Colors.indigo.shade900.withOpacity(0.6),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -369,11 +401,10 @@ final AuthController authController = Get.put(AuthController());
         });
       },
       child: Container(
-        height: 50,
-        width: 100,
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? Colors.indigo.shade900 : Colors.white,
-          borderRadius: BorderRadius.circular(0),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(color: Colors.indigo.shade900),
         ),
         child: Center(
@@ -390,207 +421,5 @@ final AuthController authController = Get.put(AuthController());
     );
   }
 
-  Widget _drawer() {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.only(top: 70),
-          height: 260,
-          width: double.infinity,
-          color: Colors.yellow.shade800,
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 46,
-                backgroundImage: NetworkImage(
-                  "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80",
-                ),
-              ),
-              SizedBox(height: 10),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Yadvendra Sharma",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              SizedBox(height: 3),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "New delhi",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 25),
-          child: Column(
-            children: [
 
-              GestureDetector(
-                onTap: () {
-                  Get.to(PrivacyPolicyScreen());
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.policy_outlined),
-                    SizedBox(width: 10),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Privacy policy",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 26),
-              GestureDetector(
-                onTap: () {
-                  Get.to(TermsConditionScreen());
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.sports_tennis),
-                    SizedBox(width: 10),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Terms & Condition",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 26),
-              GestureDetector(
-                onTap: () {
-                  Get.to(DriverScreen());
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.drive_eta),
-                    SizedBox(width: 10),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Driver",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 26),
-              GestureDetector(
-                onTap: () {
-                  Get.to(BusListScreen());
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.bus_alert_rounded),
-                    SizedBox(width: 10),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Bus",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 26),
-              GestureDetector(
-                onTap: (){
-                  Get.to(ContactSupportScreen());
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(CupertinoIcons.person_alt_circle),
-                    SizedBox(width: 10),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Contact support",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 30),
-              GestureDetector(
-                onTap: (){
-                 authController.logout();
-                },
-                child: Container(
-                  height: 45,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow.shade800,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Log Out",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 }

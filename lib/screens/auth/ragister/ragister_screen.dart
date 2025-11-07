@@ -197,7 +197,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               Center(
                 child: Text(
-                  "Let's search and book your travel ticket\nwith SLTB Express.",
+                  "Let's search and book your travel ticket\nGR Tour & Travel.",
                   style: AppStyle.userText2(),
                   textAlign: TextAlign.center,
                 ),

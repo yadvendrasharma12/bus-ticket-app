@@ -179,25 +179,35 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
 
             Align(
               alignment: Alignment.center,
-              child: Wrap(
-                spacing: 20,
-                runSpacing: 15,
-                children: [
-                  _socialButton("Facebook", facebookUrl, Colors.blueAccent,
-                      FontAwesomeIcons.facebook),
-                  _socialButton("Instagram", instagramUrl, Colors.indigo.shade800,
-                      FontAwesomeIcons.instagram),
-                  _socialButton("YouTube", youtubeUrl, Colors.red,
-                      FontAwesomeIcons.youtube),
-                  _socialButton("X", xUrl, Colors.pink,
-                      FontAwesomeIcons.xbox),
-                  _socialButton("LinkedIn", linkedinUrl, Colors.blue,
-                      FontAwesomeIcons.linkedin),
-                  _socialButton("WhatsApp", mediaUrl, Colors.green,
-                      FontAwesomeIcons.whatsapp),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Determine button width dynamically (3 per row ideally)
+                  double screenWidth = constraints.maxWidth;
+                  double buttonWidth = (screenWidth - 60) / 3; // 3 per row with spacing
+
+                  return Wrap(
+                    spacing: 20,
+                    runSpacing: 15,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _socialButton("Facebook", facebookUrl, Colors.blueAccent,
+                          FontAwesomeIcons.facebook, buttonWidth),
+                      _socialButton("Instagram", instagramUrl, Colors.indigo.shade800,
+                          FontAwesomeIcons.instagram, buttonWidth),
+                      _socialButton("YouTube", youtubeUrl, Colors.red,
+                          FontAwesomeIcons.youtube, buttonWidth),
+                      _socialButton("X", xUrl, Colors.black,
+                          FontAwesomeIcons.xTwitter, buttonWidth),
+                      _socialButton("LinkedIn", linkedinUrl, Colors.blue,
+                          FontAwesomeIcons.linkedin, buttonWidth),
+                      _socialButton("WhatsApp", mediaUrl, Colors.green,
+                          FontAwesomeIcons.whatsapp, buttonWidth),
+                    ],
+                  );
+                },
               ),
             ),
+
           ],
         ),
       ),
@@ -276,28 +286,36 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
 
   // 🧩 Social Button Widget
   Widget _socialButton(
-      String name, String link, Color color, IconData icon) {
+      String name, String link, Color color, IconData icon, double width) {
     return InkWell(
       onTap: () => _openLink(link),
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        width: 100,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        width: width,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: color, width: 1),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: color, size: 26),
             const SizedBox(height: 6),
-            Text(name,
-                style: GoogleFonts.poppins(
-                    color: color, fontWeight: FontWeight.w600)),
+            Text(
+              name,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
 }

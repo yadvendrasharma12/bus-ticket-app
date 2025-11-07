@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../serives/profile_serices.dart';
+import '../../utils/shared_prefrance.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -15,25 +18,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _imageFile;
   DateTime? _selectedDate;
   String _selectedGender = "Female";
-  bool _isPasswordVisible = false;
 
-  // Editable controllers
-  final TextEditingController _nameController =
-  TextEditingController(text: "Anna Miller");
-  final TextEditingController _emailController =
-  TextEditingController(text: "annamiller@gmail.com");
-  final TextEditingController _mobileController =
-  TextEditingController(text: "+91 9876543210");
-  final TextEditingController _addressController =
-  TextEditingController(text: "Colombo, Sri Lanka");
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _mobileController = TextEditingController();
+  final _addressController = TextEditingController();
+
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    final user = await ProfileService.fetchProfile();
+    final imagePath = await MySharedPref.getProfileImage();
+
+    if (mounted) {
+      setState(() {
+        _loading = false;
+
+        if (user != null) {
+          _nameController.text = user["name"] ?? "";
+          _emailController.text = user["email"] ?? "";
+          _mobileController.text = user["mobile"] ?? "";
+        }
+
+        if (imagePath != null && File(imagePath).existsSync()) {
+          _imageFile = File(imagePath);
+        }
+      });
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source, imageQuality: 70);
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+      final file = File(pickedFile.path);
+      setState(() => _imageFile = file);
+      await MySharedPref.saveProfileImage(file.path);
     }
   }
 
@@ -87,7 +113,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body:  _loading
+          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
+          : SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           children: [
@@ -97,12 +125,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 alignment: Alignment.bottomRight,
                 children: [
                   CircleAvatar(
-                    radius: 50,
+                    radius: 55,
                     backgroundColor: Colors.grey.shade300,
                     backgroundImage:
                     _imageFile != null ? FileImage(_imageFile!) : null,
                     child: _imageFile == null
-                        ? const Icon(Icons.person, size: 50, color: Colors.white)
+                        ? const Icon(Icons.person, size: 60, color: Colors.white)
                         : null,
                   ),
                   GestureDetector(
@@ -305,3 +333,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+
+
+

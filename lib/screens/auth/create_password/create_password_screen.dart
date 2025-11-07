@@ -2,7 +2,6 @@ import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:bus_booking_app/screens/auth/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../core/constant/app_colors.dart';
 import '../../../core/constant/app_style.dart';
 import '../../../widgets/custom_button.dart';
@@ -21,28 +20,22 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   final AuthController authController = Get.put(AuthController());
 
   bool isInputNotEmpty = false;
+  late final String email;
 
   @override
   void initState() {
     super.initState();
+    email = Get.arguments?['email'] ?? ''; // ✅ Safe initialization
     passwordController.addListener(_checkInput);
     cPasswordController.addListener(_checkInput);
   }
 
   void _checkInput() {
     setState(() {
-      isInputNotEmpty = passwordController.text.isNotEmpty &&
-          cPasswordController.text.isNotEmpty;
+      isInputNotEmpty =
+          passwordController.text.isNotEmpty && cPasswordController.text.isNotEmpty;
     });
   }
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    cPasswordController.dispose();
-    super.dispose();
-  }
-
 
   void _validateAndReset() {
     FocusScope.of(context).unfocus();
@@ -50,41 +43,50 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     final password = passwordController.text.trim();
     final confirmPassword = cPasswordController.text.trim();
 
-    // ✅ Empty fields
     if (password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text("Please fill in both password fields."),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text("Please fill in both password fields."),
+      ));
       return;
     }
 
-
-
-    // ✅ Match check
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text("Passwords do not match. Please try again."),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text("Passwords do not match. Please try again."),
+      ));
       return;
     }
 
-    // ✅ Success
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.green,
-        content: Text("Password successfully reset!"),
-      ),
-    );
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text("Something went wrong. Email not found."),
+      ));
+      return;
+    }
 
-    Future.delayed(const Duration(seconds: 1), () {
-      Get.offAll(() => const LoginScreen());
-    });
+    // ✅ Call reset password API
+    authController.resetPassword(
+      email: email,
+      newPassword: password,
+      onSuccess: () {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text("Password successfully reset!"),
+        ));
+        Future.delayed(const Duration(seconds: 1), () {
+          Get.offAll(() => const LoginScreen());
+        });
+      },
+      onError: (error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text(error.toString()),
+        ));
+      },
+    );
   }
 
   @override
@@ -103,64 +105,45 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       ),
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🔹 Header Text
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  width: 300,
-                  child: Text(
-                    "Reset Password\nSLTB Express account",
-                    style: AppStyle.userText1(),
-                    maxLines: 2,
-                    textAlign: TextAlign.start,
-                  ),
-                ),
-              ),
+        padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Reset Password\nGR Tour & Travel",
+              style: AppStyle.userText1(),
+              maxLines: 2,
+              textAlign: TextAlign.start,
+            ),
+            const SizedBox(height: 32),
 
-              const SizedBox(height: 32),
+            CustomTextField(
+              label: "Enter your password",
+              hint: "Enter your password",
+              controller: passwordController,
+              isPassword: true,
+            ),
+            const SizedBox(height: 16),
 
-              // 🔹 Password Fields
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 21.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomTextField(
-                      label: "Enter your password",
-                      hint: "Enter your password",
-                      controller: passwordController,
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 16),
+            CustomTextField(
+              label: "Confirm Password",
+              hint: "Re-enter your password",
+              controller: cPasswordController,
+              isPassword: true,
+            ),
 
-                    CustomTextField(
-                      label: "Confirm Password",
-                      hint: "Re-enter your password",
-                      controller: cPasswordController,
-                      isPassword: true,
-                    ),
+            const SizedBox(height: 50),
 
-                    const SizedBox(height: 50),
-
-                    // 🔹 Reset Button
-                    CustomButton(
-                      text: "Reset Password",
-                      backgroundColor: Colors.yellow.shade800,
-                      textColor: Colors.black,
-                      onPressed: _validateAndReset,
-                    ),
-
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            Obx(() => CustomButton(
+              text: authController.isLoading.value
+                  ? "Please wait..."
+                  : "Reset Password",
+              backgroundColor: Colors.yellow.shade800,
+              textColor: Colors.black,
+              onPressed:
+              authController.isLoading.value ? () {} : _validateAndReset,
+            )),
+          ],
         ),
       ),
     );

@@ -3,13 +3,37 @@ import 'package:bus_booking_app/utils/apis_url.dart';
 import 'package:bus_booking_app/utils/shared_prefs.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import '../bottom_bar/bottom_nav_bar_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../screens/auth/welcome/welcome_screen.dart';
 
 class AuthController extends GetxController {
+  var userData = <String, dynamic>{
+    "name": "Yadvendra Sharma",
+    "location": "New Delhi",
+    "profileImage": "https://example.com/photo.jpg", // or local path
+  }.obs;
   var isLoading = false.obs;
+  var token = "".obs; // ✅ Added token variable
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadToken(); // ✅ Load token automatically on start
+  }
+
+  Future<void> loadToken() async {
+    token.value = await MySharedPref.getToken() ?? "";
+  }
+
+  void _showSnack(String title, String message, Color color) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: color,
+      colorText: Colors.white,
+    );
+  }
 
   // ✅ REGISTER USER
   Future<void> registerUser({
@@ -20,53 +44,33 @@ class AuthController extends GetxController {
     required VoidCallback onSuccess,
   }) async {
     isLoading(true);
-
     try {
       final response = await http.post(
         Uri.parse(ApiUrls.register),
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "name": name,
-          "email": email,
-          "mobile": mobile,
+          "name": name.trim(),
+          "email": email.trim(),
+          "mobile": mobile.trim(),
           "password": password,
         }),
       );
 
       final data = jsonDecode(response.body);
+      print("📩 Register Response: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final token = data["data"]["token"];
-        if (token != null) await MySharedPref.saveToken(token);
-
-        Get.snackbar(
-          "Success",
-          data["message"] ?? "User registered successfully",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
+        final token = data["data"]?["token"];
+        if (token != null && token.isNotEmpty) {
+          await MySharedPref.saveToken(token);
+        }
+        _showSnack("Success", data["message"] ?? "User registered successfully", Colors.green);
         onSuccess();
       } else {
-        Get.snackbar(
-          "Error",
-          data["message"] ?? "Registration failed",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        _showSnack("Error", data["message"] ?? "Registration failed", Colors.red);
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Something went wrong: $e",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showSnack("Error", "Something went wrong: $e", Colors.red);
     } finally {
       isLoading(false);
     }
@@ -79,139 +83,87 @@ class AuthController extends GetxController {
     required VoidCallback onSuccess,
   }) async {
     isLoading(true);
-
     try {
       final response = await http.post(
         Uri.parse(ApiUrls.login),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "email": email,
+          "email": email.trim(),
           "password": password,
         }),
-
       );
 
       final data = jsonDecode(response.body);
+      print("📩 Login Response: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print(response.statusCode);
-        print(response.body);
-        print(response.request);
-        final token = data["data"]["token"];
-        if (token != null) await MySharedPref.saveToken(token);
-        print("save token: $token");
-
-
-        Get.snackbar(
-          "Success",
-          data["message"] ?? "Login successful",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
+        final token = data["data"]?["token"];
+        if (token != null && token.isNotEmpty) {
+          await MySharedPref.saveToken(token);
+        }
+        print(token);
+        _showSnack("Success", data["message"] ?? "Login successful", Colors.green);
         onSuccess();
       } else {
-        Get.snackbar(
-          "Error",
-          data["message"] ?? "Login failed",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        _showSnack("Error", data["message"] ?? "Login failed", Colors.red);
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Something went wrong: $e",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showSnack("Error", "Something went wrong: $e", Colors.red);
     } finally {
       isLoading(false);
     }
   }
 
+  // ✅ LOGOUT
   Future<void> logout() async {
     await MySharedPref.clearToken();
-    Get.offAll(() => const WelcomeScreen()); // or LoginScreen
+    Get.offAll(() => const WelcomeScreen());
   }
 
-
+  // ✅ FORGET PASSWORD → send OTP
   Future<void> forgetPassword({
     required String email,
-    required VoidCallback onSuccess, required Null Function(dynamic error) onError,
-  }) async {
-    isLoading(true);
-
-    try {
-      final response = await http.post(
-        Uri.parse(ApiUrls.forgetPassword),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode({
-          "email": email,
-        }),
-
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print(response.statusCode);
-        print(response.body);
-        print(response.request);
-        final data = jsonDecode(response.body);
-        print("📩 API Response: $data");
-
-
-        Get.snackbar(
-          "Success",
-          data["message"] ?? "  OTP Send successfully",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
-        onSuccess();
-      } else {
-        Get.snackbar(
-          "Error",
-          data["message"] ?? "OTP Not Send",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Something went wrong: $e",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } finally {
-      isLoading(false);
-    }
-
-
-
-    }
-
-
-  Future<void> verifyOtp({
-    required String email,
-    required int otp,
-    required VoidCallback onSuccess,
+    required Function(Map<String, dynamic> data) onSuccess,
     required Function(dynamic error) onError,
   }) async {
     isLoading(true);
     try {
       final response = await http.post(
-        Uri.parse(ApiUrls.veryFyOtp),
+        Uri.parse(ApiUrls.forgetPassword),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email.trim()}),
+      );
+
+      final data = jsonDecode(response.body);
+      print("📩 ForgetPassword Response: ${response.body}");
+
+      if (response.statusCode == 200 && data["success"] == true) {
+        _showSnack("Success", data["message"], Colors.green);
+        onSuccess(data["data"] ?? {});
+      } else {
+        final msg = data["message"] ?? "Failed to send OTP";
+        _showSnack("Error", msg, Colors.red);
+        onError(msg);
+      }
+    } catch (e) {
+      _showSnack("Error", "Something went wrong: $e", Colors.red);
+      onError(e);
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  // ✅ VERIFY OTP
+  Future<void> verifyOtp({
+    required String email,
+    required int otp,
+    required Function() onSuccess,
+    required Function(dynamic error) onError,
+  }) async {
+    isLoading(true);
+    try {
+      final response = await http.post(
+        Uri.parse("https://fleetbus.onrender.com/api/auth/verify-otp"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "email": email.trim(),
@@ -219,52 +171,19 @@ class AuthController extends GetxController {
         }),
       );
 
-      print("🔹 Response Code: ${response.statusCode}");
-      print("🔹 Response Body: ${response.body}");
-
       final data = jsonDecode(response.body);
+      print("🔍 Verify OTP Response: ${response.body}");
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (data["success"] == true) {
-          Get.snackbar(
-            "Success",
-            data["message"] ?? "OTP verified successfully",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
-          onSuccess();
-        } else {
-          final errorMsg = data["message"] ?? "Invalid OTP. Please try again.";
-          Get.snackbar(
-            "Error",
-            errorMsg,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-          onError(errorMsg);
-        }
+      if (response.statusCode == 200 && data["success"] == true) {
+        _showSnack("Success", data["message"], Colors.green);
+        onSuccess();
       } else {
-        final errorMsg =
-            data["message"] ?? "Server error: ${response.statusCode}";
-        Get.snackbar(
-          "Error",
-          errorMsg,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        onError(errorMsg);
+        final msg = data["message"] ?? "Invalid OTP";
+        _showSnack("Error", msg, Colors.red);
+        onError(msg);
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Something went wrong: $e",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showSnack("Error", "Something went wrong: $e", Colors.red);
       onError(e);
     } finally {
       isLoading(false);
@@ -272,69 +191,71 @@ class AuthController extends GetxController {
   }
 
 
-
-
+  // ✅ RESET PASSWORD
   Future<void> resetPassword({
-      required String email,
-      required String password,
-      required VoidCallback onSuccess,
-      required Function(dynamic error) onError,
-    }) async {
-      isLoading(true);
+    required String email,
+    required String newPassword,
+    required VoidCallback onSuccess,
+    required Function(dynamic error) onError,
+  }) async {
+    isLoading(true);
+    try {
+      final response = await http.post(
+        Uri.parse(ApiUrls.resetPassword),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email.trim(),
+          "newPassword": newPassword, // ✅ backend expects this key
+        }),
+      );
 
-      try {
-        final response = await http.post(
-          Uri.parse(ApiUrls.resetPassword),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            "email": email,
-             "password": password,
-          }),
-        );
+      final data = jsonDecode(response.body);
+      print("📩 ResetPassword Response: ${response.body}");
 
-        final data = jsonDecode(response.body);
-        print("🔹 Response: ${response.body}");
-
-        if (response.statusCode == 200 || response.statusCode == 201) {
-
-          Get.snackbar(
-            "Success",
-            data["message"] ?? "Password Reset successfully",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
-
-          onSuccess();
-        } else {
-          // ❌ Server returned error
-          final errorMsg = data["message"] ?? "Invalid Password, please try again";
-          Get.snackbar(
-            "Error",
-            errorMsg,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-          onError(errorMsg);
-        }
-      } catch (e) {
-        // ❌ Network or parsing error
-        Get.snackbar(
-          "Error",
-          "Something went wrong: $e",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        onError(e);
-      } finally {
-        isLoading(false);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        onSuccess();
+      } else {
+        final msg = data["message"] ?? "Invalid Password, please try again";
+        onError(msg);
       }
+    } catch (e) {
+      onError("Something went wrong: $e");
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  Future<void> resendOTP({
+    required String email,
+    required Function(Map<String, dynamic> data) onSuccess,
+    required Function(dynamic error) onError,
+  }) async {
+    isLoading(true);
+    try {
+      final response = await http.post(
+        Uri.parse("https://fleetbus.onrender.com/api/auth/resend-otp"), // ✅ Updated endpoint
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email.trim()}),
+      );
+
+      final data = jsonDecode(response.body);
+      print("📩 Resend OTP Response: ${response.body}");
+
+      if (response.statusCode == 200 && data["success"] == true) {
+        _showSnack("Success", data["message"], Colors.green);
+        onSuccess(data["data"] ?? {});
+      } else {
+        final msg = data["message"] ?? "Failed to resend OTP";
+        _showSnack("Error", msg, Colors.red);
+        onError(msg);
+      }
+    } catch (e) {
+      _showSnack("Error", "Something went wrong: $e", Colors.red);
+      onError(e);
+    } finally {
+      isLoading(false);
     }
   }
 
 
-
+}

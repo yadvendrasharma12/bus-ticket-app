@@ -1,18 +1,13 @@
-
-import 'package:bus_booking_app/screens/all_bus/all_busses_screen.dart';
-import 'package:bus_booking_app/screens/bus_listing/bus_listing_screen.dart';
-import 'package:bus_booking_app/screens/driver/driver_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../serives/onboard_service.dart';
 
 import '../routes_screen/bus_routes_screen.dart';
 
 
-
 class BusListScreen extends StatefulWidget {
-  const BusListScreen({super.key});
+  const BusListScreen({super.key, required List busList});
 
   @override
   State<BusListScreen> createState() => _BusListScreenState();
@@ -21,38 +16,30 @@ class BusListScreen extends StatefulWidget {
 class _BusListScreenState extends State<BusListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<Map<String, String>> buses = [
-    {
-      "busName": "SLTB Express",
-      "startTime": "06:30 AM",
-      "endTime": "11:15 AM",
-      "date": "30 Oct 2025",
-      "journeyTime": "4h 45m",
-      "distance": "320 km"
-    },
-    {
-      "busName": "Blue Line Travels",
-      "startTime": "08:00 AM",
-      "endTime": "01:00 PM",
-      "date": "30 Oct 2025",
-      "journeyTime": "5h 00m",
-      "distance": "340 km"
-    },
-    {
-      "busName": "Green Go Express",
-      "startTime": "09:15 AM",
-      "endTime": "02:45 PM",
-      "date": "30 Oct 2025",
-      "journeyTime": "5h 30m",
-      "distance": "360 km"
-    },
-  ];
+  bool isLoading = true;
+  List<dynamic> allBuses = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    fetchUpcomingBuses();
+  }
+
+  Future<void> fetchUpcomingBuses() async {
+    try {
+      final result = await OnboardService.fetchUpcomingBuses();
+      setState(() {
+        allBuses = result;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      Get.snackbar("Error", e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white);
+    }
   }
 
   @override
@@ -74,18 +61,17 @@ class _BusListScreenState extends State<BusListScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Container(
-          margin:  EdgeInsets.only(right: 10),
+          margin: const EdgeInsets.only(right: 10),
           height: 40,
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: Colors.indigo.shade900, width: 2),
           ),
-
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 7),
             child: Text(
-              "Colombo → Kandy , 30 Oct 2025",
+              "Upcoming Buses",
               style: GoogleFonts.poppins(
                 color: Colors.indigo.shade900,
                 fontWeight: FontWeight.w600,
@@ -118,27 +104,39 @@ class _BusListScreenState extends State<BusListScreen>
           ),
         ),
       ),
-      body: TabBarView(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : TabBarView(
         controller: _tabController,
         children: [
-          _buildBusList(buses),
-          _buildBusList(buses.where((bus) => bus["busName"]!.contains("AC")).toList()),
-          _buildBusList(buses.where((bus) => !bus["busName"]!.contains("AC")).toList()),
+          _buildBusList(allBuses),
+          _buildBusList(allBuses
+              .where((bus) => (bus["bus"]["acType"] ?? "").toLowerCase() == "ac")
+              .toList()),
+          _buildBusList(allBuses
+              .where((bus) => (bus["bus"]["acType"] ?? "").toLowerCase() == "non-ac")
+              .toList()),
         ],
       ),
     );
   }
 
-  Widget _buildBusList(List<Map<String, String>> list) {
+  Widget _buildBusList(List<dynamic> list) {
+    if (list.isEmpty) {
+      return const Center(child: Text("No upcoming buses found"));
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: list.length,
       itemBuilder: (context, index) {
-        final bus = list[index];
+        final busData = list[index];
+        final bus = busData["bus"] ?? {};
+        final route = busData["route"] ?? {};
+        final pricing = busData["pricing"] ?? {};
+
         return GestureDetector(
-          onTap: (){
-            Get.to(BusRoutesScreen());
-          },
+          onTap: () => Get.to(() => const BusRoutesScreen()),
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
@@ -156,46 +154,54 @@ class _BusListScreenState extends State<BusListScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Bus Name
+                // 🔹 Bus name and icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      bus["busName"]!,
+                      bus["busName"] ?? "Unknown Bus",
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.indigo[900],
                       ),
                     ),
-                    InkWell(
-                      onTap: (){
-                        Get.to(AllBussesScreen());
-                      },
-                        child: Icon(Icons.directions_bus, color: Colors.indigo[800])),
+                    Icon(Icons.directions_bus, color: Colors.indigo[800]),
                   ],
                 ),
                 const SizedBox(height: 10),
 
-                // Time Row
+                // 🔹 Route info
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _timeBox("Start", bus["startTime"]!),
+                    _timeBox("Start", route["startPoint"] ?? "-"),
                     Icon(Icons.arrow_forward, color: Colors.grey[700]),
-                    _timeBox("End", bus["endTime"]!),
+                    _timeBox("End", route["finalDestination"] ?? "-"),
                   ],
                 ),
                 const SizedBox(height: 12),
 
+                // 🔹 Additional info
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                  Text("10 Seats",style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),),
-                    _infoItem(Icons.timer_outlined, bus["journeyTime"]!),
-                    _infoItem(Icons.map_outlined, bus["distance"]!),
+                    Text("Seats: ${bus["seatCapacity"] ?? 'N/A'}",
+                        style: GoogleFonts.poppins(
+                            fontSize: 13, color: Colors.black87)),
+                    _infoItem(Icons.timer_outlined,
+                        "${route["estimatedTravelTime"] ?? 0} mins"),
+                    _infoItem(Icons.map_outlined,
+                        "${route["totalDistance"] ?? 0} km"),
                   ],
                 ),
+                const SizedBox(height: 8),
+
+                Text("Fare: ₹${pricing["totalFare"] ?? 0}",
+                    style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green[700])),
               ],
             ),
           ),
@@ -208,18 +214,13 @@ class _BusListScreenState extends State<BusListScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
+        Text(label,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+        Text(value,
+            style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black)),
       ],
     );
   }
@@ -229,10 +230,8 @@ class _BusListScreenState extends State<BusListScreen>
       children: [
         Icon(icon, size: 16, color: Colors.indigo[800]),
         const SizedBox(width: 4),
-        Text(
-          value,
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
-        ),
+        Text(value,
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87)),
       ],
     );
   }

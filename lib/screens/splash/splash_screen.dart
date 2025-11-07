@@ -45,10 +45,10 @@ class _SplashScreenState extends State<SplashScreen> {
         width: double.infinity,
         child: Center(
           child: SizedBox(
-            width: 154,
-            height: 123,
+            width: 160,
+            height: 126,
             child: Image.asset(
-              "assets/logo/bus-logo.jpg",
+              "assets/logo/GR Tour & Travel.jpg",
               filterQuality: FilterQuality.high,
             ),
           ),

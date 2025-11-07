@@ -18,27 +18,31 @@ class _OtpScreenState extends State<OtpScreen> {
   final AuthController authController = Get.put(AuthController());
   String otpCode = '';
   bool isInputNotEmpty = false;
+  bool isResending = false; // 🔹 To show loading for resend button
 
-  // ⚡ Pass email from previous screen via Get.arguments or constructor
   final String email = Get.arguments?['email'] ?? '';
+  final String? otpFromServer = Get.arguments?['otp']; // Optional (from backend)
 
   void _validateAndProceed() {
     if (otpCode.isEmpty || otpCode.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter a valid 6-digit OTP"),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please enter a valid 6-digit OTP"),
+        backgroundColor: Colors.redAccent,
+      ));
       return;
     }
 
-    // ✅ Backend OTP verify API call
+    // ⚠️ Removed local OTP comparison check
+
+    // ✅ Verify OTP via API
     authController.verifyOtp(
       email: email,
-      otp: int.parse(otpCode),
+      otp: int.tryParse(otpCode) ?? 0,
       onSuccess: () {
-        Get.to(() => const CreatePasswordScreen());
+        Get.to(
+              () => const CreatePasswordScreen(),
+          arguments: {'email': email},
+        );
       },
       onError: (error) {
         Get.snackbar(
@@ -52,20 +56,41 @@ class _OtpScreenState extends State<OtpScreen> {
     );
   }
 
+
+  /// 🔹 Function to resend OTP
+  void _resendOtp() async {
+    setState(() => isResending = true);
+
+    await authController.resendOTP(
+      email: email,
+      onSuccess: (data) {
+        setState(() => isResending = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("OTP Resent Successfully"),
+          backgroundColor: Colors.green,
+        ));
+      },
+      onError: (error) {
+        setState(() => isResending = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Failed to resend OTP: $error"),
+          backgroundColor: Colors.redAccent,
+        ));
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
         title: Text("OTP Verification", style: AppStyle.appBarText()),
-        actions: [
-          IconButton(
-            onPressed: () => Get.back(),
-            icon: const Icon(Icons.close, color: Colors.black),
-          )
-        ],
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+        ),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -73,10 +98,11 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Verify OTP\nSLTB Express account", style: AppStyle.userText1()),
+            Text("Verify OTP\nGR Tour & Travel",
+                style: AppStyle.userText1()),
             const SizedBox(height: 30),
 
-            // 🔹 OTP Input Field
+            // ✅ OTP Input Fields
             PinCodeFields(
               onChange: (value) {
                 setState(() {
@@ -85,26 +111,29 @@ class _OtpScreenState extends State<OtpScreen> {
                 });
               },
               onComplete: (code) {
-                otpCode = code;
                 setState(() {
+                  otpCode = code;
                   isInputNotEmpty = true;
                 });
               },
               length: 6,
-              fieldHeight: 30,
-              fieldWidth: 55,
+              fieldHeight: 50,
+              fieldWidth: 45,
               keyboardType: TextInputType.number,
               activeBorderColor: Colors.yellow.shade800,
-              textStyle:
-              const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              textStyle: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 40),
 
-            // 🔹 Verify Button
-            const SizedBox(height: 10),
+            // ✅ Verify Button
             Obx(() => CustomButton(
-              text: authController.isLoading.value ? "Please wait..." : "Verify OTP",
+              text: authController.isLoading.value
+                  ? "Please wait..."
+                  : "Verify OTP",
               backgroundColor: Colors.yellow.shade800,
               textColor: Colors.black,
               onPressed: authController.isLoading.value
@@ -112,24 +141,22 @@ class _OtpScreenState extends State<OtpScreen> {
                   : _validateAndProceed,
             )),
 
-            // 🔹 Resend OTP
+            const SizedBox(height: 20),
+
+            // ✅ Resend OTP Button
             Center(
               child: TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("OTP Resent Successfully"),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
-                child: Text(
-                  "Resend OTP",
-                  style: TextStyle(
-                    color: Colors.indigo.shade800,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                onPressed: isResending ? null : _resendOtp,
+                child: isResending
+                    ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                    : Text("Resend OTP",
+                    style: TextStyle(
+                        color: Colors.indigo.shade800,
+                        fontWeight: FontWeight.w600)),
               ),
             ),
           ],
