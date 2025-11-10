@@ -83,6 +83,9 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       onError: (error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.redAccent,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
           content: Text(error.toString()),
         ));
       },

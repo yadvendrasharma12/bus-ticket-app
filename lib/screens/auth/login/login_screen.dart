@@ -43,18 +43,36 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar("Error", "Please fill in both email and password.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Please fill in both email and password.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5), // smaller margins
+        borderRadius: 10, // rounded corners
+        snackStyle: SnackStyle.FLOATING, // floating snackbar
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
+        maxWidth: 300, // max width of snackbar
+        duration: const Duration(seconds: 2), // shorter duration
+      );
       return;
     }
 
     if (!_isValidEmail(email)) {
-      Get.snackbar("Error", "Please enter a valid email address.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Please enter a valid email address.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        borderRadius: 10,
+        snackStyle: SnackStyle.FLOATING,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        maxWidth: 300,
+        duration: const Duration(seconds: 2),
+      );
       return;
     }
 
@@ -67,6 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // 🔹 Info Text
               Center(
                 child: Text(
-                  "Let's search and book your travel ticket\nwith SLTB Express.",
+                  "Let's search and book your travel ticket\nGR Tour & Travel.",
                   style: AppStyle.userText2(),
                   textAlign: TextAlign.center,
                 ),

@@ -292,7 +292,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
       borderRadius: BorderRadius.circular(10),
       child: Container(
         width: width,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 3),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),

@@ -367,7 +367,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _customTextField(String hint,
-      {TextEditingController? controller, required double width}) {
+      {
+        TextEditingController? controller, required double width
+      }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),

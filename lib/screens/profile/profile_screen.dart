@@ -17,7 +17,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _imageFile;
   DateTime? _selectedDate;
-  String _selectedGender = "Female";
+  String _selectedGender="Select Gender";
+
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -239,6 +240,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // --- Gender Dropdown ---
+// --- Gender Dropdown (Fixed) ---
   Widget _buildGenderField() {
     return Container(
       height: 60,
@@ -250,31 +252,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: _selectedGender,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: Colors.indigo, size: 28),
+          value: _selectedGender == "Select Gender" ? null : _selectedGender,
+          hint: Text(
+            "Select Gender",
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.indigo,
+            size: 28,
+          ),
           items: ["Male", "Female", "Other"]
-              .map((gender) => DropdownMenuItem(
-            value: gender,
-            child: Text(
-              gender,
-              style: GoogleFonts.poppins(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
+              .map(
+                (gender) => DropdownMenuItem(
+              value: gender,
+              child: Text(
+                gender,
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
               ),
             ),
-          ))
+          )
               .toList(),
           onChanged: (value) {
             setState(() {
-              _selectedGender = value!;
+              _selectedGender = value ?? "Select Gender";
             });
           },
         ),
       ),
     );
   }
+
+
+
 
   // --- Date Picker ---
   Widget _buildDatePickerField(BuildContext context) {

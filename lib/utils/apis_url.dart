@@ -13,6 +13,7 @@ class ApiUrls {
   // 🔹 Onboard APIs
   static const String onboardBaseUrl = "https://fleetbus.onrender.com/api/onboard";
   static const String searchBuses = "$onboardBaseUrl/search";
+  static const String upcoming = "$onboardBaseUrl/upcoming";
 
   // 🔹 Driver APIs
   static const String driverBaseUrl = "https://fleetbus.onrender.com/api/drivers/public";

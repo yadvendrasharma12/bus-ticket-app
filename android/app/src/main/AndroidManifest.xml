@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="bus_booking_app"
+        android:label="GR Tour_Travel"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

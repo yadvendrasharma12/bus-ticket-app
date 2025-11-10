@@ -83,8 +83,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
         phone.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
-      Get.snackbar("Error", "Please fill all the fields.",
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Please fill in both email and password.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
+        maxWidth: 300,
+        borderRadius: 8,//
+        snackStyle: SnackStyle.FLOATING, // floating snackbar, bottom me dikhega properly
+      );
       return;
     }
 
@@ -147,7 +158,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Create your SLTB Express account", style: AppStyle.userText1()),
+              Text("Create your GR Tour & Travel", style: AppStyle.userText1()),
               const SizedBox(height: 30),
 
               // Fields

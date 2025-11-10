@@ -14,7 +14,7 @@ class OnboardService {
       throw Exception("No token found. Please login again.");
     }
 
-    final url = Uri.parse("${ApiUrls.onboardBaseUrl}/upcoming");
+    final url = Uri.parse("${ApiUrls.upcoming}");
 
     final response = await http.get(
       url,

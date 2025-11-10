@@ -1,7 +1,7 @@
-import 'package:bus_booking_app/screens/select_seats/select_seats_screen.dart';
-import 'package:bus_booking_app/widgets/custom_button.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import '../../serives/route_service.dart';
 
@@ -19,10 +19,10 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
   @override
   void initState() {
     super.initState();
-    fetchBusStops("delhi"); // Default query — can be dynamic later
+    fetchBusStops("delhi");
   }
 
-  // 🔹 Fetch Bus Stops from API
+
   Future<void> fetchBusStops(String query) async {
     setState(() => isLoading = true);
 
@@ -33,7 +33,9 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print("Error fetching stops: $e");
+      if (kDebugMode) {
+        print("Error fetching stops: $e");
+      }
       setState(() => isLoading = false);
     }
   }
@@ -59,18 +61,18 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
         ),
       ),
 
-      // 🔹 UI based on API state
+
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
           : busStops.isEmpty
           ? const Center(child: Text("No stops found"))
           : ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: busStops.length,
         itemBuilder: (context, index) {
           final stop = busStops[index];
 
-          // 🔹 Safely extract values (avoid null errors)
+
           final stopName = stop["displayName"]?.toString().trim().isNotEmpty == true
               ? stop["displayName"]
               : (stop["name"]?.toString().trim().isNotEmpty == true
@@ -79,13 +81,16 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
 
           final usageCount = stop["usageCount"]?.toString() ?? "0";
 
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          return Container(
+            margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey
+              ),
+              borderRadius: BorderRadius.circular(12)
             ),
             child: ListTile(
-              leading: const Icon(Icons.location_on, color: Colors.indigo),
+
               title: Text(
                 stopName,
                 style: GoogleFonts.poppins(
@@ -94,7 +99,7 @@ class _BusRoutesScreenState extends State<BusRoutesScreen> {
                 ),
               ),
               subtitle: Text(
-                "Usage Count: $usageCount",
+                usageCount,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Colors.grey[700],

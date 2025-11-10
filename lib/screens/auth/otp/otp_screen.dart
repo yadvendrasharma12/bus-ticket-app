@@ -66,6 +66,10 @@ class _OtpScreenState extends State<OtpScreen> {
       onSuccess: (data) {
         setState(() => isResending = false);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
+
           content: Text("OTP Resent Successfully"),
           backgroundColor: Colors.green,
         ));

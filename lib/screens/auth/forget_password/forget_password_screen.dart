@@ -40,6 +40,10 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         },
         onError: (error) {
           Get.snackbar("Error", error.toString(),
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
+              maxWidth: 300,
               backgroundColor: Colors.redAccent, colorText: Colors.white);
         },
       );
