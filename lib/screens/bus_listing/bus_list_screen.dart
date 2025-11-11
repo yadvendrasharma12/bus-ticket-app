@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../models/onboard_bus_model.dart';
 import '../../serives/onboard_service.dart';
-
 import '../routes_screen/bus_routes_screen.dart';
 
-
 class BusListScreen extends StatefulWidget {
-  const BusListScreen({super.key, required List busList});
+  const BusListScreen({super.key});
 
   @override
   State<BusListScreen> createState() => _BusListScreenState();
@@ -17,7 +16,7 @@ class _BusListScreenState extends State<BusListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool isLoading = true;
-  List<dynamic> allBuses = [];
+  List<OnboardBus> allBuses = [];
 
   @override
   void initState() {
@@ -28,24 +27,23 @@ class _BusListScreenState extends State<BusListScreen>
 
   Future<void> fetchUpcomingBuses() async {
     try {
-      final result = await OnboardService.fetchUpcomingBuses();
+      final response = await OnboardService.fetchUpcomingBuses();
+
+      // ✅ Proper model mapping (response is List)
       setState(() {
-        allBuses = result;
+        allBuses = response.map((e) => OnboardBus.fromJson(e)).toList();
         isLoading = false;
       });
     } catch (e) {
       setState(() => isLoading = false);
-      Get.snackbar("Error", e.toString(),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     }
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   @override
@@ -54,30 +52,18 @@ class _BusListScreenState extends State<BusListScreen>
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         titleSpacing: 0,
-        elevation: 0,
+        elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.indigo.shade900),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Container(
-          margin: const EdgeInsets.only(right: 10),
-          height: 40,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.indigo.shade900, width: 2),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 7),
-            child: Text(
-              "Upcoming Buses",
-              style: GoogleFonts.poppins(
-                color: Colors.indigo.shade900,
-                fontWeight: FontWeight.w600,
-                fontSize: 14.5,
-              ),
-            ),
+        title: Text(
+          "Upcoming Buses",
+          style: GoogleFonts.poppins(
+            color: Colors.indigo.shade900,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
           ),
         ),
         bottom: PreferredSize(
@@ -87,15 +73,8 @@ class _BusListScreenState extends State<BusListScreen>
             indicatorColor: Colors.indigo.shade900,
             labelColor: Colors.indigo.shade900,
             unselectedLabelColor: Colors.grey,
-            dividerColor: Colors.transparent,
             labelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-            unselectedLabelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
+                fontWeight: FontWeight.w600, fontSize: 13),
             tabs: const [
               Tab(text: "ALL"),
               Tab(text: "AC"),
@@ -111,17 +90,17 @@ class _BusListScreenState extends State<BusListScreen>
         children: [
           _buildBusList(allBuses),
           _buildBusList(allBuses
-              .where((bus) => (bus["bus"]["acType"] ?? "").toLowerCase() == "ac")
+              .where((b) => b.bus.acType.toLowerCase() == "ac")
               .toList()),
           _buildBusList(allBuses
-              .where((bus) => (bus["bus"]["acType"] ?? "").toLowerCase() == "non-ac")
+              .where((b) => b.bus.acType.toLowerCase() == "non-ac")
               .toList()),
         ],
       ),
     );
   }
 
-  Widget _buildBusList(List<dynamic> list) {
+  Widget _buildBusList(List<OnboardBus> list) {
     if (list.isEmpty) {
       return const Center(child: Text("No upcoming buses found"));
     }
@@ -130,109 +109,126 @@ class _BusListScreenState extends State<BusListScreen>
       padding: const EdgeInsets.all(16),
       itemCount: list.length,
       itemBuilder: (context, index) {
-        final busData = list[index];
-        final bus = busData["bus"] ?? {};
-        final route = busData["route"] ?? {};
-        final pricing = busData["pricing"] ?? {};
+
+        final bus = list[index];
+        final route = bus.route;
+        final pricing = bus.pricing;
 
         return GestureDetector(
-          onTap: () => Get.to(() => const BusRoutesScreen()),
+          onTap: () => Get.to(() => BusRoutesScreen(busData: bus)),
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
+                  color: Colors.grey.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🔹 Bus name and icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      bus["busName"] ?? "Unknown Bus",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.indigo[900],
-                      ),
-                    ),
-                    Icon(Icons.directions_bus, color: Colors.indigo[800]),
-                  ],
-                ),
-                const SizedBox(height: 10),
 
-                // 🔹 Route info
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _timeBox("Start", route["startPoint"] ?? "-"),
-                    Icon(Icons.arrow_forward, color: Colors.grey[700]),
-                    _timeBox("End", route["finalDestination"] ?? "-"),
-                  ],
+                Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.indigo.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    image: bus.bus.frontImage != null
+                        ? DecorationImage(
+                      image: NetworkImage(bus.bus.frontImage!),
+                      fit: BoxFit.cover,
+                    )
+                        : null,
+                  ),
+                  child: bus.bus.frontImage == null
+                      ? const Icon(Icons.directions_bus,
+                      color: Colors.indigo, size: 30)
+                      : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(width: 16),
 
-                // 🔹 Additional info
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Seats: ${bus["seatCapacity"] ?? 'N/A'}",
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        bus.bus.busName,
                         style: GoogleFonts.poppins(
-                            fontSize: 13, color: Colors.black87)),
-                    _infoItem(Icons.timer_outlined,
-                        "${route["estimatedTravelTime"] ?? 0} mins"),
-                    _infoItem(Icons.map_outlined,
-                        "${route["totalDistance"] ?? 0} km"),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.indigo.shade900,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        bus.bus.busNumber,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
 
-                Text("Fare: ₹${pricing["totalFare"] ?? 0}",
-                    style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green[700])),
+                      Text(
+                        "Seats: ${bus.bus.seatCapacity}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+                      Text(
+                        "${route.startPoint} → ${route.finalDestination}",
+                        style: GoogleFonts.poppins(
+                            fontSize: 14, color: Colors.grey[700]),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.schedule,
+                                  size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                route.originalDepartureTime,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            "₹${pricing.totalFare}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.indigo.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _timeBox(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-        Text(value,
-            style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black)),
-      ],
-    );
-  }
-
-  Widget _infoItem(IconData icon, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.indigo[800]),
-        const SizedBox(width: 4),
-        Text(value,
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87)),
-      ],
     );
   }
 }

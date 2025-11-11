@@ -1,135 +1,85 @@
-
-import 'package:flutter/foundation.dart';
+import 'package:bus_booking_app/screens/select_seats/select_seats_screen.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../serives/route_service.dart';
+import '../../models/onboard_bus_model.dart';
 
-class BusRoutesScreen extends StatefulWidget {
-  const BusRoutesScreen({super.key});
-
-  @override
-  State<BusRoutesScreen> createState() => _BusRoutesScreenState();
-}
-
-class _BusRoutesScreenState extends State<BusRoutesScreen> {
-  List<Map<String, dynamic>> busStops = [];
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchBusStops("delhi");
-  }
-
-
-  Future<void> fetchBusStops(String query) async {
-    setState(() => isLoading = true);
-
-    try {
-      final stops = await RouteService.fetchStops(query);
-      setState(() {
-        busStops = stops;
-        isLoading = false;
-      });
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error fetching stops: $e");
-      }
-      setState(() => isLoading = false);
-    }
-  }
+class BusRoutesScreen extends StatelessWidget {
+  final OnboardBus busData;
+  const BusRoutesScreen({super.key, required this.busData});
 
   @override
   Widget build(BuildContext context) {
+    final route = busData.route;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios, color: Colors.indigo.shade800),
-        ),
-        backgroundColor: Colors.white,
-        centerTitle: true,
         title: Text(
-          "Step 1: View Bus Route",
+          route.name,
           style: GoogleFonts.poppins(
-            color: Colors.indigo.shade800,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
-            fontSize: 17,
+            color: Colors.indigo.shade900,
           ),
         ),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.indigo),
       ),
-
-
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
-          : busStops.isEmpty
-          ? const Center(child: Text("No stops found"))
-          : ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: busStops.length,
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: route.stops.length,
         itemBuilder: (context, index) {
-          final stop = busStops[index];
-
-
-          final stopName = stop["displayName"]?.toString().trim().isNotEmpty == true
-              ? stop["displayName"]
-              : (stop["name"]?.toString().trim().isNotEmpty == true
-              ? stop["name"]
-              : "Unknown Stop");
-
-          final usageCount = stop["usageCount"]?.toString() ?? "0";
-
-          return Container(
-            margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey
+          final stop = route.stops[index];
+          return GestureDetector(
+            onTap: (){
+              Get.to(SelectSeatsScreen());
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    blurRadius: 6,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              borderRadius: BorderRadius.circular(12)
-            ),
-            child: ListTile(
-
-              title: Text(
-                stopName,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              subtitle: Text(
-                usageCount,
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: Colors.grey[700],
-                ),
+              child: Row(
+                children: [
+                  const Icon(Icons.location_on, color: Colors.indigo),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          stop.name,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Colors.indigo.shade900,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Arrival: ${stop.arrivalTime}  |  Distance: ${stop.distanceFromStart} km",
+                          style: GoogleFonts.poppins(
+                              fontSize: 13, color: Colors.grey[700]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _infoText(String label, String value) {
-    return RichText(
-      text: TextSpan(
-        text: label,
-        style: GoogleFonts.poppins(
-          color: Colors.grey.shade700,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-        children: [
-          TextSpan(
-            text: value,
-            style: GoogleFonts.poppins(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

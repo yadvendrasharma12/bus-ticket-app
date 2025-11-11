@@ -100,7 +100,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   Get.to(() => const DriverScreen());
                 }),
                 _drawerItem(Icons.bus_alert_rounded, "Bus", () {
-                  Get.to(() => const BusListScreen(busList: []));
+                  Get.to(() => const BusListScreen());
                 }),
                 _drawerItem(CupertinoIcons.person_alt_circle, "Contact Support",
                         () {

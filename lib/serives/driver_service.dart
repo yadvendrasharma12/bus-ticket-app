@@ -32,7 +32,6 @@ class DriverService {
         },
       );
 
-      // Step 3: Log response
       print("📥 Status Code: ${response.statusCode}");
       print("📥 Response: ${response.body}");
 

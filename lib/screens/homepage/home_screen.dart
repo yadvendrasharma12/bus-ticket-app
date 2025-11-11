@@ -1,12 +1,8 @@
 import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:bus_booking_app/screens/bus_listing/bus_list_screen.dart';
-import 'package:bus_booking_app/screens/contect_support/contact_support_screen.dart';
-import 'package:bus_booking_app/screens/driver/driver_screen.dart';
+import 'package:bus_booking_app/screens/bus_listing/search_bus_screen.dart';
 import 'package:bus_booking_app/screens/homepage/widgets/custom_drawer.dart';
-import 'package:bus_booking_app/screens/privacy_policy/privacy_policy_screen.dart';
-import 'package:bus_booking_app/screens/terms_condition/terms_condition_screen.dart';
 import 'package:bus_booking_app/widgets/custom_button.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,18 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-
-  final _nameController = TextEditingController();
-
-
-  @override
-  void initState() {
-    super.initState();
-
-  }
-  bool _loading = true;
-
   String selectedOption = "Today";
   DateTime? selectedDate;
 
@@ -56,8 +40,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+
+    super.dispose();
+    fromController.dispose();
+    toController.dispose();
+    busController.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size; // Responsive base
+    final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
 
@@ -102,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: height * 0.02),
 
-            // ---- Previous booking cards ----
+            // 🔹 Previous booking horizontal cards
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -116,10 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
             SizedBox(height: height * 0.04),
 
-            // ---- Find a bus ----
+            // 🔹 Search Bus Section
             Container(
               padding: const EdgeInsets.only(top: 10),
               width: double.infinity,
@@ -139,8 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding:
-                    EdgeInsets.symmetric(horizontal: width * 0.05),
+                    padding: EdgeInsets.symmetric(horizontal: width * 0.05),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -232,17 +223,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.indigo.shade900),
+                                    border: Border.all(color: Colors.indigo.shade900),
                                     borderRadius: BorderRadius.circular(6),
                                     color: Colors.white,
                                   ),
                                   child: selectedDate == null
-                                      ? Icon(
-                                    Icons.calendar_today_outlined,
-                                    color: Colors.indigo.shade900,
-                                    size: width * 0.05,
-                                  )
+                                      ? Icon(Icons.calendar_today_outlined,
+                                      color: Colors.indigo.shade900,
+                                      size: width * 0.05)
                                       : Text(
                                     "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
                                     textAlign: TextAlign.center,
@@ -269,8 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () async {
                       if (fromController.text.isEmpty ||
                           toController.text.isEmpty) {
-                        Get.snackbar("Error",
-                            "Please fill both From and To fields");
+                        Get.snackbar("Error", "Please fill both From and To fields");
                         return;
                       }
 
@@ -281,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         date =
                         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
                       } else if (selectedOption == "Tomorrow") {
-                        final tomorrow = now.add(Duration(days: 1));
+                        final tomorrow = now.add(const Duration(days: 1));
                         date =
                         "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
                       } else if (selectedDate != null) {
@@ -302,28 +289,29 @@ class _HomeScreenState extends State<HomeScreen> {
                         token: token,
                       );
 
+                      // ✅ FIX: BusListScreen now has no parameter
                       if (busController.busList.isNotEmpty) {
-                        Get.to(() =>
-                            BusListScreen(busList: busController.busList));
+                        Get.to(() => const SearchBusScreen());
                       } else {
-                        Get.snackbar("No Buses",
-                            "No buses found for this route",
-                            snackPosition: SnackPosition.BOTTOM);
+                        Get.snackbar(
+                          "No Buses",
+                          "No buses found for this route",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
                       }
                     },
                   ),
                   SizedBox(height: height * 0.02),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  // ---- Reusable Widgets ----
-
+  // 🔹 Reusable Widgets
   Widget _dateCard(String month, String day, double width) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: width * 0.02),
@@ -367,9 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _customTextField(String hint,
-      {
-        TextEditingController? controller, required double width
-      }) {
+      {TextEditingController? controller, required double width}) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
@@ -422,6 +408,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-
 }

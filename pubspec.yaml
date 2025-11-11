@@ -42,4 +42,7 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logo/gr_tour_travel.jpg"
+  image_path: "assets/logo/GR Tour & Travel.jpg"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo/GR Tour & Travel.jpg"
+

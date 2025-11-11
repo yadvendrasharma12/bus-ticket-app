@@ -28,10 +28,9 @@ class _SplashScreenState extends State<SplashScreen> {
     final token = await MySharedPref.getToken();
 
     if (token != null && token.isNotEmpty) {
-      // 🔹 Token exists → go to Home
+
       Get.offAll(() => const BottomNavBarScreen());
     } else {
-      // 🔹 No token → go to Onboarding (or Welcome)
       Get.offAll(() => const OnboardingScreen());
     }
   }

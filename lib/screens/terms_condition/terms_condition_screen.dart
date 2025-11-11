@@ -14,7 +14,7 @@ class _TermsConditionScreenState extends State<TermsConditionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        surfaceTintColor: Colors.transparent, // 👈 ye zaruri hai
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back_ios)),
         title: Text(

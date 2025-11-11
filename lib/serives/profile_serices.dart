@@ -18,11 +18,11 @@ class ProfileService {
         return null;
       }
 
-      // 🔸 Step 2: Create API URL
+
       final url = Uri.parse(ApiUrls.profile);
       print("🌐 API URL: $url");
 
-      // 🔸 Step 3: Send GET request
+
       print("📡 Sending GET request to $url ...");
       final response = await http.get(
         url,
