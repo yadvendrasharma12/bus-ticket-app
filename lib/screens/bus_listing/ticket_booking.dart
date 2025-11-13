@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 
-class BusListingScreen extends StatefulWidget {
-  const BusListingScreen({super.key});
+class TicketBookingScreen extends StatefulWidget {
+  const TicketBookingScreen({super.key});
 
   @override
-  State<BusListingScreen> createState() => _BusListingScreenState();
+  State<TicketBookingScreen> createState() => _TicketBookingScreenState();
 }
 
-class _BusListingScreenState extends State<BusListingScreen> {
+class _TicketBookingScreenState extends State<TicketBookingScreen> {
   final List<Map<String, dynamic>> buses = [
     {
       "date": "Thu, 12 Apr 2025",
@@ -27,6 +27,7 @@ class _BusListingScreenState extends State<BusListingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 1,
         title: Text(

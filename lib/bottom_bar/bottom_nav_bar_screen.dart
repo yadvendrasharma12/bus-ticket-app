@@ -1,4 +1,4 @@
-import 'package:bus_booking_app/screens/bus_listing/bus_listing_screen.dart';
+import 'package:bus_booking_app/screens/bus_listing/ticket_booking.dart';
 import 'package:bus_booking_app/screens/homepage/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   // ---------- Screen list ----------
   final List<Widget> _screens = [
     const HomeScreen(),
-    const BusListingScreen(),
+    const TicketBookingScreen(),
     const ProfileScreen(),
   ];
 
@@ -98,18 +98,5 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   }
 }
 
-// ---------- Dummy Screens (agar abhi nahi bane) ----------
-class TicketScreen extends StatelessWidget {
-  const TicketScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        "Tickets Screen",
-        style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
 

@@ -29,7 +29,6 @@ class _BusListScreenState extends State<BusListScreen>
     try {
       final response = await OnboardService.fetchUpcomingBuses();
 
-      // ✅ Proper model mapping (response is List)
       setState(() {
         allBuses = response.map((e) => OnboardBus.fromJson(e)).toList();
         isLoading = false;
@@ -90,10 +89,10 @@ class _BusListScreenState extends State<BusListScreen>
         children: [
           _buildBusList(allBuses),
           _buildBusList(allBuses
-              .where((b) => b.bus.acType.toLowerCase() == "ac")
+              .where((b) => b.bus?.acType.toLowerCase() == "ac")
               .toList()),
           _buildBusList(allBuses
-              .where((b) => b.bus.acType.toLowerCase() == "non-ac")
+              .where((b) => b.bus?.acType.toLowerCase() == "non-ac")
               .toList()),
         ],
       ),
@@ -115,7 +114,7 @@ class _BusListScreenState extends State<BusListScreen>
         final pricing = bus.pricing;
 
         return GestureDetector(
-          onTap: () => Get.to(() => BusRoutesScreen(busData: bus)),
+          onTap: () => Get.to(() => BusRoutesScreen(busData: bus,)),
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
@@ -140,14 +139,14 @@ class _BusListScreenState extends State<BusListScreen>
                   decoration: BoxDecoration(
                     color: Colors.indigo.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
-                    image: bus.bus.frontImage != null
+                    image: bus.bus?.frontImage != null
                         ? DecorationImage(
-                      image: NetworkImage(bus.bus.frontImage!),
+                      image: NetworkImage(bus.bus!.frontImage!),
                       fit: BoxFit.cover,
                     )
                         : null,
                   ),
-                  child: bus.bus.frontImage == null
+                  child: bus.bus?.frontImage == null
                       ? const Icon(Icons.directions_bus,
                       color: Colors.indigo, size: 30)
                       : null,
@@ -161,7 +160,7 @@ class _BusListScreenState extends State<BusListScreen>
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        bus.bus.busName,
+                        bus.bus!.busName,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -170,7 +169,7 @@ class _BusListScreenState extends State<BusListScreen>
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        bus.bus.busNumber,
+                        bus.bus!.busNumber,
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -179,7 +178,7 @@ class _BusListScreenState extends State<BusListScreen>
                       ),
 
                       Text(
-                        "Seats: ${bus.bus.seatCapacity}",
+                        "Seats: ${bus.bus?.seatCapacity}",
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -212,7 +211,7 @@ class _BusListScreenState extends State<BusListScreen>
                             ],
                           ),
                           Text(
-                            "₹${pricing.totalFare}",
+                            "₹${pricing?.totalFare}",
                             style: GoogleFonts.poppins(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

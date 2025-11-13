@@ -1,12 +1,11 @@
 import 'package:bus_booking_app/controllers/auth_controllers.dart';
-import 'package:bus_booking_app/screens/bus_listing/bus_list_screen.dart';
-import 'package:bus_booking_app/screens/bus_listing/search_bus_screen.dart';
+import 'package:bus_booking_app/controllers/bus_search_controller.dart';
 import 'package:bus_booking_app/screens/homepage/widgets/custom_drawer.dart';
 import 'package:bus_booking_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../controllers/bus_search_controller.dart';
+import '../bus_listing/search_bus_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,13 +40,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-
-    super.dispose();
     fromController.dispose();
     toController.dispose();
     busController.dispose();
+    super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -94,8 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: height * 0.02),
-
-            // 🔹 Previous booking horizontal cards
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -110,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: height * 0.04),
-
             // 🔹 Search Bus Section
             Container(
               padding: const EdgeInsets.only(top: 10),
@@ -144,8 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         SizedBox(height: height * 0.02),
-
-                        // ✅ From - To Fields
                         Row(
                           children: [
                             Expanded(
@@ -197,8 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                         SizedBox(height: height * 0.025),
-
-                        // ✅ Date selector
                         Text(
                           "Date",
                           style: GoogleFonts.poppins(
@@ -223,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.indigo.shade900),
+                                    border:
+                                    Border.all(color: Colors.indigo.shade900),
                                     borderRadius: BorderRadius.circular(6),
                                     color: Colors.white,
                                   ),
@@ -249,14 +241,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   SizedBox(height: height * 0.035),
-
-                  // ✅ Button
                   CustomButton(
                     backgroundColor: Colors.yellow.shade800,
                     text: "Let's check!",
                     onPressed: () async {
-                      if (fromController.text.isEmpty ||
-                          toController.text.isEmpty) {
+                      if (fromController.text.isEmpty || toController.text.isEmpty) {
                         Get.snackbar("Error", "Please fill both From and To fields");
                         return;
                       }
@@ -265,22 +254,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       final now = DateTime.now();
 
                       if (selectedOption == "Today") {
-                        date =
-                        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+                        date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
                       } else if (selectedOption == "Tomorrow") {
-                        final tomorrow = now.add(const Duration(days: 1));
-                        date =
-                        "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+                        final tomorrow = now.add(const Duration(days:1));
+                        date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2,'0')}-${tomorrow.day.toString().padLeft(2,'0')}";
                       } else if (selectedDate != null) {
-                        date =
-                        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+                        date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
                       } else {
-                        Get.snackbar("Error", "Please select a date",
-                            snackPosition: SnackPosition.BOTTOM);
+                        Get.snackbar("Error", "Please select a date", snackPosition: SnackPosition.BOTTOM);
                         return;
                       }
 
                       final token = authController.token.value;
+
+                      // Show loading while fetching
+                      Get.dialog(
+                        const Center(child: CircularProgressIndicator()),
+                        barrierDismissible: false,
+                      );
 
                       await busController.searchBuses(
                         origin: fromController.text,
@@ -289,18 +280,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         token: token,
                       );
 
-                      // ✅ FIX: BusListScreen now has no parameter
-                      if (busController.busList.isNotEmpty) {
-                        Get.to(() => const SearchBusScreen());
-                      } else {
-                        Get.snackbar(
-                          "No Buses",
-                          "No buses found for this route",
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
+                      // Close loading
+                      if (Get.isDialogOpen ?? false) Get.back();
+
+                      if (busController.busList.isEmpty) {
+                        Get.snackbar("No Buses", "No buses found for this route", snackPosition: SnackPosition.BOTTOM);
+                        return;
                       }
+
+                      // Navigate after list is loaded
+                      Get.to(() => const SearchBusScreen());
                     },
                   ),
+
                   SizedBox(height: height * 0.02),
                 ],
               ),
@@ -311,7 +303,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Reusable Widgets
   Widget _dateCard(String month, String day, double width) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: width * 0.02),

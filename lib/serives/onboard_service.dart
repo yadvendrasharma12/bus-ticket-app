@@ -25,6 +25,9 @@ class OnboardService {
     );
 
     if (response.statusCode == 200) {
+      print("🔹 Response Code: ${response.statusCode}");
+      print("🔹 Response Body: ${response.body}");
+
       final data = json.decode(response.body);
       if (data["success"] == true && data["data"] is List) {
         return List<Map<String, dynamic>>.from(data["data"]);

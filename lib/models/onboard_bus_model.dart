@@ -1,32 +1,35 @@
+
 class OnboardBus {
   final String id;
-  final DateTime date;
-  final String time;
-  final Pricing pricing;
-  final Bus bus;
+  final DateTime? date;
+  final String? time;
+  final Pricing? pricing;
+  final Bus? bus;
   final RouteData route;
 
   OnboardBus({
-    required this.id,
-    required this.date,
-    required this.time,
-    required this.pricing,
-    required this.bus,
     required this.route,
+    this.id = '',
+    this.date,
+    this.time,
+    this.pricing,
+    this.bus,
   });
 
   factory OnboardBus.fromJson(Map<String, dynamic> json) {
     return OnboardBus(
-      id: json['_id'],
-      date: DateTime.parse(json['date']),
+      id: json['_id'] ?? '',
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
       time: json['time'],
-      pricing: Pricing.fromJson(json['pricing']),
-      bus: Bus.fromJson(json['bus']),
-      route: RouteData.fromJson(json['route']),
+      pricing: json['pricing'] != null ? Pricing.fromJson(json['pricing']) : null,
+      bus: json['bus'] != null ? Bus.fromJson(json['bus']) : null,
+      route: json['route'] != null
+          ? RouteData.fromJson(json['route'])
+          : RouteData(name: '', stops: []),
     );
   }
 
-  void operator [](String other) {}
+
 }
 
 class Pricing {
@@ -42,9 +45,9 @@ class Pricing {
 
   factory Pricing.fromJson(Map<String, dynamic> json) {
     return Pricing(
-      baseAmount: json['baseAmount'],
-      perKmRate: json['perKmRate'],
-      totalFare: json['totalFare'],
+      baseAmount: json['baseAmount'] ?? 0,
+      perKmRate: json['perKmRate'] ?? 0,
+      totalFare: json['totalFare'] ?? 0,
     );
   }
 }
@@ -70,75 +73,60 @@ class Bus {
 
   factory Bus.fromJson(Map<String, dynamic> json) {
     return Bus(
-      id: json['_id'],
-      busName: json['busName'],
-      busNumber: json['busNumber'],
-      seatCapacity: json['seatCapacity'],
-      seatArchitecture: json['seatArchitecture'],
-      acType: json['acType'],
+      id: json['_id'] ?? '',
+      busName: json['busName'] ?? '',
+      busNumber: json['busNumber'] ?? '',
+      seatCapacity: json['seatCapacity'] ?? 0,
+      seatArchitecture: json['seatArchitecture'] ?? '',
+      acType: json['acType'] ?? '',
       frontImage: json['frontImage'],
     );
   }
 }
 
 class RouteData {
-  final String id;
   final String name;
   final String startPoint;
   final String finalDestination;
   final String originalDepartureTime;
-  final int totalDistance;
-  final int estimatedTravelTime;
   final List<Stop> stops;
 
   RouteData({
-    required this.id,
     required this.name,
-    required this.startPoint,
-    required this.finalDestination,
-    required this.originalDepartureTime,
-    required this.totalDistance,
-    required this.estimatedTravelTime,
+    this.startPoint = '',
+    this.finalDestination = '',
+    this.originalDepartureTime = '',
     required this.stops,
   });
 
   factory RouteData.fromJson(Map<String, dynamic> json) {
+    final stopsJson = json['stops'] as List<dynamic>? ?? [];
     return RouteData(
-      id: json['_id'],
-      name: json['name'],
-      startPoint: json['startPoint'],
-      finalDestination: json['finalDestination'],
-      originalDepartureTime: json['originalDepartureTime'],
-      totalDistance: json['totalDistance'],
-      estimatedTravelTime: json['estimatedTravelTime'],
-      stops:
-      (json['stops'] as List).map((e) => Stop.fromJson(e)).toList(),
+      name: json['name'] ?? '',
+      startPoint: json['startPoint'] ?? '',
+      finalDestination: json['finalDestination'] ?? '',
+      originalDepartureTime: json['originalDepartureTime'] ?? '',
+      stops: stopsJson.map((e) => Stop.fromJson(e)).toList(),
     );
   }
 }
 
 class Stop {
   final String name;
-  final int distanceFromPrev;
-  final int durationFromPrev;
   final String arrivalTime;
-  final int distanceFromStart;
+  final double distanceFromStart;
 
   Stop({
     required this.name,
-    required this.distanceFromPrev,
-    required this.durationFromPrev,
     required this.arrivalTime,
     required this.distanceFromStart,
   });
 
   factory Stop.fromJson(Map<String, dynamic> json) {
     return Stop(
-      name: json['name'],
-      distanceFromPrev: json['distanceFromPrev'],
-      durationFromPrev: json['durationFromPrev'],
-      arrivalTime: json['arrivalTime'],
-      distanceFromStart: json['distanceFromStart'],
+      name: json['name'] ?? '',
+      arrivalTime: json['arrivalTime'] ?? '',
+      distanceFromStart: (json['distanceFromStart'] ?? 0).toDouble(),
     );
   }
 }

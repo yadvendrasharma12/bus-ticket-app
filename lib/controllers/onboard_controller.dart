@@ -26,8 +26,8 @@ class OnboardController extends GetxController {
   }
 
   List<OnboardBus> get acBuses =>
-      allBuses.where((bus) => bus.bus.acType.toLowerCase() == 'ac').toList();
+      allBuses.where((bus) => bus.bus?.acType.toLowerCase() == 'ac').toList();
 
   List<OnboardBus> get nonAcBuses =>
-      allBuses.where((bus) => bus.bus.acType.toLowerCase() == 'non-ac').toList();
+      allBuses.where((bus) => bus.bus?.acType.toLowerCase() == 'non-ac').toList();
 }

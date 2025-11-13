@@ -20,6 +20,9 @@ class RouteService {
     );
 
     if (response.statusCode == 200) {
+      print("🔹 Response Code: ${response.statusCode}");
+      print("🔹 Response Body: ${response.body}");
+
       final data = jsonDecode(response.body);
       if (data["success"] == true && data["data"] != null) {
         return List<Map<String, dynamic>>.from(data["data"]);

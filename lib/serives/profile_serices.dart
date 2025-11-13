@@ -38,6 +38,9 @@ class ProfileService {
 
       // 🔸 Step 5: Handle success
       if (response.statusCode == 200) {
+        print("🔹 Response Code: ${response.statusCode}");
+        print("🔹 Response Body: ${response.body}");
+
         final Map<String, dynamic> data = jsonDecode(response.body);
         print("✅ Profile data fetched successfully!");
 

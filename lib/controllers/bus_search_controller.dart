@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:bus_booking_app/utils/shared_prefs.dart';
-
+import '../utils/shared_prefs.dart';
 import '../utils/apis_url.dart';
 
 class BusSearchController extends GetxController {
   var isLoading = false.obs;
-  var busList = [].obs;
+  var busList = <Map<String, dynamic>>[].obs;
 
+  /// Search buses from API
   Future<void> searchBuses({
     required String origin,
     required String destination,
@@ -38,8 +38,10 @@ class BusSearchController extends GetxController {
             "&page=1&limit=10",
       );
 
-      print("🔹 Calling API: $url");
-      print("🔹 Token: $savedToken");
+      if (kDebugMode) {
+        print("🔹 Calling API: $url");
+        print("🔹 Token: $savedToken");
+      }
 
       final response = await http.get(
         url,
@@ -49,18 +51,18 @@ class BusSearchController extends GetxController {
         },
       );
 
-      print("🔹 Response Code: ${response.statusCode}");
-      print("🔹 Response Body: ${response.body}");
+      if (kDebugMode) {
+        print("🔹 Response Code: ${response.statusCode}");
+        print("🔹 Response Body: ${response.body}");
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data["success"] == true && data["data"] != null) {
           busList.value = List<Map<String, dynamic>>.from(data["data"]);
-          if (kDebugMode) {
-            print("✅ Bus list loaded successfully: ${busList.length} items");
-          }
+          if (kDebugMode) print("✅ Bus list loaded: ${busList.length} items");
         } else {
-          busList.value = [];
+          busList.clear();
           Get.snackbar(
             "No Buses",
             "No buses found for this route",
@@ -70,7 +72,7 @@ class BusSearchController extends GetxController {
       } else if (response.statusCode == 401) {
         Get.snackbar(
           "Unauthorized",
-          "Your session expired. Please login again.",
+          "Session expired. Please login again.",
           snackPosition: SnackPosition.BOTTOM,
         );
         await MySharedPref.clearToken();
@@ -82,7 +84,7 @@ class BusSearchController extends GetxController {
         );
       }
     } catch (e) {
-      print("❌ Exception: $e");
+      if (kDebugMode) print("❌ Exception: $e");
       Get.snackbar(
         "Error",
         "Failed to fetch buses: $e",

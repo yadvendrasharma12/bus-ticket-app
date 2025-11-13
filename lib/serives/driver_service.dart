@@ -36,6 +36,9 @@ class DriverService {
       print("📥 Response: ${response.body}");
 
       if (response.statusCode == 200) {
+        print("🔹 Response Code: ${response.statusCode}");
+        print("🔹 Response Body: ${response.body}");
+
         final data = jsonDecode(response.body);
         if (data["success"] == true) {
           print("✅ Drivers fetched successfully!");

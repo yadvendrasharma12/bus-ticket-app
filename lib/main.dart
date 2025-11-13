@@ -1,14 +1,17 @@
-import 'package:bus_booking_app/controllers/auth_controllers.dart';
-import 'package:bus_booking_app/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:get_storage/get_storage.dart';
+import 'controllers/booking_controller.dart';
 import 'core/constant/routes/app_page.dart';
 import 'core/constant/routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_service.dart';
+import 'screens/splash/splash_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await GetStorage.init(); // ✅ Storage initialize
+  Get.put(BookingController());
 
   runApp(const MyApp());
 }
@@ -19,14 +22,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialRoute: AppRoutes.splash,
-      getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
       title: 'Bus Booking App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeService().theme, // ✅ Theme loaded dynamically
+      initialRoute: AppRoutes.splash,
+      getPages: AppPages.pages,
       home: const SplashScreen(),
     );
   }

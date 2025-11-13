@@ -11,7 +11,8 @@ class AuthController extends GetxController {
     "name": "Yadvendra Sharma",
     "location": "New Delhi",
     "profileImage": "https://example.com/photo.jpg", // or local path
-  }.obs;
+  }
+  .obs;
   var isLoading = false.obs;
   var token = "".obs; // ✅ Added token variable
 

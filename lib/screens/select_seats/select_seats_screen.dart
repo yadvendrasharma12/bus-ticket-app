@@ -1,353 +1,127 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:http/http.dart' as http;
+import '../../models/onboard_bus_model.dart';
+import '../../widgets/custom_button.dart';
 import '../pesenger_details/pasenger_details_screen.dart';
 
 class SelectSeatsScreen extends StatefulWidget {
-  const SelectSeatsScreen({super.key});
+  final OnboardBus busData;
+
+  const SelectSeatsScreen({super.key, required this.busData});
 
   @override
   State<SelectSeatsScreen> createState() => _SelectSeatsScreenState();
 }
 
 class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
+  List<String> serverBookedSeats = [];
+  final List<String> selectedSeats = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBookedSeats();
 
 
-  final int rows = 8;
-  final int columns = 4;
+  }
 
-  // store selected seats
-  List<String> selectedSeats = [];
-
-  // predefined booked seats
-  final List<String> bookedSeats = ["1A", "2C", "3D", "4B", "6C"];
+  Future<void> fetchBookedSeats() async {
+    try {
+      final scheduleId = widget.busData.id;
+      final url = Uri.parse("https://fleetbus.onrender.com/api/bookings/bookedSeats/$scheduleId");
+      final response = await http.get(url, headers: {"Authorization": "Bearer ${Get.find<String>()}"});
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          serverBookedSeats = List<String>.from(data['bookedSeats']);
+        });
+      } else {
+        Get.snackbar("Error", "Failed to fetch booked seats");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Exception: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bus = widget.busData;
+
+    List<String> seatLabels = [];
+    const rows = 8;
+    const seatsPerRow = 4;
+    for (int i = 0; i < rows; i++) {
+      seatLabels.addAll(["${i + 1}A", "${i + 1}B", "${i + 1}C", "${i + 1}D"]);
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-
-
-
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            children: [
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: (){
-                          Get.back();
-                        },
-                          child: Icon(Icons.arrow_back_ios,color: Colors.indigo.shade800,)),
-                      Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 136),
-                        child: Text(
-                          "Select seats",
-                          style: GoogleFonts.poppins(
-                            color: Colors.indigo.shade900,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 6,),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Moratuwa",
-                          style: GoogleFonts.poppins(
-                            color: Colors.indigo.shade900,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                          ),
-                        ),
-                        Icon(Icons.arrow_forward,color: Colors.grey),
-                        Text(
-                          "CoovaChilli",
-                          style: GoogleFonts.poppins(
-                            color: Colors.indigo.shade900,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],),
-                  ),
-                  SizedBox(height: 6,),
-                  Container(
-                    margin: EdgeInsets.only(left: 30,right: 30),
-
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 20,
-                          width: 90,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.indigo.shade800)
-                          ),
-                          child: Center(
-                            child:      Text(
-                              textAlign: TextAlign.center,
-                              "Super Luxury",
-                              style: GoogleFonts.poppins(
-                                color: Colors.indigo.shade900,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          child: Row(children: [
-                            Icon(Icons.alarm,size: 12,color: Colors.indigo.shade800,) ,
-                            SizedBox(width: 4,),
-                            Center(
-                              child:      Text(
-                                textAlign: TextAlign.center,
-                                "15:30",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.indigo.shade900,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],),
-                        ),
-                        Container(
-                          child: Row(children: [
-                            Icon(Icons.date_range,size: 12,color: Colors.indigo.shade800,) ,
-                            SizedBox(width: 4,),
-                            Center(
-                              child:      Text(
-                                textAlign: TextAlign.center,
-                                "23 Sep 2019",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.indigo.shade900,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],),
-                        ),
-                      ],),
-                  )
-                ],
-              ),
-
-              const SizedBox(height: 33),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 30),
-                    padding: const EdgeInsets.only(left: 15, right: 10,bottom: 18),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.indigo.shade800, width: 1),
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade300,
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15, right: 10),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Icon(
-                              Icons.car_crash,
-                              color: Colors.indigo.shade800,
-                              size: 30,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-
-                        // ✅ Grid auto expands inside SingleChildScrollView
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 1.1,
-                          ),
-                          itemCount: rows * columns,
-                          itemBuilder: (context, index) {
-                            int row = (index ~/ columns) + 1;
-                            String seatLetter = String.fromCharCode(65 + (index % columns));
-                            String seatId = "$row$seatLetter";
-
-                            bool isBooked = bookedSeats.contains(seatId);
-                            bool isSelected = selectedSeats.contains(seatId);
-
-                            Color seatColor;
-                            if (isBooked) {
-                              seatColor = Colors.grey.shade400;
-                            } else if (isSelected) {
-                              seatColor = Colors.yellow.shade700;
-                            } else {
-                              seatColor = Colors.white;
-                            }
-
-                            return GestureDetector(
-                              onTap: isBooked
-                                  ? null
-                                  : () {
-                                setState(() {
-                                  if (isSelected) {
-                                    selectedSeats.remove(seatId);
-                                  } else {
-                                    selectedSeats.add(seatId);
-                                  }
-                                });
-                              },
-                              child: Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: seatColor,
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                    color: Colors.indigo.shade900,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    seatId,
-                                    style: GoogleFonts.poppins(
-                                      color: isBooked
-                                          ? Colors.white
-                                          : Colors.indigo.shade900,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-
-            ],
-          ),
-        ),
+      appBar: AppBar(
+        title: Text(bus.bus?.busName ?? "Select Seats", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.indigo),
       ),
-
-      bottomSheet: Container(
-        padding: EdgeInsets.only(left: 20,top: 0,right: 0),
-        height: 80,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
           children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                Text(
-                  "Seats",
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  "21.22M",
-                  style: GoogleFonts.poppins(
-                    color: Colors.indigo.shade900,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                ),
-              ],),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Flore fare",
-                    style: GoogleFonts.poppins(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+            Text(bus.route.name.isNotEmpty ? "Route: ${bus.route.name}" : "No Route Info", style: GoogleFonts.poppins(fontSize: 15, color: Colors.indigo.shade900)),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: rows,
+                itemBuilder: (context, rowIndex) {
+                  final seatRow = seatLabels.skip(rowIndex * seatsPerRow).take(seatsPerRow).toList();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: seatRow.map((seatNo) {
+                        final isBooked = serverBookedSeats.contains(seatNo);
+                        final isSelected = selectedSeats.contains(seatNo);
+                        return GestureDetector(
+                          onTap: () {
+                            if (isBooked) return;
+                            setState(() {
+                              isSelected ? selectedSeats.remove(seatNo) : selectedSeats.add(seatNo);
+                            });
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isBooked ? Colors.grey.shade400 : isSelected ? Colors.green : Colors.white,
+                              border: Border.all(color: isBooked ? Colors.grey : Colors.indigo, width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(seatNo, style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: isBooked ? Colors.black54 : Colors.indigo.shade900)),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ),
-                  Text(
-                    "2400.00 KLR",
-                    style: GoogleFonts.poppins(
-                      color: Colors.indigo.shade900,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                    ),
-                  ),
-                ],),
-            ),
-          ),
-          GestureDetector(
-            onTap: (){
-             Get.to(PassengerDetailsScreen());
-            },
-            child: Container(
-              height: 80,
-              width: 140,
-              decoration: BoxDecoration(
-                color: Colors.yellow.shade800
-              ),
-              child: Center(
-                child:    Text(
-                  "Book Now",
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                  ),
-                ),
+                  );
+                },
               ),
             ),
-          )
-        ],),
+            const SizedBox(height: 10),
+            CustomButton(
+              backgroundColor: Colors.yellow.shade800,
+              text: "Continue",
+              onPressed: () {
+                if (selectedSeats.isEmpty) {
+                  Get.snackbar("Error", "Please select at least one seat");
+                } else {
+                  Get.to(() => PassengerDetailsScreen(busData: widget.busData, selectedSeats: selectedSeats));
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
-

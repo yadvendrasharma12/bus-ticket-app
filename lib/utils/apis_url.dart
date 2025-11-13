@@ -20,5 +20,6 @@ class ApiUrls {
   static const String driversList = "$driverBaseUrl/list";
 
   static const String routesBaseUrl = "https://fleetbus.onrender.com/api/routes/stops/suggest";
+  static const String ticketBooking = "https://fleetbus.onrender.com/api/bookings/ticket";
 
 }
