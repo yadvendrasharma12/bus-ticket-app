@@ -14,12 +14,12 @@ class AuthController extends GetxController {
   }
   .obs;
   var isLoading = false.obs;
-  var token = "".obs; // ✅ Added token variable
+  var token = "".obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadToken(); // ✅ Load token automatically on start
+    loadToken();
   }
 
   Future<void> loadToken() async {
@@ -37,6 +37,7 @@ class AuthController extends GetxController {
   }
 
   // ✅ REGISTER USER
+
   Future<void> registerUser({
     required String name,
     required String email,

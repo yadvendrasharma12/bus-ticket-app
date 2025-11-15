@@ -1,6 +1,6 @@
 class ApiUrls {
   // 🔹 Auth Base
-  static const String baseUrl = "https://fleetbus.onrender.com/api/auth";
+  static const String baseUrl = "https://fleetbus.onrender.com/api/auth/";
 
   static const String register = "$baseUrl/register";
   static const String login = "$baseUrl/login";
@@ -21,5 +21,6 @@ class ApiUrls {
 
   static const String routesBaseUrl = "https://fleetbus.onrender.com/api/routes/stops/suggest";
   static const String ticketBooking = "https://fleetbus.onrender.com/api/bookings/ticket";
+  static const String ticketHistory = " https://fleetbus.onrender.com/api/bookings/history";
 
 }

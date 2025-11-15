@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:bus_booking_app/screens/booking_confirm_screen/booking_confirm_screen.dart';
 import 'package:bus_booking_app/utils/apis_url.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingController extends GetxController {
   var isLoading = false.obs;
@@ -22,22 +22,25 @@ class BookingController extends GetxController {
     required String destination,
     required double fare,
     required String travelDate,
-    required List<String> seats, // ✅ Dynamic seats from SelectSeatsScreen
+    required List<String> seats,
   }) async {
     try {
-      if (kDebugMode) {
-        print("📢 [BOOKING STARTED]");
-      }
-      if (kDebugMode) {
-        print("------------------------------------------------");
-      }
+      print("📢 [BOOKING STARTED]");
 
       isLoading.value = true;
-      if (kDebugMode) {
-        print("⏳ Loading: ${isLoading.value}");
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token");
+
+      print("🔑 Saved Token: $token");
+
+      if (token == null || token.isEmpty) {
+        print("❌ Token Missing!!!");
+        Get.snackbar("Error", "User not logged in! Token missing.");
+        return;
       }
 
-      // 🧾 Prepare request body
+      // 🧾 Request Body
       final body = {
         "passengerName": passengerName.trim(),
         "age": age,
@@ -52,67 +55,46 @@ class BookingController extends GetxController {
         "scheduleId": scheduleId,
         "source": source.trim(),
         "destination": destination.trim(),
-        "seats": seats, // ✅ Use only the seats passed from screen
+        "seats": seats,
         "fare": fare,
         "travelDate": travelDate,
       };
 
-      print("📝 Booking Request Body:");
-      print(jsonEncode(body));
+      print("📝 Booking Request Body: ${jsonEncode(body)}");
 
       final url = Uri.parse(ApiUrls.ticketBooking);
-      print("🌍 API URL: $url");
+
+      // 🔥 IMPORTANT: Token must be added here
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      print("📩 Sending headers: $headers");
 
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: headers,
         body: jsonEncode(body),
       );
 
-      if (kDebugMode) {
-        print("✅ Response Status Code: ${response.statusCode}");
-      }
-      if (kDebugMode) {
-        print("✅ Raw Response Body: ${response.body}");
-      }
+      print("📥 Status Code: ${response.statusCode}");
+      print("📥 Response: ${response.body}");
 
       final result = jsonDecode(response.body);
-      if (kDebugMode) {
-        print("📦 Decoded JSON Response: $result");
-      }
 
-      if ((response.statusCode == 200 || response.statusCode == 201) &&
-          (result['success'] == true || result['status'] == "success")) {
-        if (kDebugMode) {
-          print("🎉 Booking Successful!");
-        }
-        Get.snackbar("✅ Success", "Ticket booked successfully!");
-        Get.off(() => const BookingConfirmationScreen());
+      if (response.statusCode == 201 && result["success"] == true) {
+        Get.snackbar("Success", "Ticket booked successfully!");
+        Get.offAll(() =>  BookingConfirmationScreen());
       } else {
-        if (kDebugMode) {
-          print("⚠️ Booking Failed!");
-        }
-        Get.snackbar("Error", result['message'] ?? "Booking failed");
+        Get.snackbar("Error", result["message"] ?? "Booking failed");
       }
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print("💥 Exception Caught: $e");
-      }
-      if (kDebugMode) {
-        print("🧱 Stack Trace:\n$stackTrace");
-      }
+    } catch (e) {
+      print("💥 EXCEPTION: $e");
       Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
-      if (kDebugMode) {
-        print("⏹ Loading: ${isLoading.value}");
-      }
-      if (kDebugMode) {
-        print("------------------------------------------------");
-      }
-      if (kDebugMode) {
-        print("📢 [BOOKING END]");
-      }
+      print("⏹ Loading: ${isLoading.value}");
     }
   }
 }

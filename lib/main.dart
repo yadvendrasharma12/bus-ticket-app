@@ -10,7 +10,7 @@ import 'screens/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GetStorage.init(); // ✅ Storage initialize
+  await GetStorage.init();
   Get.put(BookingController());
 
   runApp(const MyApp());
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       title: 'Bus Booking App',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeService().theme, // ✅ Theme loaded dynamically
+      themeMode: ThemeService().theme,
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
       home: const SplashScreen(),

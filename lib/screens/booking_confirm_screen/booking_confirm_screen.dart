@@ -78,27 +78,4 @@ class BookingConfirmationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w500, color: Colors.grey.shade700)),
-          Flexible(
-            child: Text(
-              value,
-              style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.indigo.shade900),
-              textAlign: TextAlign.right,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
