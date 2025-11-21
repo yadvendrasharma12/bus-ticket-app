@@ -18,19 +18,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, String>> onboardingData = [
     {
-      "image": "assets/logo/onboarding4.jpg",
+      "image": "assets/images/1.png",
       "title": "Easy Ticket Booking",
       "desc":
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore."
     },
     {
-      "image": "assets/logo/logo8.png",
+      "image": "assets/images/4.png",
       "title": "Online Payment",
       "desc":
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore."
     },
     {
-      "image": "assets/logo/onboarding 1.jpg",
+      "image": "assets/logo/onboarding4.jpg",
       "title": "No Need To Queue",
       "desc":
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore."
@@ -45,7 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             Expanded(
-              flex: 4,
+              flex: 3,
               child: PageView.builder(
                 controller: _controller,
                 onPageChanged: (value) {
@@ -162,9 +162,13 @@ class OnboardContent extends StatelessWidget {
       children: [
         const SizedBox(height: 40),
         Expanded(
-          child: Image.asset(image, fit: BoxFit.contain),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadiusGeometry.circular(10),
+                  child: Image.asset(image, fit: BoxFit.contain))),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 40),
         Text(
           title,
           style: GoogleFonts.poppins(
@@ -173,7 +177,7 @@ class OnboardContent extends StatelessWidget {
             color: Colors.yellow.shade800,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: Text(

@@ -2,9 +2,11 @@ import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:bus_booking_app/controllers/bus_search_controller.dart';
 import 'package:bus_booking_app/screens/homepage/widgets/custom_drawer.dart';
 import 'package:bus_booking_app/widgets/custom_button.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../bus_listing/search_bus_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -46,6 +48,17 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  final CarouselController carouselController = CarouselController();
+  int _currentPage = 0;
+
+  final List<String> images = [
+    "assets/images/1.png",
+    "assets/images/2.png",
+    "assets/images/3.png",
+    "assets/images/4.png",
+    "assets/images/5.png",
+  ];
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -83,28 +96,55 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Previous booking",
-              style: GoogleFonts.poppins(
-                fontSize: width * 0.045,
-                fontWeight: FontWeight.w600,
-                color: Colors.indigo[900],
+            SizedBox(height: 16,),
+            CarouselSlider(
+              items: images.map((imgPath) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      imgPath,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  ),
+                );
+              }).toList(),
+              options: CarouselOptions(
+                height: 160,
+                aspectRatio: 16 / 9,
+                viewportFraction: 0.99,
+                initialPage: 0,
+                enableInfiniteScroll: true,
+                autoPlay: true,
+                autoPlayInterval: const Duration(seconds: 3),
+                autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                autoPlayCurve: Curves.fastOutSlowIn,
+                enlargeCenterPage: false,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
               ),
             ),
-            SizedBox(height: height * 0.02),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: [
-                  _dateCard("February", "12", width),
-                  _dateCard("January", "03", width),
-                  _dateCard("December", "24", width),
-                  _dateCard("November", "18", width),
-                  _dateCard("October", "05", width),
-                ],
+
+            const SizedBox(height: 16),
+            Center(
+              child: AnimatedSmoothIndicator(
+                activeIndex: _currentPage,
+                count: images.length,
+                effect:  ExpandingDotsEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  activeDotColor: Colors.yellow.shade800,
+                  dotColor: Colors.grey,
+                ),
+
               ),
             ),
+
             SizedBox(height: height * 0.04),
             // 🔹 Search Bus Section
             Container(
@@ -143,10 +183,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Expanded(
                               flex: 2,
-                              child: _customTextField(
+                              child: _customAutocompleteTextField(
                                 "From",
                                 controller: fromController,
-                                width: width,
+                                options: ["Mumbai", "Pune", "Delhi", "Bangalore", "Chennai","Noida"],
                               ),
                             ),
                             SizedBox(width: width * 0.02),
@@ -154,14 +194,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.indigo.shade50,
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    spreadRadius: 1,
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: IconButton(
                                 icon: const Icon(
@@ -170,25 +202,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   size: 28,
                                 ),
                                 onPressed: () {
-                                  setState(() {
-                                    final temp = fromController.text;
-                                    fromController.text = toController.text;
-                                    toController.text = temp;
-                                  });
+                                  final temp = fromController.text;
+                                  fromController.text = toController.text;
+                                  toController.text = temp;
                                 },
                               ),
                             ),
                             SizedBox(width: width * 0.02),
                             Expanded(
                               flex: 2,
-                              child: _customTextField(
+                              child: _customAutocompleteTextField(
                                 "To",
                                 controller: toController,
-                                width: width,
+                                options: ["Mumbai", "Pune", "Delhi", "Bangalore", "Chennai","Noida"],
                               ),
                             ),
                           ],
                         ),
+
                         SizedBox(height: height * 0.025),
                         Text(
                           "Date",
@@ -245,8 +276,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Colors.yellow.shade800,
                     text: "Let's check!",
                     onPressed: () async {
+                      // 🔹 Keyboard hide
+                      FocusScope.of(context).unfocus();
+
                       if (fromController.text.isEmpty || toController.text.isEmpty) {
-                        Get.snackbar("Error", "Please fill both From and To fields");
+                        Get.snackbar("Error", "Please fill both From and To fields",
+                            snackPosition: SnackPosition.BOTTOM);
                         return;
                       }
 
@@ -254,20 +289,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       final now = DateTime.now();
 
                       if (selectedOption == "Today") {
-                        date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
+                        date =
+                        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
                       } else if (selectedOption == "Tomorrow") {
-                        final tomorrow = now.add(const Duration(days:1));
-                        date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2,'0')}-${tomorrow.day.toString().padLeft(2,'0')}";
+                        final tomorrow = now.add(const Duration(days: 1));
+                        date =
+                        "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
                       } else if (selectedDate != null) {
-                        date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
+                        date =
+                        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
                       } else {
-                        Get.snackbar("Error", "Please select a date", snackPosition: SnackPosition.BOTTOM);
+                        Get.snackbar("Error", "Please select a date",
+                            snackPosition: SnackPosition.BOTTOM);
                         return;
                       }
 
                       final token = authController.token.value;
 
-                      // Show loading while fetching
+                      // 🔹 Loading dialog
                       Get.dialog(
                         const Center(child: CircularProgressIndicator()),
                         barrierDismissible: false,
@@ -280,18 +319,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         token: token,
                       );
 
-                      // Close loading
+                      // 🔹 Close loading
                       if (Get.isDialogOpen ?? false) Get.back();
 
-                      if (busController.busList.isEmpty) {
-                        Get.snackbar("No Buses", "No buses found for this route", snackPosition: SnackPosition.BOTTOM);
-                        return;
-                      }
 
-                      // Navigate after list is loaded
                       Get.to(() => const SearchBusScreen());
                     },
                   ),
+
+
 
                   SizedBox(height: height * 0.02),
                 ],
@@ -345,30 +381,95 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _customTextField(String hint,
-      {TextEditingController? controller, required double width}) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: TextField(
-        controller: controller,
-        style: GoogleFonts.poppins(color: Colors.indigo.shade900),
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: width * 0.04,
-            vertical: width * 0.03,
+  Widget _customAutocompleteTextField(
+      String hint, {
+        required TextEditingController controller,
+        required List<String> options,
+      }) {
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text.isEmpty) {
+          return const Iterable<String>.empty();
+        }
+        return options.where(
+              (option) => option.toLowerCase().contains(
+            textEditingValue.text.toLowerCase(),
           ),
-          border: InputBorder.none,
-          hintText: hint,
-          hintStyle: GoogleFonts.poppins(
-            color: Colors.indigo.shade900.withOpacity(0.6),
+        );
+      },
+      onSelected: (String selection) {
+        controller.text = selection; // ✅ yahi sahi jagah hai update ki
+      },
+      fieldViewBuilder: (
+          BuildContext context,
+          TextEditingController textController,
+          FocusNode focusNode,
+          VoidCallback onFieldSubmitted,
+          ) {
+        // ❌ yeh line MAT likho:
+        // textController.text = controller.text;
+
+        // Bas agar external controller me value already hai
+        // to sirf first time sync karna ho to:
+        if (textController.text.isEmpty && controller.text.isNotEmpty) {
+          textController.text = controller.text;
+        }
+
+        return TextField(
+          controller: textController,
+          focusNode: focusNode,
+          onChanged: (value) {
+            // ✅ external controller ko in-sync rakhne ke liye
+            controller.text = value;
+          },
+          style: GoogleFonts.poppins(color: Colors.indigo.shade900),
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            hintText: hint,
+            hintStyle: GoogleFonts.poppins(
+              color: Colors.indigo.shade900.withOpacity(0.6),
+            ),
           ),
-        ),
-      ),
+        );
+      },
+      optionsViewBuilder: (
+          BuildContext context,
+          AutocompleteOnSelected<String> onSelected,
+          Iterable<String> options,
+          ) {
+        return Material(
+          elevation: 4,
+          borderRadius: BorderRadius.circular(6),
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount: options.length,
+            itemBuilder: (BuildContext context, int index) {
+              final option = options.elementAt(index);
+              return InkWell(
+                onTap: () {
+                  onSelected(option);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(option, style: GoogleFonts.poppins()),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
+
+
 
   Widget _buildSelectableChip(String label) {
     bool isSelected = selectedOption == label;

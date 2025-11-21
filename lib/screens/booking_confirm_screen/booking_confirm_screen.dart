@@ -65,12 +65,17 @@ class BookingConfirmationScreen extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-               CustomButton(
-                 backgroundColor: Colors.yellow.shade800,
-                   text: "Check Ticket", onPressed: (){
-                   Get.to(BottomNavBarScreen());
-               })
-              ],
+            CustomButton(
+              backgroundColor: Colors.yellow.shade800,
+              text: "Check Ticket",
+              onPressed: () {
+                Get.to(() => const BottomNavBarScreen(
+                  initialIndex: 1, // ✅ Tickets tab (index 1)
+                ));
+              },
+            ),
+
+            ],
             ),
           ),
         ),

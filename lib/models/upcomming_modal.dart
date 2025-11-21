@@ -1,18 +1,17 @@
-class OnboardBus {
+class UpCommingBus {
   final String id;
   final DateTime? date;
   final String time;
   final Pricing? pricing;
   final Bus? bus;
+  final RouteData? route;
 
   final String searchOrigin;
   final String searchDestination;
   final String finalDestination;
   final String originalDepartureTime;
 
-  final RouteData route;
-
-  OnboardBus({
+  UpCommingBus({
     required this.id,
     required this.date,
     required this.time,
@@ -25,22 +24,30 @@ class OnboardBus {
     this.originalDepartureTime = '',
   });
 
-  factory OnboardBus.fromJson(Map<String, dynamic> json) {
-    // ✅ Route mapping: API me routeId me data aa raha hai
-    final routeJson = json['routeId'] ?? json['route'] ?? {};
-    final routeData = RouteData.fromJson(Map<String, dynamic>.from(routeJson));
+  factory UpCommingBus.fromJson(Map<String, dynamic> json) {
+    final routeJson = json['route'] ?? {};
+    final busJson = json['bus'] ?? {};
 
-    return OnboardBus(
+    final routeData = routeJson.isNotEmpty
+        ? RouteData.fromJson(Map<String, dynamic>.from(routeJson))
+        : null;
+    final busData = busJson.isNotEmpty
+        ? Bus.fromJson(Map<String, dynamic>.from(busJson))
+        : null;
+
+    return UpCommingBus(
       id: json['_id']?.toString() ?? '',
       date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
       time: json['time']?.toString() ?? '',
-      pricing: json['pricing'] != null ? Pricing.fromJson(json['pricing']) : null,
-      bus: json['busId'] != null ? Bus.fromJson(json['busId']) : null,
+      pricing: json['pricing'] != null
+          ? Pricing.fromJson(json['pricing'])
+          : null,
+      bus: busData,
       route: routeData,
       searchOrigin: json['searchOrigin']?.toString() ?? '',
       searchDestination: json['searchDestination']?.toString() ?? '',
-      finalDestination: routeData.finalDestination,
-      originalDepartureTime: routeData.originalDepartureTime,
+      finalDestination: routeData?.finalDestination ?? '',
+      originalDepartureTime: routeData?.originalDepartureTime ?? '',
     );
   }
 }
@@ -56,13 +63,11 @@ class Pricing {
     required this.totalFare,
   });
 
-  factory Pricing.fromJson(Map<String, dynamic> json) {
-    return Pricing(
-      baseAmount: json['baseAmount'] ?? 0,
-      perKmRate: json['perKmRate'] ?? 0,
-      totalFare: json['totalFare'] ?? 0,
-    );
-  }
+  factory Pricing.fromJson(Map<String, dynamic> json) => Pricing(
+    baseAmount: json['baseAmount'] ?? 0,
+    perKmRate: json['perKmRate'] ?? 0,
+    totalFare: json['totalFare'] ?? 0,
+  );
 }
 
 class Bus {
@@ -73,9 +78,9 @@ class Bus {
   final String seatArchitecture;
   final String acType;
   final String? frontImage;
-  final num? fare;
-
-  final Map<String, dynamic>? seatLayout; // ✅ add this
+  final int? averageRating;
+  final int? totalRatings;
+  final Map<String, dynamic>? seatLayout;
 
   Bus({
     required this.id,
@@ -85,25 +90,26 @@ class Bus {
     required this.seatArchitecture,
     required this.acType,
     this.frontImage,
-    this.fare,
-    this.seatLayout, // ✅ add this
+    this.averageRating,
+    this.totalRatings,
+    this.seatLayout,
   });
 
-  factory Bus.fromJson(Map<String, dynamic> json) {
-    return Bus(
-      id: json['_id']?.toString() ?? '',
-      busName: json['busName']?.toString() ?? '',
-      busNumber: json['busNumber']?.toString() ?? '',
-      seatCapacity: json['seatCapacity'] ?? 0,
-      seatArchitecture: json['seatArchitecture']?.toString() ?? '',
-      acType: json['acType']?.toString() ?? '',
-      frontImage: json['frontImage']?.toString(),
-      fare: json['fare'],
-      seatLayout: json['seatLayout'] != null ? Map<String, dynamic>.from(json['seatLayout']) : null, // ✅ parse seatLayout
-    );
-  }
+  factory Bus.fromJson(Map<String, dynamic> json) => Bus(
+    id: json['_id']?.toString() ?? '',
+    busName: json['busName']?.toString() ?? '',
+    busNumber: json['busNumber']?.toString() ?? '',
+    seatCapacity: json['seatCapacity'] ?? 0,
+    seatArchitecture: json['seatArchitecture']?.toString() ?? '',
+    acType: json['acType']?.toString() ?? '',
+    frontImage: json['frontImage']?.toString(),
+    averageRating: json['averageRating'],
+    totalRatings: json['totalRatings'],
+    seatLayout: json['seatLayout'] != null
+        ? Map<String, dynamic>.from(json['seatLayout'])
+        : null,
+  );
 }
-
 
 class RouteData {
   final String id;
@@ -127,7 +133,10 @@ class RouteData {
   });
 
   factory RouteData.fromJson(Map<String, dynamic> json) {
-    final stopsJson = json['stops'] as List<dynamic>? ?? [];
+    final stopsList = (json['stops'] as List<dynamic>? ?? [])
+        .map((e) => Stop.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+
     return RouteData(
       id: json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -136,7 +145,7 @@ class RouteData {
       originalDepartureTime: json['originalDepartureTime']?.toString() ?? '',
       totalDistance: json['totalDistance'] ?? 0,
       estimatedTravelTime: json['estimatedTravelTime'] ?? 0,
-      stops: stopsJson.map((e) => Stop.fromJson(Map<String, dynamic>.from(e))).toList(),
+      stops: stopsList,
     );
   }
 }
@@ -154,12 +163,10 @@ class Stop {
     required this.distanceFromStart,
   });
 
-  factory Stop.fromJson(Map<String, dynamic> json) {
-    return Stop(
-      id: json['_id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      arrivalTime: json['arrivalTime']?.toString() ?? '',
-      distanceFromStart: (json['distanceFromStart'] ?? 0).toDouble(),
-    );
-  }
+  factory Stop.fromJson(Map<String, dynamic> json) => Stop(
+    id: json['_id']?.toString() ?? '',
+    name: json['name']?.toString() ?? '',
+    arrivalTime: json['arrivalTime']?.toString() ?? '',
+    distanceFromStart: (json['distanceFromStart'] ?? 0).toDouble(),
+  );
 }

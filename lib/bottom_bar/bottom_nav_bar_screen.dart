@@ -6,15 +6,21 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../screens/profile/profile_screen.dart';
 
+
 class BottomNavBarScreen extends StatefulWidget {
-  const BottomNavBarScreen({super.key});
+  final int initialIndex; // 👈 yeh add karo
+
+  const BottomNavBarScreen({
+    super.key,
+    this.initialIndex = 0, // default: Home tab
+  });
 
   @override
   State<BottomNavBarScreen> createState() => _BottomNavBarScreenState();
 }
 
 class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   final List<IconData> _icons = [
     CupertinoIcons.home,
@@ -24,7 +30,6 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
   final List<String> _labels = ["Home", "Tickets", "Profile"];
 
-  // ---------- Screen list ----------
   final List<Widget> _screens = [
     const HomeScreen(),
     const TicketBookingScreen(),
@@ -32,20 +37,23 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex; // 👈 yahan se decide hoga
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       body: _screens[_selectedIndex],
-
       bottomNavigationBar: Container(
-
         margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
         height: 68,
         decoration: BoxDecoration(
           color: const Color(0xFF0D1333),
           borderRadius: BorderRadius.circular(40),
         ),
-
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(_icons.length, (index) {
@@ -72,9 +80,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                   children: [
                     Icon(
                       _icons[index],
-                      color: isSelected
-                          ? const Color(0xFF0D1333)
-                          : Colors.white,
+                      color:
+                      isSelected ? const Color(0xFF0D1333) : Colors.white,
                     ),
                     if (isSelected) ...[
                       const SizedBox(width: 6),

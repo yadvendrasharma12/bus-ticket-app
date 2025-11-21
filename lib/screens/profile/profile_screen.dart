@@ -1,11 +1,12 @@
 import 'dart:io';
+
+import 'package:bus_booking_app/screens/profile/widgets/my_sharedpref.dart';
 import 'package:bus_booking_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../serives/profile_serices.dart';
-import '../../utils/shared_prefrance.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,8 +18,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _imageFile;
   DateTime? _selectedDate;
-  String _selectedGender="Select Gender";
-
+  String _selectedGender = "Select Gender";
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -34,33 +34,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfileData() async {
+    // API se profile
     final user = await ProfileService.fetchProfile();
-    final imagePath = await MySharedPref.getProfileImage();
 
-    if (mounted) {
-      setState(() {
-        _loading = false;
+    // SharedPreference se saved data
+    final savedProfile = await SharedPreferenceProfile.getProfileData();
+    final imagePath = await SharedPreferenceProfile.getProfileImage();
 
-        if (user != null) {
-          _nameController.text = user["name"] ?? "";
-          _emailController.text = user["email"] ?? "";
-          _mobileController.text = user["mobile"] ?? "";
-        }
+    if (!mounted) return;
 
-        if (imagePath != null && File(imagePath).existsSync()) {
-          _imageFile = File(imagePath);
-        }
-      });
-    }
+    setState(() {
+      _loading = false;
+
+      _nameController.text = savedProfile["name"] ?? user?["name"] ?? "";
+      _emailController.text = savedProfile["email"] ?? user?["email"] ?? "";
+      _mobileController.text = savedProfile["mobile"] ?? user?["mobile"] ?? "";
+      _addressController.text = savedProfile["address"] ?? "";
+
+      _selectedGender = savedProfile["gender"] ?? "Select Gender";
+
+      final dobString = savedProfile["dob"];
+      if (dobString != null && dobString.isNotEmpty) {
+        _selectedDate = DateTime.tryParse(dobString);
+      }
+
+      if (imagePath != null && File(imagePath).existsSync()) {
+        _imageFile = File(imagePath);
+      }
+    });
   }
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 70);
+    final pickedFile =
+    await picker.pickImage(source: source, imageQuality: 70);
     if (pickedFile != null) {
       final file = File(pickedFile.path);
       setState(() => _imageFile = file);
-      await MySharedPref.saveProfileImage(file.path);
+      await SharedPreferenceProfile.saveProfileImage(file.path);
     }
   }
 
@@ -96,6 +107,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _saveProfile() async {
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter your name"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+    });
+
+    String dobString = "";
+    if (_selectedDate != null) {
+      dobString = _selectedDate!.toIso8601String();
+    }
+
+    // Local SharedPreference me save
+    await SharedPreferenceProfile.saveProfileData(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      mobile: _mobileController.text.trim(),
+      address: _addressController.text.trim(),
+      gender: _selectedGender,
+      dob: dobString,
+    );
+
+    // Optional: API update
+    /*
+    await ProfileService.updateProfile(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      mobile: _mobileController.text.trim(),
+      address: _addressController.text.trim(),
+      gender: _selectedGender,
+      dob: dobString,
+      imagePath: _imageFile?.path,
+    );
+    */
+
+    if (!mounted) return;
+
+    setState(() {
+      _loading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.green,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 10),
+            Text(
+              "Profile updated successfully",
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,18 +197,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
-
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body:  _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
+      body: _loading
+          ? const Center(                         // 👈 page load / save dono time
+        child: CircularProgressIndicator(
+          color: Colors.indigo,
+        ),
+      )
           : SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        padding:
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           children: [
-
             Center(
               child: Stack(
                 alignment: Alignment.bottomRight,
@@ -128,10 +219,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   CircleAvatar(
                     radius: 55,
                     backgroundColor: Colors.grey.shade300,
-                    backgroundImage:
-                    _imageFile != null ? FileImage(_imageFile!) : null,
+                    backgroundImage: _imageFile != null
+                        ? FileImage(_imageFile!)
+                        : null,
                     child: _imageFile == null
-                        ? const Icon(Icons.person, size: 60, color: Colors.white)
+                        ? const Icon(Icons.person,
+                        size: 60, color: Colors.white)
                         : null,
                   ),
                   GestureDetector(
@@ -139,7 +232,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 3),
+                        border: Border.all(
+                            color: Colors.white, width: 3),
                         shape: BoxShape.circle,
                         color: Colors.indigo.shade800,
                       ),
@@ -152,7 +246,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 30),
 
-            // --- Personal Info Section ---
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -201,17 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             CustomButton(
               text: "Save",
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: Colors.indigo,
-                    content: Text(
-                      "Saved!\nName: ${_nameController.text}\nGender: $_selectedGender\nDOB: ${_selectedDate != null ? "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}" : "Not selected"}",
-                      style: GoogleFonts.poppins(color: Colors.white),
-                    ),
-                  ),
-                );
-              },
+              onPressed: _saveProfile,
               backgroundColor: Colors.yellow.shade800,
               textColor: Colors.white,
             ),
@@ -221,7 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- Editable Name Field (Top) ---
+
   Widget _buildEditableNameField() {
     return TextField(
       controller: _nameController,
@@ -239,8 +322,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- Gender Dropdown ---
-// --- Gender Dropdown (Fixed) ---
   Widget _buildGenderField() {
     return Container(
       height: 60,
@@ -291,10 +372,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
-
-
-  // --- Date Picker ---
   Widget _buildDatePickerField(BuildContext context) {
     return GestureDetector(
       onTap: () async {
@@ -332,7 +409,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- Editable Text Field (Profile Info) ---
   Widget _buildTextField(String label, TextEditingController controller) {
     return TextField(
       controller: controller,
@@ -346,11 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
         fillColor: Colors.white,
-
       ),
     );
   }
 }
-
-
-

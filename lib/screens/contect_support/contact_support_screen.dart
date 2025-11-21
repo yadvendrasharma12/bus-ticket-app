@@ -242,8 +242,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
       ),
     );
   }
-
-  // 🧩 Address Field Widget
+// 🧩 Address / Input Field Widget
   Widget _buildInputField(
       String label, {
         required TextEditingController controller,
@@ -255,34 +254,36 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: GoogleFonts.poppins(
-                fontSize: 14, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 5),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          decoration: InputDecoration(
-            hintText: hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
-          onChanged: (value) {
-            if (validator != null && !validator(value)) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                backgroundColor: Colors.redAccent,
-                content: Text("Invalid $label entered."),
-              ));
-            }
-          },
+        ),
+        const SizedBox(height: 5),
+
+
+        Container(
+          height: 45,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            controller.text,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
       ],
     );
   }
+
 
   // 🧩 Social Button Widget
   Widget _socialButton(

@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../controllers/ticket_controller.dart';
+
 import '../../controllers/ticket_details_controller.dart';
 
 class TicketDetailsScreen extends StatelessWidget {
@@ -18,7 +17,10 @@ class TicketDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ticket Details", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        title: Text(
+          "Ticket Details",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.indigo),
       ),
@@ -32,22 +34,26 @@ class TicketDetailsScreen extends StatelessWidget {
           return const Center(child: Text("No ticket details found."));
         }
 
+        final seatCount = ticket.bookingDetails.seats.length;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Ticket Info
-
               _sectionTitle("🎟 Ticket Information"),
-              _infoText("Booking ID", ticket.bookingId),
+              _infoText("Booking ID", _formatBookingId(ticket.bookingId)),
               _infoText("Reference", ticket.bookingReference),
-              _infoText("Status", ticket.bookingDetails.status,
+              _infoText(
+                "Status",
+                ticket.bookingDetails.status,
                 color: ticket.bookingDetails.status.toLowerCase() == "active"
                     ? Colors.green
                     : Colors.red,
               ),
-              _infoText("Seats", ticket.bookingDetails.seats.join(", ")),
+              _infoText("Seats Booked", ticket.bookingDetails.seats.join(", ")),
+              _infoText("Total Tickets", "$seatCount ticket${seatCount > 1 ? 's' : ''}"),
               _infoText("Fare", "₹${ticket.bookingDetails.fare}"),
               const SizedBox(height: 20),
 
@@ -84,8 +90,7 @@ class TicketDetailsScreen extends StatelessWidget {
               _infoText("Route", ticket.travel.routeName),
               _infoText("Departure", ticket.travel.departureTime),
               _infoText("Arrival", ticket.travel.arrivalTime),
-
-              SizedBox(height: 30,)
+              const SizedBox(height: 30),
             ],
           ),
         );
@@ -93,15 +98,25 @@ class TicketDetailsScreen extends StatelessWidget {
     );
   }
 
+  String _formatBookingId(String id) {
+    if (id.length <= 4) return id.toUpperCase();
+    return id.substring(0, 4).toUpperCase();
+  }
+
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         title,
-        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.indigo.shade900),
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: Colors.indigo.shade900,
+        ),
       ),
     );
   }
+
   Widget _infoText(String label, String value, {Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -121,13 +136,11 @@ class TicketDetailsScreen extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: color ?? Colors.black, // Use color if provided, else black
+              color: color ?? Colors.black,
             ),
           ),
         ],
       ),
     );
   }
-
 }
-

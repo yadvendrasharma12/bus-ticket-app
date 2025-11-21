@@ -1,3 +1,4 @@
+import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -11,6 +12,7 @@ import 'screens/splash/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+  Get.put(AuthController());
   Get.put(BookingController());
 
   runApp(const MyApp());

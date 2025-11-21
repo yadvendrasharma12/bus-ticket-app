@@ -138,9 +138,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
             const SizedBox(height: 50),
 
             Obx(() => CustomButton(
-              text: authController.isLoading.value
-                  ? "Please wait..."
-                  : "Reset Password",
+              text: "Reset Password",
+              isLoading: authController.isLoading.value,
               backgroundColor: Colors.yellow.shade800,
               textColor: Colors.black,
               onPressed:

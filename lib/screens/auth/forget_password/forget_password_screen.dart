@@ -82,9 +82,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               ),
               const SizedBox(height: 30),
               Obx(() => CustomButton(
-                text: authController.isLoading.value
-                    ? "Please wait..."
-                    : "Send OTP",
+                text: "Forget Password",
+                isLoading: authController.isLoading.value,
                 backgroundColor: Colors.yellow.shade800,
                 textColor: Colors.black,
                 onPressed: authController.isLoading.value

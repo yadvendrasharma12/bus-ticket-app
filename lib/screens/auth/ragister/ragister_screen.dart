@@ -217,7 +217,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // ✅ Reactive Sign Up Button
               Obx(() => CustomButton(
-                text: authController.isLoading.value ? "Please wait..." : "Sign Up",
+                isLoading: authController.isLoading.value,
+                text: "Sign Up",
                 backgroundColor: Colors.yellow.shade800,
                 textColor: Colors.black,
                 onPressed: authController.isLoading.value

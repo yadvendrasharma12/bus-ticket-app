@@ -9,6 +9,7 @@ class CustomButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textColor;
   final Color? borderColor;
+  final bool isLoading;
 
   const CustomButton({
     Key? key,
@@ -16,40 +17,45 @@ class CustomButton extends StatelessWidget {
     required this.onPressed,
     this.backgroundColor, // optional
     this.textColor,       // optional
-    this.borderColor,     // optional
+    this.borderColor,
+    this.isLoading = false,// optional
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double buttonWidth = MediaQuery.of(context).size.width * 0.9; // 90% width
-
+    final Color effectiveTextColor = textColor ?? Colors.white;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
       width: buttonWidth,
       height: 45,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? Colors.white, // default white
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
             side: BorderSide(
-              color: borderColor ?? Colors.transparent, // border optional
+              color: borderColor ?? Colors.yellowAccent, // border optional
               width: borderColor != null ? 1 : 0, // only show if given
             ),
           ),
           elevation: 2, // optional shadow
         ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: textColor ?? Colors.black, // default black
+        child: isLoading
+            ? const SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
           ),
+        )
+            : Text(
+          text,
+          style: TextStyle(color: effectiveTextColor),
         ),
       ),
     );
   }
 }
+

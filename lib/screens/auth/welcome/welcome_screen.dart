@@ -34,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
                 },
                 backgroundColor: Colors.yellow.shade800,
                 textColor: Colors.black,
-                borderColor: Colors.transparent,
+
               ),
               CustomButton(
                 text: "Sign In",
@@ -43,7 +43,6 @@ class WelcomeScreen extends StatelessWidget {
                 },
                 backgroundColor: Colors.transparent,
                 textColor: Colors.yellow.shade800,
-                borderColor: Colors.yellow.shade600,
               ),
               const SizedBox(height: 40), // 👈 thoda space bottom se
             ],

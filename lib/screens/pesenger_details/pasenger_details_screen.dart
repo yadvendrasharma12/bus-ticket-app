@@ -8,11 +8,15 @@ import '../../widgets/custom_button.dart';
 class PassengerDetailsScreen extends StatefulWidget {
   final OnboardBus busData;
   final List<String> selectedSeats;
+  final double farePerSeat;
+  final DateTime travelDate;
 
   const PassengerDetailsScreen({
     super.key,
     required this.busData,
     required this.selectedSeats,
+    required this.farePerSeat,
+    required this.travelDate,
   });
 
   @override
@@ -32,9 +36,89 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
   final stateController = TextEditingController();
   String? gender;
 
+  // ------------ VALIDATORS -------------
+
+  String? _validateName(String? v) {
+    final value = v?.trim() ?? '';
+    if (value.isEmpty) return "Name is required";
+    if (value.length < 3) return "Name must be at least 3 characters";
+    final regex = RegExp(r"^[a-zA-Z ]+$");
+    if (!regex.hasMatch(value)) {
+      return "Name should contain only letters";
+    }
+    return null;
+  }
+
+  String? _validateAge(String? v) {
+    final value = v?.trim() ?? '';
+    if (value.isEmpty) return "Age is required";
+    final age = int.tryParse(value);
+    if (age == null) return "Age must be a number";
+    if (age < 1 || age > 120) return "Enter a valid age";
+    return null;
+  }
+
+  String? _validatePhoneRequired(String? v) {
+    final value = v?.trim() ?? '';
+    if (value.isEmpty) return "Contact number is required";
+    final regex = RegExp(r'^[0-9]{10}$');
+    if (!regex.hasMatch(value)) {
+      return "Enter a valid 10 digit number";
+    }
+    return null;
+  }
+
+  String? _validatePhoneOptional(String? v) {
+    final value = v?.trim() ?? '';
+    if (value.isEmpty) return null; // optional
+    final regex = RegExp(r'^[0-9]{10}$');
+    if (!regex.hasMatch(value)) {
+      return "Enter a valid 10 digit number";
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? v) {
+    final value = v?.trim() ?? '';
+    if (value.isEmpty) return null; // optional
+    final regex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$');
+    if (!regex.hasMatch(value)) {
+      return "Enter a valid email address";
+    }
+    return null;
+  }
+
+  String? _validateCityOrState(String? v, String fieldName) {
+    final value = v?.trim() ?? '';
+    if (value.isEmpty) return "$fieldName is required";
+    if (value.length < 3) return "$fieldName must be at least 3 characters";
+    final regex = RegExp(r"^[a-zA-Z ]+$");
+    if (!regex.hasMatch(value)) {
+      return "$fieldName should contain only letters";
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bus = widget.busData;
+
+    // ✅ Source / Destination resolve (RouteData.finalDestination hata diya)
+    final String source =
+    bus.searchOrigin.isNotEmpty ? bus.searchOrigin : bus.route.startPoint;
+
+    final String destination = bus.finalDestination.isNotEmpty
+        ? bus.finalDestination
+        : bus.searchDestination;
+
+    // Extra safety (agar kuch bhi empty ho)
+    final String safeSource =
+    source.isNotEmpty ? source : bus.route.startPoint;
+    final String safeDestination =
+    destination.isNotEmpty ? destination : bus.searchDestination;
+
+    final double totalFare =
+        widget.farePerSeat * widget.selectedSeats.length.toDouble();
 
     return Scaffold(
       appBar: AppBar(
@@ -51,118 +135,212 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
           key: _formKey,
           child: Column(
             children: [
+              // Full Name
               TextFormField(
                 controller: nameController,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "Full Name"),
-                validator: (v) => v!.isEmpty ? "Required" : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "Full Name",
+                ),
+                validator: _validateName,
               ),
               const SizedBox(height: 18),
+
+              // Age
               TextFormField(
                 controller: ageController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "Age"),
-                validator: (v) => v!.isEmpty ? "Required" : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "Age",
+                ),
+                validator: _validateAge,
               ),
               const SizedBox(height: 18),
+
+              // Contact Number
               TextFormField(
                 controller: contactController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "Contact Number"),
-                validator: (v) => v!.isEmpty ? "Required" : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "Contact Number",
+                ),
+                validator: _validatePhoneRequired,
               ),
               const SizedBox(height: 18),
+
+              // Alternate Contact (optional)
               TextFormField(
                 controller: altContactController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "Alternate Contact (optional)"),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "Alternate Contact (optional)",
+                ),
+                validator: _validatePhoneOptional,
               ),
               const SizedBox(height: 18),
+
+              // Email (optional)
               TextFormField(
                 controller: emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "Email"),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "Email",
+                ),
+                validator: _validateEmail,
               ),
               const SizedBox(height: 18),
+
+              // City
               TextFormField(
                 controller: cityController,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "City"),
-                validator: (v) => v!.isEmpty ? "Required" : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "City",
+                ),
+                validator: (v) => _validateCityOrState(v, "City"),
               ),
               const SizedBox(height: 18),
+
+              // State
               TextFormField(
                 controller: stateController,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "State"),
-                validator: (v) => v!.isEmpty ? "Required" : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "State",
+                ),
+                validator: (v) => _validateCityOrState(v, "State"),
               ),
               const SizedBox(height: 18),
+
+              // Gender
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    labelText: "Gender"),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: "Gender",
+                ),
                 value: gender,
                 items: ["Male", "Female", "Other"]
-                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                    .map(
+                      (g) => DropdownMenuItem(
+                    value: g,
+                    child: Text(g),
+                  ),
+                )
                     .toList(),
                 onChanged: (val) => setState(() => gender = val),
                 validator: (v) => v == null ? "Select gender" : null,
               ),
-              const SizedBox(height: 40),
 
 
-          Obx(() => bookingController.isLoading.value
-              ? const CircularProgressIndicator()
-              :CustomButton(
-                backgroundColor: Colors.yellow.shade800,
+              // // Summary card
+              // Container(
+              //   padding: const EdgeInsets.all(12),
+              //   decoration: BoxDecoration(
+              //     color: Colors.indigo.shade50,
+              //     borderRadius: BorderRadius.circular(12),
+              //   ),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Text(
+              //         "Trip Summary",
+              //         style: GoogleFonts.poppins(
+              //           fontWeight: FontWeight.w600,
+              //           fontSize: 14,
+              //         ),
+              //       ),
+              //       const SizedBox(height: 8),
+              //       Text(
+              //         "From: $safeSource",
+              //         style: GoogleFonts.poppins(fontSize: 13),
+              //       ),
+              //       Text(
+              //         "To: $safeDestination",
+              //         style: GoogleFonts.poppins(fontSize: 13),
+              //       ),
+              //       Text(
+              //         "Travel Date: ${widget.travelDate.toLocal().toString().split(' ').first}",
+              //         style: GoogleFonts.poppins(fontSize: 13),
+              //       ),
+              //       Text(
+              //         "Seats: ${widget.selectedSeats.join(', ')}",
+              //         style: GoogleFonts.poppins(fontSize: 13),
+              //       ),
+              //       Text(
+              //         "Total Fare: ₹$totalFare",
+              //         style: GoogleFonts.poppins(
+              //           fontSize: 14,
+              //           fontWeight: FontWeight.w600,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
-                text: "Confirm Booking",
+              const SizedBox(height: 30),
 
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                await bookingController.bookTicket(
-                  passengerName: nameController.text.trim(),
-                  age: int.parse(ageController.text.trim()),
-                  contactNumber: contactController.text.trim(),
-                  altContactNumber: altContactController.text.trim(),
-                  gender: gender!,
-                  email: emailController.text.trim(),
-                  city: cityController.text.trim(),
-                  state: stateController.text.trim(),
+              // Confirm Booking Button
+              Obx(
+                    () => bookingController.isLoading.value
+                    ? const CircularProgressIndicator()
+                    : CustomButton(
+                  backgroundColor: Colors.yellow.shade800,
+                  text: "Confirm Booking",
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      // Debug prints
+                      print(
+                          "🔍 searchOrigin: ${widget.busData.searchOrigin}");
+                      print(
+                          "🔍 route.startPoint: ${widget.busData.route.startPoint}");
+                      print(
+                          "🔍 finalDestination: ${widget.busData.finalDestination}");
+                      print(
+                          "🔍 searchDestination: ${widget.busData.searchDestination}");
 
-                  scheduleId: bus.id,
-                  source: bus.route.startPoint,
-                  destination: bus.route.finalDestination,
-                  fare: (bus.pricing?.totalFare ?? 0).toDouble(),
-                  travelDate: bus.date?.toIso8601String() ??
-                      DateTime.now().toIso8601String(),
-                  seats: widget.selectedSeats,
-                );
-              }
-            },
+                      bookingController.bookTicket(
+                        passengerName: nameController.text,
+                        age: int.parse(ageController.text),
+                        contactNumber: contactController.text,
+                        altContactNumber: altContactController.text,
+                        gender: gender ?? '',
+                        email: emailController.text,
+                        city: cityController.text,
+                        state: stateController.text,
+                        scheduleId: widget.busData.id,
+                        source: safeSource,
+                        destination: safeDestination,
+                        fare: widget.farePerSeat *
+                            widget.selectedSeats.length,
+                        travelDate:
+                        widget.travelDate.toIso8601String(),
+                        seats: widget.selectedSeats,
+                      );
+                    }
+                  },
+                ),
               ),
-
-
-          )],
+            ],
           ),
         ),
       ),

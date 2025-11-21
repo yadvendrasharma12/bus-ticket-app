@@ -36,6 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return emailRegex.hasMatch(email);
   }
 
+
+  bool isloading = false;
   void _validateAndLogin() {
     FocusScope.of(context).unfocus();
 
@@ -166,17 +168,19 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 25),
 
               // 🔹 Button
-              Obx(() => CustomButton(
-                text: authController.isLoading.value
-                    ? "Please wait..."
-                    : "Sign In",
+            Obx(
+                  () => CustomButton(
+                text: "Sign In",
                 backgroundColor: Colors.yellow.shade800,
                 textColor: Colors.black,
+                isLoading: authController.isLoading.value,   // 👈 yaha se loader control
                 onPressed: authController.isLoading.value
-                    ? (){}
+                    ? () {}
                     : _validateAndLogin,
-              )),
-              const SizedBox(height: 20),
+              ),
+            ),
+
+            const SizedBox(height: 20),
             ],
           ),
         ),

@@ -1,11 +1,11 @@
+import 'package:bus_booking_app/models/upcomming_modal.dart';
 import 'package:get/get.dart';
-import '../models/onboard_bus_model.dart';
-import '../serives/onboard_service.dart';
 
+import '../serives/onboard_service.dart';
 
 class OnboardController extends GetxController {
   var isLoading = true.obs;
-  var allBuses = <OnboardBus>[].obs;
+  var allBuses = <UpCommingBus>[].obs;
 
   @override
   void onInit() {
@@ -17,7 +17,7 @@ class OnboardController extends GetxController {
     try {
       isLoading(true);
       final data = await OnboardService.fetchUpcomingBuses();
-      allBuses.assignAll(data.map((e) => OnboardBus.fromJson(e)).toList());
+      allBuses.assignAll(data.map((e) => UpCommingBus.fromJson(e)).toList());
     } catch (e) {
       Get.snackbar("Error", e.toString());
     } finally {
@@ -25,9 +25,9 @@ class OnboardController extends GetxController {
     }
   }
 
-  List<OnboardBus> get acBuses =>
+  List<UpCommingBus> get acBuses =>
       allBuses.where((bus) => bus.bus?.acType.toLowerCase() == 'ac').toList();
 
-  List<OnboardBus> get nonAcBuses =>
+  List<UpCommingBus> get nonAcBuses =>
       allBuses.where((bus) => bus.bus?.acType.toLowerCase() == 'non-ac').toList();
 }

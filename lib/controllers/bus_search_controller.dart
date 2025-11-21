@@ -1,13 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import '../utils/shared_prefs.dart';
-import '../utils/apis_url.dart';
 
+import 'package:get/get.dart';
+
+import 'package:http/http.dart' as http;
+
+import '../utils/apis_url.dart';
+import '../utils/shared_prefs.dart';
+
+import '../models/onboard_bus_model.dart';
+
+/// ================== BUS SEARCH CONTROLLER ==================
 class BusSearchController extends GetxController {
   var isLoading = false.obs;
-  var busList = <Map<String, dynamic>>[].obs;
+  var busList = <OnboardBus>[].obs; // ✅ Use model type
 
   /// Search buses from API
   Future<void> searchBuses({
@@ -59,7 +65,9 @@ class BusSearchController extends GetxController {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data["success"] == true && data["data"] != null) {
-          busList.value = List<Map<String, dynamic>>.from(data["data"]);
+          busList.value = List<Map<String, dynamic>>.from(data["data"])
+              .map((json) => OnboardBus.fromJson(Map<String, dynamic>.from(json)))
+              .toList();
           if (kDebugMode) print("✅ Bus list loaded: ${busList.length} items");
         } else {
           busList.clear();

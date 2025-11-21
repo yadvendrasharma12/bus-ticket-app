@@ -40,21 +40,32 @@ class BookingController extends GetxController {
         return;
       }
 
+      // ✅ Extra safety: Log & prevent empty source/destination
+      if (source.trim().isEmpty || destination.trim().isEmpty) {
+        print("⚠️ WARNING: source/destination EMPTY aa raha hai!");
+        print("   👉 source: '$source'");
+        print("   👉 destination: '$destination'");
+      }
+
       // 🧾 Request Body
       final body = {
         "passengerName": passengerName.trim(),
         "age": age,
         "contactNumber": "+91${contactNumber.trim()}",
-        "altContactNumber": (altContactNumber != null && altContactNumber.isNotEmpty)
+        "altContactNumber":
+        (altContactNumber != null && altContactNumber.isNotEmpty)
             ? "+91${altContactNumber.trim()}"
             : "",
         "gender": gender,
-        "email": email ?? "",
+        "email": (email ?? "").trim(),
         "city": city.trim(),
         "state": state.trim(),
         "scheduleId": scheduleId,
+
+        // 🔥 YAHI DO FIELD BACKEND KO JAA RAHE HAIN
         "source": source.trim(),
         "destination": destination.trim(),
+
         "seats": seats,
         "fare": fare,
         "travelDate": travelDate,
@@ -64,7 +75,6 @@ class BookingController extends GetxController {
 
       final url = Uri.parse(ApiUrls.ticketBooking);
 
-      // 🔥 IMPORTANT: Token must be added here
       final headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -85,7 +95,7 @@ class BookingController extends GetxController {
 
       if (response.statusCode == 201 && result["success"] == true) {
         Get.snackbar("Success", "Ticket booked successfully!");
-        Get.offAll(() =>  BookingConfirmationScreen());
+        Get.offAll(() => BookingConfirmationScreen());
       } else {
         Get.snackbar("Error", result["message"] ?? "Booking failed");
       }
