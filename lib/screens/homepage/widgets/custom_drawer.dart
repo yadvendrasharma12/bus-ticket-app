@@ -37,51 +37,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
         // 🟡 Profile Header
         Container(
           padding: const EdgeInsets.only(top: 70),
-          height: 260,
+          height: 120,
           width: double.infinity,
           color: Colors.yellow.shade800,
-          child: Obx(() {
-            final user = authController.userData.value;
-            final imagePath = user['profileImage'];
-            final name = user['name'] ?? 'Guest User';
-            final location = user['location'] ?? 'Unknown';
 
-            ImageProvider imageProvider;
-
-            if (imagePath == null || imagePath.isEmpty) {
-              imageProvider = const AssetImage('assets/images/default_user.png');
-            } else if (imagePath.startsWith('http')) {
-              imageProvider = NetworkImage(imagePath);
-            } else {
-              imageProvider = FileImage(File(imagePath));
-            }
-
-            return Column(
-              children: [
-                CircleAvatar(
-                  radius: width * 0.12,
-                  backgroundImage: imageProvider,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  name,
-                  style: GoogleFonts.poppins(
-                    fontSize: width * 0.04,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  location,
-                  style: GoogleFonts.poppins(
-                    fontSize: width * 0.035,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            );
-          }),
         ),
 
         // 🟢 Drawer Menu

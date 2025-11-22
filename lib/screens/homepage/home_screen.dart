@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
     "assets/images/5.png",
   ];
 
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -90,12 +91,24 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
-          horizontal: width * 0.05,
+          horizontal: width * 0.01,
           vertical: height * 0.015,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                textAlign: TextAlign.center,
+                "Book Your Bus Tickets Instantly!",
+                style: GoogleFonts.poppins(
+                  fontSize: width * 0.048,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.indigo.shade900,
+                ),
+              ),
+            ),
             SizedBox(height: 16,),
             CarouselSlider(
               items: images.map((imgPath) {
@@ -112,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }).toList(),
               options: CarouselOptions(
-                height: 160,
+                height: 175,
                 aspectRatio: 16 / 9,
                 viewportFraction: 0.99,
                 initialPage: 0,
@@ -148,6 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: height * 0.04),
             // 🔹 Search Bus Section
             Container(
+              margin: EdgeInsets.symmetric(horizontal: 6),
               padding: const EdgeInsets.only(top: 10),
               width: double.infinity,
               decoration: BoxDecoration(
@@ -186,7 +200,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _customAutocompleteTextField(
                                 "From",
                                 controller: fromController,
-                                options: ["Mumbai", "Pune", "Delhi", "Bangalore", "Chennai","Noida"],
+                                options: [
+                                  "Mumbai", "Pune", "Delhi", "Bangalore", "Chennai", "Noida",
+                                  "Hyderabad", "Kolkata", "Ahmedabad", "Surat", "Jaipur",
+                                  "Lucknow", "Bhubaneswar", "Coimbatore", "Indore", "Nagpur"
+                                ],
                               ),
                             ),
                             SizedBox(width: width * 0.02),
@@ -214,7 +232,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _customAutocompleteTextField(
                                 "To",
                                 controller: toController,
-                                options: ["Mumbai", "Pune", "Delhi", "Bangalore", "Chennai","Noida"],
+                                options: [
+                                  "Mumbai", "Pune", "Delhi", "Bangalore", "Chennai", "Noida",
+                                  "Hyderabad", "Kolkata", "Ahmedabad", "Surat", "Jaipur",
+                                  "Lucknow", "Bhubaneswar", "Coimbatore", "Indore", "Nagpur",
+                                  "Goa", "Gurgaon", "Mysore", "Amritsar", "Patna", "Vadodara",
+                                  "Thane", "Faridabad", "Rajkot", "Vishakhapatnam", "Bhubaneshwar"
+                                ],
                               ),
                             ),
                           ],
@@ -406,11 +430,7 @@ class _HomeScreenState extends State<HomeScreen> {
           FocusNode focusNode,
           VoidCallback onFieldSubmitted,
           ) {
-        // ❌ yeh line MAT likho:
-        // textController.text = controller.text;
 
-        // Bas agar external controller me value already hai
-        // to sirf first time sync karna ho to:
         if (textController.text.isEmpty && controller.text.isNotEmpty) {
           textController.text = controller.text;
         }
@@ -447,25 +467,31 @@ class _HomeScreenState extends State<HomeScreen> {
         return Material(
           elevation: 4,
           borderRadius: BorderRadius.circular(6),
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (BuildContext context, int index) {
-              final option = options.elementAt(index);
-              return InkWell(
-                onTap: () {
-                  onSelected(option);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(option, style: GoogleFonts.poppins()),
-                ),
-              );
-            },
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 200, // Dropdown ka max height, scrollable ho jayega
+            ),
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemCount: options.length,
+              itemBuilder: (BuildContext context, int index) {
+                final option = options.elementAt(index);
+                return InkWell(
+                  onTap: () {
+                    onSelected(option);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(option, style: GoogleFonts.poppins()),
+                  ),
+                );
+              },
+            ),
           ),
         );
       },
+
     );
   }
 

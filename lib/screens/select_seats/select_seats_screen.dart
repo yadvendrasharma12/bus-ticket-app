@@ -6,17 +6,17 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
-import '../../models/onboard_bus_model.dart';
+
 import '../../widgets/custom_button.dart';
 
 class SelectSeatsScreen extends StatefulWidget {
-  final OnboardBus busData;
+  final dynamic busData;
   final Map<String, dynamic> rawBusJson;
 
   const SelectSeatsScreen({
     super.key,
     required this.busData,
-    required this.rawBusJson,
+    required this.rawBusJson, required Map<String, dynamic> onboardJson,
   });
 
   @override
@@ -221,7 +221,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             CustomButton(
               backgroundColor: Colors.yellow.shade800,
               text:
-              "Continue (${selectedSeats.length} Seats | ₹${_totalPrice()})",
+              "Continue",
               onPressed: () {
                 if (selectedSeats.isEmpty) {
                   Get.snackbar("Error", "Please select at least one seat");
@@ -246,25 +246,4 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
     );
   }
 
-  Widget _buildBlockedSeatBox() {
-    return Container(
-      width: 55,
-      height: 55,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        border: Border.all(color: Colors.grey.shade400, width: 1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        "X",
-        style: GoogleFonts.poppins(
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
-        ),
-      ),
-    );
-  }
 }

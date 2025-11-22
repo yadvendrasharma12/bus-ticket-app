@@ -17,7 +17,7 @@ class BusListScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         titleSpacing: 0,
-        elevation: 1,
+        elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.indigo.shade900),
@@ -112,7 +112,7 @@ class BusListScreen extends StatelessWidget {
           onTap: () => Get.to(
                 () => BusRoutesScreen(
               busData: bus,
-              rawBusJson: {}, // agar chahe to original JSON yaha pass kar sakte ho
+              rawBusJson: {},
             ),
           ),
           child: Container(

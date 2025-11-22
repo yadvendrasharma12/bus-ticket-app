@@ -2,6 +2,7 @@ import 'package:bus_booking_app/screens/bus_listing/ticket_details_scren.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../controllers/cancle_booking_controller.dart';
 import '../../controllers/ticket_controller.dart';
@@ -17,8 +18,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
   final TicketController controller = Get.put(TicketController());
   final CancelBookingController cancelController =
   Get.put(CancelBookingController());
-
-  final Map<String, bool> expandedTickets = {};
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
@@ -59,7 +57,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           return const Center(child: Text("No Tickets Found"));
         }
 
-        return  ListView.builder(
+        return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: controller.tickets.length,
           itemBuilder: (context, index) {
@@ -73,8 +71,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               margin: const EdgeInsets.only(bottom: 16),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: // Inside ListView.builder -> Card -> Column
-                Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Date Row
@@ -140,14 +137,16 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // ✅ Rating (only if ride complete)
+                    // Rating if completed
                     if (ticket.status.toLowerCase() == "completed") ...[
                       Row(
                         children: [
                           const Icon(Icons.star, color: Colors.orange, size: 18),
                           const SizedBox(width: 4),
                           Text(
-                            ticket.rating != null ? "${ticket.rating} / 5" : "Rate your ride",
+                            ticket.rating != null
+                                ? "${ticket.rating} / 5"
+                                : "Rate your ride",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -159,6 +158,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       const SizedBox(height: 12),
                     ],
 
+                    // Action Buttons
                     Row(
                       children: [
                         Expanded(
@@ -221,7 +221,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-
+                              const phoneNumber = "9915678943";
+                              _callBusStaff(phoneNumber);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.yellow.shade800,
@@ -243,22 +244,17 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                         ),
                       ],
                     ),
-
-
-
                   ],
                 ),
-
               ),
             );
           },
         );
-
       }),
     );
   }
 
-  // ⏰ Time Column
+  // Time column
   Widget _timeColumn(String time, String city) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,37 +279,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
     );
   }
 
-  // 🔘 Action Buttons
-  Widget _actionButton(
-      String label,
-      IconData icon,
-      Color color,
-      VoidCallback onTap,
-      ) {
-    return Expanded(
-      child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.white, size: 20),
-        label: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        onPressed: onTap,
-      ),
-    );
-  }
-
+  // Cancel booking dialog
   void _handleCancelBooking(dynamic ticket) {
     final status = ticket.status.toString().toLowerCase();
 
@@ -347,13 +313,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           ),
           content: TextField(
             controller: reasonController,
-
             decoration: InputDecoration(
               hintText: "Enter cancellation reason",
-
-              contentPadding: const EdgeInsets.symmetric(
-
-              ),
             ),
           ),
           actions: [
@@ -397,5 +358,17 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         );
       },
     );
+  }
+
+  // Call bus staff
+  void _callBusStaff(String phoneNumber) async {
+    final Uri callUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(callUri)) {
+      await launchUrl(callUri);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Cannot make a call")),
+      );
+    }
   }
 }

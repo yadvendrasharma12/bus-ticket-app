@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/booking_controller.dart';
 import '../../models/onboard_bus_model.dart';
+import '../../models/upcomming_modal.dart';
 import '../../widgets/custom_button.dart';
 
 class PassengerDetailsScreen extends StatefulWidget {
@@ -10,6 +11,7 @@ class PassengerDetailsScreen extends StatefulWidget {
   final List<String> selectedSeats;
   final double farePerSeat;
   final DateTime travelDate;
+
 
   const PassengerDetailsScreen({
     super.key,
@@ -252,54 +254,10 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
               ),
 
 
-              // // Summary card
-              // Container(
-              //   padding: const EdgeInsets.all(12),
-              //   decoration: BoxDecoration(
-              //     color: Colors.indigo.shade50,
-              //     borderRadius: BorderRadius.circular(12),
-              //   ),
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       Text(
-              //         "Trip Summary",
-              //         style: GoogleFonts.poppins(
-              //           fontWeight: FontWeight.w600,
-              //           fontSize: 14,
-              //         ),
-              //       ),
-              //       const SizedBox(height: 8),
-              //       Text(
-              //         "From: $safeSource",
-              //         style: GoogleFonts.poppins(fontSize: 13),
-              //       ),
-              //       Text(
-              //         "To: $safeDestination",
-              //         style: GoogleFonts.poppins(fontSize: 13),
-              //       ),
-              //       Text(
-              //         "Travel Date: ${widget.travelDate.toLocal().toString().split(' ').first}",
-              //         style: GoogleFonts.poppins(fontSize: 13),
-              //       ),
-              //       Text(
-              //         "Seats: ${widget.selectedSeats.join(', ')}",
-              //         style: GoogleFonts.poppins(fontSize: 13),
-              //       ),
-              //       Text(
-              //         "Total Fare: ₹$totalFare",
-              //         style: GoogleFonts.poppins(
-              //           fontSize: 14,
-              //           fontWeight: FontWeight.w600,
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
 
               const SizedBox(height: 30),
 
-              // Confirm Booking Button
+
               Obx(
                     () => bookingController.isLoading.value
                     ? const CircularProgressIndicator()

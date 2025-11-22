@@ -447,7 +447,7 @@ class BusRoutesScreen extends StatelessWidget {
                   "busId": {
                     "seatLayout": busData.bus?.seatLayout ?? {},
                   },
-                },
+                }, onboardJson: {},
               ),
             );
           },

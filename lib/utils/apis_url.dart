@@ -23,4 +23,7 @@ class ApiUrls {
   static const String ticketBooking = "https://fleetbus.onrender.com/api/bookings/ticket";
   static const String ticketHistory = " https://fleetbus.onrender.com/api/bookings/history";
 
+
+  static const String baseUrls = "https://fleetbus.onrender.com/api";
+  static const String onboard = "$baseUrl/onboard";
 }

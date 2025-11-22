@@ -1,3 +1,5 @@
+// lib/models/upcomming_modal.dart
+
 class UpCommingBus {
   final String id;
   final DateTime? date;
@@ -40,12 +42,14 @@ class UpCommingBus {
       date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
       time: json['time']?.toString() ?? '',
       pricing: json['pricing'] != null
-          ? Pricing.fromJson(json['pricing'])
+          ? Pricing.fromJson(Map<String, dynamic>.from(json['pricing']))
           : null,
       bus: busData,
       route: routeData,
+      // 🔁 CHANGED: safe string defaults
       searchOrigin: json['searchOrigin']?.toString() ?? '',
       searchDestination: json['searchDestination']?.toString() ?? '',
+      // finalDestination directly route se
       finalDestination: routeData?.finalDestination ?? '',
       originalDepartureTime: routeData?.originalDepartureTime ?? '',
     );
@@ -100,7 +104,7 @@ class Bus {
     busName: json['busName']?.toString() ?? '',
     busNumber: json['busNumber']?.toString() ?? '',
     seatCapacity: json['seatCapacity'] ?? 0,
-    seatArchitecture: json['seatArchitecture']?.toString() ?? '',
+    seatArchitecture: json['seatArchitecture']?.toString() ?? '2+2',
     acType: json['acType']?.toString() ?? '',
     frontImage: json['frontImage']?.toString(),
     averageRating: json['averageRating'],
@@ -115,7 +119,7 @@ class RouteData {
   final String id;
   final String name;
   final String startPoint;
-  final String finalDestination;
+  final String finalDestination; // 🔁 CHANGED: yahi use karenge
   final String originalDepartureTime;
   final int totalDistance;
   final int estimatedTravelTime;
@@ -148,6 +152,8 @@ class RouteData {
       stops: stopsList,
     );
   }
+
+// 🔁 REMOVED: get endPoint => null;
 }
 
 class Stop {
