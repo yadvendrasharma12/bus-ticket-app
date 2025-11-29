@@ -51,12 +51,12 @@ class _LoginScreenState extends State<LoginScreen> {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5), // smaller margins
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         borderRadius: 10, // rounded corners
-        snackStyle: SnackStyle.FLOATING, // floating snackbar
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
-        maxWidth: 300, // max width of snackbar
-        duration: const Duration(seconds: 2), // shorter duration
+        snackStyle: SnackStyle.FLOATING,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        maxWidth: 330,
+        duration: const Duration(seconds: 2),
       );
       return;
     }
@@ -173,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 text: "Sign In",
                 backgroundColor: Colors.yellow.shade800,
                 textColor: Colors.black,
-                isLoading: authController.isLoading.value,   // 👈 yaha se loader control
+                isLoading: authController.isLoading.value,
                 onPressed: authController.isLoading.value
                     ? () {}
                     : _validateAndLogin,

@@ -4,7 +4,6 @@ class MySharedPref {
   static const String _tokenKey = "token";
   static const String _profileImageKey = "profile_image";
 
-  // 🔹 Token Handling
   static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
@@ -20,7 +19,7 @@ class MySharedPref {
     await prefs.remove(_tokenKey);
   }
 
-  // 🔹 Profile Image Handling
+
   static Future<void> saveProfileImage(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_profileImageKey, path);

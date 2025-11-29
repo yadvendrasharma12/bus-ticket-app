@@ -40,14 +40,12 @@ class BookingController extends GetxController {
         return;
       }
 
-      // ✅ Extra safety: Log & prevent empty source/destination
       if (source.trim().isEmpty || destination.trim().isEmpty) {
         print("⚠️ WARNING: source/destination EMPTY aa raha hai!");
         print("   👉 source: '$source'");
         print("   👉 destination: '$destination'");
       }
 
-      // 🧾 Request Body
       final body = {
         "passengerName": passengerName.trim(),
         "age": age,
@@ -62,7 +60,6 @@ class BookingController extends GetxController {
         "state": state.trim(),
         "scheduleId": scheduleId,
 
-        // 🔥 YAHI DO FIELD BACKEND KO JAA RAHE HAIN
         "source": source.trim(),
         "destination": destination.trim(),
 

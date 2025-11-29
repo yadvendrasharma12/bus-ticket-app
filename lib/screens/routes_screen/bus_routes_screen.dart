@@ -1,15 +1,16 @@
-// lib/screens/bus_routes/bus_routes_screen.dart
 
-import 'dart:convert';
+
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 
-import '../../controllers/auth_controllers.dart';
 import '../../controllers/booking_controller.dart';
+
 import '../../models/upcomming_modal.dart';
+import '../../serives/bus_api_service.dart';
 import '../../widgets/custom_button.dart';
+
 
 class BusRoutesScreen extends StatelessWidget {
   final UpCommingBus busData;
@@ -23,50 +24,17 @@ class BusRoutesScreen extends StatelessWidget {
 
   Future<void> _openSeatSelection(BuildContext context) async {
     final scheduleId = busData.id;
-    final token = Get.find<AuthController>().token.value;
 
-    try {
-      final url = Uri.parse(
-        "https://fleetbus.onrender.com/api/onboard/$scheduleId",
-      );
+    final data = await BusApiService.fetchScheduleDetail(scheduleId);
 
-      debugPrint("🚍 Fetching onboard detail for: $scheduleId");
-      final response = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+    if (data == null) return;
 
-      debugPrint("🧾 Onboard detail code: ${response.statusCode}");
-      debugPrint("🧾 Onboard detail body: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final data = json['data'] as Map<String, dynamic>?;
-
-        if (data == null) {
-          Get.snackbar("Error", "Invalid onboard data from server");
-          return;
-        }
-
-        Get.to(
-              () => SelectSeatsScreen(
-            busData: busData,
-            onboardJson: data,
-          ),
-        );
-      } else {
-        Get.snackbar(
-          "Error",
-          "Failed to load seat layout. (${response.statusCode})",
-        );
-      }
-    } catch (e) {
-      debugPrint("❌ Error while fetching onboard detail: $e");
-      Get.snackbar("Error", "Something went wrong while loading seats");
-    }
+    Get.to(
+          () => SelectSeatsScreen(
+        busData: busData,
+        onboardJson: data,
+      ),
+    );
   }
 
   @override
@@ -310,23 +278,20 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
 
                         final bool enabled = seat['enabled'] ?? false;
 
-                        // UI pe kya dikhana hai (FF, JI, JK, JII…)
-                        final String displayLabel = seat['seatLabel']?.toString() ?? '';
+                        final String displayLabel =
+                            seat['seatLabel']?.toString() ?? '';
 
-                        // API ke liye bhi isi ko use karenge
                         final String seatId = displayLabel;
 
-                        // sirf wahi seat valid jinka label hai + enabled hai
-                        final bool isValidSeat = enabled && displayLabel.trim().isNotEmpty;
+                        final bool isValidSeat =
+                            enabled && displayLabel.trim().isNotEmpty;
 
                         final bool isBooked =
                             isValidSeat && serverBookedSeats.contains(seatId);
                         final bool isSelected =
                             isValidSeat && selectedSeats.contains(seatId);
 
-                        // ✅ structure hamesha rahega: har cell ek 55x55 box
                         if (!isValidSeat) {
-                          // yaha blank / disabled seat ka structure dikhayenge
                           return Container(
                             width: 55,
                             height: 55,
@@ -390,7 +355,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                       }),
                     ),
                   );
-
                 },
               ),
             ),
@@ -430,7 +394,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
   }
 }
 
-/// ---------------- PassengerDetailsScreen ----------------
+/// -------------------- PASSENGER DETAILS SCREEN --------------------
 
 class PassengerDetailsScreen extends StatefulWidget {
   final List<String> selectedSeats; // FF, JK, JII ...
@@ -447,7 +411,8 @@ class PassengerDetailsScreen extends StatefulWidget {
   });
 
   @override
-  State<PassengerDetailsScreen> createState() => _PassengerDetailsScreenState();
+  State<PassengerDetailsScreen> createState() =>
+      _PassengerDetailsScreenState();
 }
 
 class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
@@ -495,7 +460,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
 
   String? _validatePhoneOptional(String? v) {
     final value = v?.trim() ?? '';
-    if (value.isEmpty) return null;
+    if (value.isEmpty) return "Alternate contact is required";
     final regex = RegExp(r'^[0-9]{10}$');
     if (!regex.hasMatch(value)) {
       return "Enter a valid 10 digit number";
@@ -505,7 +470,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
 
   String? _validateEmail(String? v) {
     final value = v?.trim() ?? '';
-    if (value.isEmpty) return null;
+    if (value.isEmpty) return "Email is required";
     final regex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$');
     if (!regex.hasMatch(value)) {
       return "Enter a valid email address";
@@ -558,18 +523,11 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction, // realtime
           child: Column(
             children: [
-              Text(
-                "$safeSource → $safeDestination\nTotal Fare: ₹$totalFare\nSeats: ${widget.selectedSeats.join(", ")}",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.indigo.shade900,
-                ),
-              ),
-              const SizedBox(height: 20),
+
+
 
               TextFormField(
                 controller: nameController,
@@ -577,7 +535,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "Full Name",
+                  labelText: "Full Name *",
                 ),
                 validator: _validateName,
               ),
@@ -590,33 +548,37 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "Age",
+                  labelText: "Age *",
                 ),
                 validator: _validateAge,
               ),
               const SizedBox(height: 18),
 
               TextFormField(
+                maxLength: 10,
                 controller: contactController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
+                  counterText: '',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "Contact Number",
+                  labelText: "Contact Number *",
                 ),
                 validator: _validatePhoneRequired,
               ),
               const SizedBox(height: 18),
 
               TextFormField(
+                maxLength: 10,
                 controller: altContactController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
+                  counterText: '',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "Alternate Contact (optional)",
+                  labelText: "Alternate Contact *",
                 ),
                 validator: _validatePhoneOptional,
               ),
@@ -629,7 +591,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "Email",
+                  labelText: "Email *",
                 ),
                 validator: _validateEmail,
               ),
@@ -641,7 +603,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "City",
+                  labelText: "City *",
                 ),
                 validator: (v) => _validateCityOrState(v, "City"),
               ),
@@ -653,7 +615,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "State",
+                  labelText: "State *",
                 ),
                 validator: (v) => _validateCityOrState(v, "State"),
               ),
@@ -664,7 +626,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelText: "Gender",
+                  labelText: "Gender *",
                 ),
                 value: gender,
                 items: ["Male", "Female", "Other"]
@@ -690,9 +652,12 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       debugPrint("🔍 searchOrigin: ${bus.searchOrigin}");
-                      debugPrint("🔍 route.startPoint: ${bus.route?.startPoint}");
-                      debugPrint("🔍 finalDestination: ${bus.finalDestination}");
-                      debugPrint("🔍 searchDestination: ${bus.searchDestination}");
+                      debugPrint(
+                          "🔍 route.startPoint: ${bus.route?.startPoint}");
+                      debugPrint(
+                          "🔍 finalDestination: ${bus.finalDestination}");
+                      debugPrint(
+                          "🔍 searchDestination: ${bus.searchDestination}");
                       debugPrint(
                           "🔍 FINAL SENDING SEATS (IDs): ${widget.selectedSeats}");
 
@@ -709,7 +674,8 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                         source: safeSource,
                         destination: safeDestination,
                         fare: totalFare,
-                        travelDate: widget.travelDate.toIso8601String(),
+                        travelDate:
+                        widget.travelDate.toIso8601String(),
                         seats: widget.selectedSeats, // ["FF","JI","JK"...]
                       );
                     }

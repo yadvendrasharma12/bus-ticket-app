@@ -8,11 +8,11 @@ import '../screens/profile/profile_screen.dart';
 
 
 class BottomNavBarScreen extends StatefulWidget {
-  final int initialIndex; // 👈 yeh add karo
+  final int initialIndex;
 
   const BottomNavBarScreen({
     super.key,
-    this.initialIndex = 0, // default: Home tab
+    this.initialIndex = 0,
   });
 
   @override
@@ -39,7 +39,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex; // 👈 yahan se decide hoga
+    _selectedIndex = widget.initialIndex;
   }
 
   @override

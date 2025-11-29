@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bus_booking_app/screens/auth/welcome/welcome_screen.dart';
 import 'package:bus_booking_app/screens/onboarding/onboarding_screen.dart';
 import 'package:bus_booking_app/bottom_bar/bottom_nav_bar_screen.dart';
 import 'package:bus_booking_app/utils/shared_prefs.dart';
@@ -22,7 +21,6 @@ class _SplashScreenState extends State<SplashScreen> {
     _checkLoginStatus();
   }
 
-  /// ✅ Check if user already logged in
   Future<void> _checkLoginStatus() async {
     await Future.delayed(const Duration(seconds: 2)); // splash delay
     final token = await MySharedPref.getToken();

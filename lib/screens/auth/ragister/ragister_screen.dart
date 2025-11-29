@@ -85,16 +85,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
         confirmPassword.isEmpty) {
       Get.snackbar(
         "Error",
-        "Please fill in both email and password.",
+        "Please fill in all fields",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
 
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
-        maxWidth: 300,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        maxWidth: 330,
         borderRadius: 8,//
-        snackStyle: SnackStyle.FLOATING, // floating snackbar, bottom me dikhega properly
+        snackStyle: SnackStyle.FLOATING,
       );
       return;
     }

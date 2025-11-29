@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bus_booking_app/utils/apis_url.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../utils/shared_prefrance.dart';
@@ -8,7 +9,7 @@ class RouteService {
 
 
   static Future<List<Map<String, dynamic>>> fetchStops(String query) async {
-    final token = await MySharedPref.getToken(); // Retrieve token if available
+    final token = await MySharedPref.getToken();
     final url = Uri.parse("${ApiUrls.routesBaseUrl}?q=$query");
 
     final response = await http.get(
@@ -20,7 +21,9 @@ class RouteService {
     );
 
     if (response.statusCode == 200) {
-      print("🔹 Response Code: ${response.statusCode}");
+      if (kDebugMode) {
+        print("🔹 Response Code: ${response.statusCode}");
+      }
       print("🔹 Response Body: ${response.body}");
 
       final data = jsonDecode(response.body);

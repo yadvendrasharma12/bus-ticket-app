@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // 🌞 Light Theme
   static final light = ThemeData(
     brightness: Brightness.light,
     primaryColor: Colors.indigo,

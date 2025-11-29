@@ -7,11 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CancelBookingController extends GetxController {
   var isLoading = false.obs;
 
-  // Cancel Booking API
   Future<void> cancelBooking(String bookingId, String reason) async {
     isLoading.value = true;
     final url = Uri.parse(
-        "https://fleetbus.onrender.com/api/bookings/ticket/$bookingId/cancel");
+        "https://api.grtourtravels.com/api/bookings/ticket/$bookingId/cancel");
 
     if (kDebugMode) {
       print("🔹 Cancel Booking Request Started");
@@ -31,11 +30,15 @@ class CancelBookingController extends GetxController {
       final token = prefs.getString("token") ?? "";
 
       if (token.isEmpty) {
-        print("❌ Token Missing!");
+        if (kDebugMode) {
+          print("❌ Token Missing!");
+        }
         return;
       }
 
-      print("🔐 Token: $token");
+      if (kDebugMode) {
+        print("🔐 Token: $token");
+      }
       final response = await http.put(
         url,
         headers: {
@@ -45,28 +48,42 @@ class CancelBookingController extends GetxController {
         body: jsonEncode({"reason": reason}),
       );
 
-      print("🔹 HTTP Status Code: ${response.statusCode}");
-      print("🔹 Raw Response Body: ${response.body}");
+      if (kDebugMode) {
+        print("🔹 HTTP Status Code: ${response.statusCode}");
+      }
+      if (kDebugMode) {
+        print("🔹 Raw Response Body: ${response.body}");
+      }
 
       final data = jsonDecode(response.body);
-      print("🔹 Parsed Response: $data");
+      if (kDebugMode) {
+        print("🔹 Parsed Response: $data");
+      }
 
       if (response.statusCode == 200 && data['success'] == true) {
-        print("✅ Ticket cancelled successfully");
+        if (kDebugMode) {
+          print("✅ Ticket cancelled successfully");
+        }
         Get.snackbar("Success", "Ticket cancelled successfully",
             snackPosition: SnackPosition.BOTTOM);
       } else {
-        print("❌ Error: ${data['message'] ?? 'Something went wrong'}");
+        if (kDebugMode) {
+          print("❌ Error: ${data['message'] ?? 'Something went wrong'}");
+        }
         Get.snackbar("Error", data['message'] ?? "Something went wrong",
             snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
-      print("❌ Exception occurred: $e");
+      if (kDebugMode) {
+        print("❌ Exception occurred: $e");
+      }
       Get.snackbar("Error", e.toString(),
           snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
-      print("🔹 Cancel Booking Request Ended");
+      if (kDebugMode) {
+        print("🔹 Cancel Booking Request Ended");
+      }
     }
   }
 

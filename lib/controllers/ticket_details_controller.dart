@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,11 +6,11 @@ import '../models/ticket.dart';
 
 class TicketDetailsController extends GetxController {
   var isLoading = true.obs;
-  var ticket = Rxn<Ticket>(); // Nullable Ticket object
+  var ticket = Rxn<Ticket>();
 
   Future<void> fetchTicket(String bookingId) async {
     isLoading.value = true;
-    final url = Uri.parse("https://fleetbus.onrender.com/api/bookings/ticket/$bookingId");
+    final url = Uri.parse("https://api.grtourtravels.com/api/bookings/ticket/$bookingId");
 
     try {
       final prefs = await SharedPreferences.getInstance();

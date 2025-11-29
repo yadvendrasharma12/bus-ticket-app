@@ -9,7 +9,7 @@ class PrivacyPolicyScreen extends StatefulWidget {
 }
 
 class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
-  bool isLoading = true; // start with loading
+  bool isLoading = true;
 
   @override
   void initState() {

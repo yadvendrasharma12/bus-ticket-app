@@ -1,6 +1,6 @@
 class ApiUrls {
   // 🔹 Auth Base
-  static const String baseUrl = "https://fleetbus.onrender.com/api/auth/";
+  static const String baseUrl = "https://api.grtourtravels.com/api/auth/";
 
   static const String register = "$baseUrl/register";
   static const String login = "$baseUrl/login";
@@ -11,19 +11,19 @@ class ApiUrls {
   static const String profile = "$baseUrl/me";
 
   // 🔹 Onboard APIs
-  static const String onboardBaseUrl = "https://fleetbus.onrender.com/api/onboard";
+  static const String onboardBaseUrl = "https://api.grtourtravels.com/api/onboard";
   static const String searchBuses = "$onboardBaseUrl/search";
   static const String upcoming = "$onboardBaseUrl/upcoming";
 
   // 🔹 Driver APIs
-  static const String driverBaseUrl = "https://fleetbus.onrender.com/api/drivers/public";
+  static const String driverBaseUrl = "https://api.grtourtravels.com/api/drivers/public";
   static const String driversList = "$driverBaseUrl/list";
 
-  static const String routesBaseUrl = "https://fleetbus.onrender.com/api/routes/stops/suggest";
-  static const String ticketBooking = "https://fleetbus.onrender.com/api/bookings/ticket";
-  static const String ticketHistory = " https://fleetbus.onrender.com/api/bookings/history";
+  static const String routesBaseUrl = "https://api.grtourtravels.com/api/routes/stops/suggest";
+  static const String ticketBooking = "https://api.grtourtravels.com/api/bookings/ticket";
+  static const String ticketHistory = "https://api.grtourtravels.com/api/bookings/history";
 
 
-  static const String baseUrls = "https://fleetbus.onrender.com/api";
+  static const String baseUrls = "https://api.grtourtravels.com/api";
   static const String onboard = "$baseUrl/onboard";
 }

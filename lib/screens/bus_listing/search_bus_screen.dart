@@ -337,7 +337,7 @@ class _SearchBusScreenState extends State<SearchBusScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Distance: ${totalDistance} km",
+                  "Distance: $totalDistance km",
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Colors.grey[700],

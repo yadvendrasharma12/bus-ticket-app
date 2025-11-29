@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,9 +26,8 @@ class TicketController extends GetxController {
 
       print("🔐 Token: $token");
 
-      // 🔥 API Call With Token
       final response = await http.get(
-        Uri.parse("https://fleetbus.onrender.com/api/bookings/history"),
+        Uri.parse("https://api.grtourtravels.com/api/bookings/history"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json"
@@ -45,7 +45,9 @@ class TicketController extends GetxController {
       }
 
     } catch (e) {
-      print("Error: $e");
+      if (kDebugMode) {
+        print("Error: $e");
+      }
     } finally {
       isLoading.value = false;
     }

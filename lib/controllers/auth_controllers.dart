@@ -10,7 +10,7 @@ class AuthController extends GetxController {
   var userData = <String, dynamic>{
     "name": "Yadvendra Sharma",
     "location": "New Delhi",
-    "profileImage": "https://example.com/photo.jpg", // or local path
+    "profileImage": "https://example.com/photo.jpg",
   }
   .obs;
   var isLoading = false.obs;
@@ -78,7 +78,7 @@ class AuthController extends GetxController {
     }
   }
 
-  // ✅ LOGIN USER
+
   Future<void> loginUser({
     required String email,
     required String password,
@@ -116,13 +116,12 @@ class AuthController extends GetxController {
     }
   }
 
-  // ✅ LOGOUT
+
   Future<void> logout() async {
     await MySharedPref.clearToken();
     Get.offAll(() => const WelcomeScreen());
   }
 
-  // ✅ FORGET PASSWORD → send OTP
   Future<void> forgetPassword({
     required String email,
     required Function(Map<String, dynamic> data) onSuccess,
@@ -155,7 +154,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ✅ VERIFY OTP
   Future<void> verifyOtp({
     required String email,
     required int otp,
@@ -165,7 +163,7 @@ class AuthController extends GetxController {
     isLoading(true);
     try {
       final response = await http.post(
-        Uri.parse("https://fleetbus.onrender.com/api/auth/verify-otp"),
+        Uri.parse(ApiUrls.veryFyOtp),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "email": email.trim(),
@@ -193,7 +191,6 @@ class AuthController extends GetxController {
   }
 
 
-  // ✅ RESET PASSWORD
   Future<void> resetPassword({
     required String email,
     required String newPassword,
@@ -207,7 +204,7 @@ class AuthController extends GetxController {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "email": email.trim(),
-          "newPassword": newPassword, // ✅ backend expects this key
+          "newPassword": newPassword,
         }),
       );
 
@@ -235,7 +232,7 @@ class AuthController extends GetxController {
     isLoading(true);
     try {
       final response = await http.post(
-        Uri.parse("https://fleetbus.onrender.com/api/auth/resend-otp"), // ✅ Updated endpoint
+        Uri.parse(ApiUrls.resendOTP),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"email": email.trim()}),
       );

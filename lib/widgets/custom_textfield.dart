@@ -6,7 +6,7 @@ class CustomTextField extends StatefulWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
-  final bool isPassword; // ✅ password field enable/disable
+  final bool isPassword;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final List<TextInputFormatter>? inputFormatters;
@@ -37,7 +37,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         TextFormField(
           controller: widget.controller,
           keyboardType: widget.keyboardType,
-          obscureText: widget.isPassword ? _isObscure : false, // ✅ only if password field
+          obscureText: widget.isPassword ? _isObscure : false,
           validator: widget.validator,
           inputFormatters: widget.inputFormatters,
           style: const TextStyle(

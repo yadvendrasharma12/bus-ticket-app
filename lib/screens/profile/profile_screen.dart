@@ -287,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             _buildTextField("Email address", _emailController),
             const SizedBox(height: 22),
-            _buildTextField("Mobile Number", _mobileController),
+            _buildTextField("Mobile Number", _mobileController, maxLength: 10),
             const SizedBox(height: 22),
             _buildTextField("Address", _addressController),
             const SizedBox(height: 25),
@@ -409,9 +409,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(
+      String label,
+      TextEditingController controller, {
+        int? maxLength,
+      }) {
     return TextField(
       controller: controller,
+      maxLength: maxLength,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.poppins(
@@ -419,10 +424,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: Colors.black,
           fontWeight: FontWeight.w600,
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+
+        counterText: maxLength != null ? "" : null,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
         filled: true,
         fillColor: Colors.white,
       ),
     );
   }
+
 }

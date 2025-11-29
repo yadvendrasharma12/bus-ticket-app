@@ -9,15 +9,15 @@ class TermsConditionScreen extends StatefulWidget {
 }
 
 class _TermsConditionScreenState extends State<TermsConditionScreen> {
-  bool isLoading = true; // start with loading
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Simulate loading delay (e.g., fetching from API)
+
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
-        isLoading = false; // stop loading after delay
+        isLoading = false;
       });
     });
   }

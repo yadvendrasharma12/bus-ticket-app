@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../../serives/route_service.dart';
 import '../bus_listing/search_bus_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -159,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             SizedBox(height: height * 0.04),
-            // 🔹 Search Bus Section
+
             Container(
               margin: EdgeInsets.symmetric(horizontal: 6),
               padding: const EdgeInsets.only(top: 10),
@@ -200,11 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _customAutocompleteTextField(
                                 "From",
                                 controller: fromController,
-                                options: [
-                                  "Mumbai", "Pune", "Delhi", "Bangalore", "Chennai", "Noida",
-                                  "Hyderabad", "Kolkata", "Ahmedabad", "Surat", "Jaipur",
-                                  "Lucknow", "Bhubaneswar", "Coimbatore", "Indore", "Nagpur"
-                                ],
+
                               ),
                             ),
                             SizedBox(width: width * 0.02),
@@ -232,13 +229,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _customAutocompleteTextField(
                                 "To",
                                 controller: toController,
-                                options: [
-                                  "Mumbai", "Pune", "Delhi", "Bangalore", "Chennai", "Noida",
-                                  "Hyderabad", "Kolkata", "Ahmedabad", "Surat", "Jaipur",
-                                  "Lucknow", "Bhubaneswar", "Coimbatore", "Indore", "Nagpur",
-                                  "Goa", "Gurgaon", "Mysore", "Amritsar", "Patna", "Vadodara",
-                                  "Thane", "Faridabad", "Rajkot", "Vishakhapatnam", "Bhubaneshwar"
-                                ],
                               ),
                             ),
                           ],
@@ -300,14 +290,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Colors.yellow.shade800,
                     text: "Let's check!",
                     onPressed: () async {
-                      // 🔹 Keyboard hide
                       FocusScope.of(context).unfocus();
 
+
                       if (fromController.text.isEmpty || toController.text.isEmpty) {
-                        Get.snackbar("Error", "Please fill both From and To fields",
-                            snackPosition: SnackPosition.BOTTOM);
+                        Get.snackbar(
+                          "Error",
+                          "Please fill both From and To fields",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
                         return;
                       }
+
 
                       String date;
                       final now = DateTime.now();
@@ -323,32 +317,57 @@ class _HomeScreenState extends State<HomeScreen> {
                         date =
                         "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
                       } else {
-                        Get.snackbar("Error", "Please select a date",
-                            snackPosition: SnackPosition.BOTTOM);
+                        Get.snackbar(
+                          "Error",
+                          "Please select a date",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
                         return;
                       }
 
                       final token = authController.token.value;
 
-                      // 🔹 Loading dialog
+
                       Get.dialog(
                         const Center(child: CircularProgressIndicator()),
                         barrierDismissible: false,
                       );
 
-                      await busController.searchBuses(
-                        origin: fromController.text,
-                        destination: toController.text,
-                        date: date,
-                        token: token,
-                      );
+                      try {
+                        await busController.searchBuses(
+                          origin: fromController.text.trim(),
+                          destination: toController.text.trim(),
+                          date: date,
+                          token: token,
+                        );
 
-                      // 🔹 Close loading
-                      if (Get.isDialogOpen ?? false) Get.back();
+                        if (busController.busList.isNotEmpty) {
 
+                          if (Get.isDialogOpen ?? false) Get.back();
 
-                      Get.to(() => const SearchBusScreen());
+                          // Next screen
+                          Get.to(() => const SearchBusScreen());
+                        } else {
+
+                          if (Get.isDialogOpen ?? false) Get.back();
+
+                          Get.snackbar(
+                            "No Buses",
+                            "No buses found for selected route and date.",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      } catch (e) {
+                        if (Get.isDialogOpen ?? false) Get.back();
+
+                        Get.snackbar(
+                          "Error",
+                          "Something went wrong while searching buses",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      }
                     },
+
                   ),
 
 
@@ -363,66 +382,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _dateCard(String month, String day, double width) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: width * 0.02),
-      padding: const EdgeInsets.all(10),
-      width: width * 0.3,
-      height: 125,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.indigo.shade800),
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(month,
-              style: GoogleFonts.poppins(
-                fontSize: width * 0.035,
-                fontWeight: FontWeight.w700,
-                color: Colors.indigo[900],
-              )),
-          Text(day,
-              style: GoogleFonts.poppins(
-                fontSize: width * 0.07,
-                fontWeight: FontWeight.w600,
-                color: Colors.indigo[900],
-              )),
-          Text("Maharashtra",
-              style: GoogleFonts.poppins(
-                fontSize: width * 0.03,
-                fontWeight: FontWeight.w600,
-              )),
-          const SizedBox(height: 4),
-          Text("Delhi",
-              style: GoogleFonts.poppins(
-                fontSize: width * 0.03,
-                fontWeight: FontWeight.w600,
-              )),
-        ],
-      ),
-    );
-  }
 
   Widget _customAutocompleteTextField(
       String hint, {
         required TextEditingController controller,
-        required List<String> options,
       }) {
     return Autocomplete<String>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
+      optionsBuilder: (TextEditingValue textEditingValue) async {
         if (textEditingValue.text.isEmpty) {
           return const Iterable<String>.empty();
         }
-        return options.where(
-              (option) => option.toLowerCase().contains(
-            textEditingValue.text.toLowerCase(),
-          ),
-        );
+
+
+        final results = await RouteService.fetchStops(textEditingValue.text);
+
+        return results.map((stop) => stop['name'].toString());
       },
       onSelected: (String selection) {
-        controller.text = selection; // ✅ yahi sahi jagah hai update ki
+        controller.text = selection;
       },
       fieldViewBuilder: (
           BuildContext context,
@@ -430,7 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
           FocusNode focusNode,
           VoidCallback onFieldSubmitted,
           ) {
-
         if (textController.text.isEmpty && controller.text.isNotEmpty) {
           textController.text = controller.text;
         }
@@ -439,15 +415,11 @@ class _HomeScreenState extends State<HomeScreen> {
           controller: textController,
           focusNode: focusNode,
           onChanged: (value) {
-            // ✅ external controller ko in-sync rakhne ke liye
             controller.text = value;
           },
           style: GoogleFonts.poppins(color: Colors.indigo.shade900),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -468,9 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 4,
           borderRadius: BorderRadius.circular(6),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: 200, // Dropdown ka max height, scrollable ho jayega
-            ),
+            constraints: const BoxConstraints(maxHeight: 200),
             child: ListView.builder(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
@@ -491,7 +461,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-
     );
   }
 

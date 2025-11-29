@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../utils/apis_url.dart';
@@ -14,7 +15,7 @@ class OnboardService {
       throw Exception("No token found. Please login again.");
     }
 
-    final url = Uri.parse("${ApiUrls.upcoming}");
+    final url = Uri.parse(ApiUrls.upcoming);
 
     final response = await http.get(
       url,
@@ -25,8 +26,12 @@ class OnboardService {
     );
 
     if (response.statusCode == 200) {
-      print("🔹 Response Code: ${response.statusCode}");
-      print("🔹 Response Body: ${response.body}");
+      if (kDebugMode) {
+        print("🔹 Response Code: ${response.statusCode}");
+      }
+      if (kDebugMode) {
+        print("🔹 Response Body: ${response.body}");
+      }
 
       final data = json.decode(response.body);
       if (data["success"] == true && data["data"] is List) {

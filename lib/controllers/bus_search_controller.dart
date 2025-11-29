@@ -10,12 +10,12 @@ import '../utils/shared_prefs.dart';
 
 import '../models/onboard_bus_model.dart';
 
-/// ================== BUS SEARCH CONTROLLER ==================
+
 class BusSearchController extends GetxController {
   var isLoading = false.obs;
-  var busList = <OnboardBus>[].obs; // ✅ Use model type
+  var busList = <OnboardBus>[].obs;
 
-  /// Search buses from API
+
   Future<void> searchBuses({
     required String origin,
     required String destination,

@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../utils/apis_url.dart';
@@ -8,21 +9,27 @@ import '../utils/shared_prefrance.dart';
 
 class DriverService {
   static Future<List<dynamic>?> fetchDrivers() async {
-    print("🔹 [DriverService] fetchDrivers() called");
+    if (kDebugMode) {
+      print("🔹 [DriverService] fetchDrivers() called");
+    }
 
     try {
-      // Step 1: Get token
       final token = await MySharedPref.getToken();
-      print("🟦 Token from SharedPreferences: $token");
+      if (kDebugMode) {
+        print("🟦 Token from SharedPreferences: $token");
+      }
 
       if (token == null) {
-        print("⚠️ No token found! User may not be logged in.");
+        if (kDebugMode) {
+          print("⚠️ No token found! User may not be logged in.");
+        }
         return null;
       }
 
-      // Step 2: API call
       final url = Uri.parse(ApiUrls.driversList);
-      print("🌐 Fetching driver list from: $url");
+      if (kDebugMode) {
+        print("🌐 Fetching driver list from: $url");
+      }
 
       final response = await http.get(
         url,
@@ -32,27 +39,45 @@ class DriverService {
         },
       );
 
-      print("📥 Status Code: ${response.statusCode}");
-      print("📥 Response: ${response.body}");
+      if (kDebugMode) {
+        print("📥 Status Code: ${response.statusCode}");
+      }
+      if (kDebugMode) {
+        print("📥 Response: ${response.body}");
+      }
 
       if (response.statusCode == 200) {
-        print("🔹 Response Code: ${response.statusCode}");
-        print("🔹 Response Body: ${response.body}");
+        if (kDebugMode) {
+          print("🔹 Response Code: ${response.statusCode}");
+        }
+        if (kDebugMode) {
+          print("🔹 Response Body: ${response.body}");
+        }
 
         final data = jsonDecode(response.body);
         if (data["success"] == true) {
-          print("✅ Drivers fetched successfully!");
+          if (kDebugMode) {
+            print("✅ Drivers fetched successfully!");
+          }
           return data["data"];
         } else {
-          print("❌ API returned success: false");
+          if (kDebugMode) {
+            print("❌ API returned success: false");
+          }
         }
       } else {
-        print("❌ Failed to fetch drivers — ${response.statusCode}");
+        if (kDebugMode) {
+          print("❌ Failed to fetch drivers — ${response.statusCode}");
+        }
       }
       return null;
     } catch (e, st) {
-      print("⚠️ Exception fetching drivers: $e");
-      print(st);
+      if (kDebugMode) {
+        print("⚠️ Exception fetching drivers: $e");
+      }
+      if (kDebugMode) {
+        print(st);
+      }
       return null;
     }
   }
