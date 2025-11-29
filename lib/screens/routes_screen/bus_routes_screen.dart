@@ -128,6 +128,7 @@ class BusRoutesScreen extends StatelessWidget {
   }
 }
 
+
 class SelectSeatsScreen extends StatefulWidget {
   final UpCommingBus busData;
   final Map<String, dynamic> onboardJson;
@@ -258,7 +259,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 16),
 
-            /// SEAT LAYOUT
+
             Expanded(
               child: ListView.builder(
                 itemCount: rows,

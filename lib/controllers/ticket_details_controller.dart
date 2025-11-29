@@ -31,6 +31,7 @@ class TicketDetailsController extends GetxController {
       );
 
       final data = jsonDecode(response.body);
+      print(response.body);
 
       if (response.statusCode == 200 && data['success'] == true) {
         ticket.value = Ticket.fromJson(data['data']);

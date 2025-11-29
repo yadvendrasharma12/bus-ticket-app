@@ -1,253 +1,3 @@
-// import 'dart:convert';
-// import 'package:bus_booking_app/controllers/auth_controllers.dart';
-// import 'package:bus_booking_app/screens/pesenger_details/pasenger_details_screen.dart';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:http/http.dart' as http;
-//
-//
-// import '../../widgets/custom_button.dart';
-//
-// class SelectSeatsScreen extends StatefulWidget {
-//   final dynamic busData;
-//   final Map<String, dynamic> rawBusJson;
-//
-//   const SelectSeatsScreen({
-//     super.key,
-//     required this.busData,
-//     required this.rawBusJson, required Map<String, dynamic> onboardJson,
-//   });
-//
-//   @override
-//   State<SelectSeatsScreen> createState() => _SelectSeatsScreenState();
-// }
-//
-// class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
-//   List<String> serverBookedSeats = [];
-//   final List<String> selectedSeats = [];
-//
-//   Map<String, dynamic> get _seatLayout {
-//     final dynamic seatLayout =
-//         widget.rawBusJson['bus']?['seatLayout'] ??
-//             widget.rawBusJson['busId']?['seatLayout'];
-//
-//     if (seatLayout is Map<String, dynamic>) {
-//       return seatLayout;
-//     }
-//
-//     return {'rows': 0, 'columns': 0, 'map': []};
-//   }
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     fetchBookedSeats();
-//   }
-//
-//   Future<void> fetchBookedSeats() async {
-//     try {
-//       final authController = Get.find<AuthController>();
-//       if (authController.token.isEmpty) await authController.loadToken();
-//       final token = authController.token.value;
-//       if (token.isEmpty) return;
-//
-//       final scheduleId = widget.busData.id;
-//       final url = Uri.parse(
-//           "https://api.grtourtravels.com/api/bookings/bookedSeats/$scheduleId");
-//
-//       final response = await http.get(
-//         url,
-//         headers: {
-//           "Authorization": "Bearer $token",
-//           "Content-Type": "application/json",
-//         },
-//       );
-//
-//       if (!mounted) return;
-//
-//       if (response.statusCode == 200) {
-//         final data = jsonDecode(response.body);
-//         setState(() {
-//           serverBookedSeats = List<String>.from(data['bookedSeats'] ?? []);
-//         });
-//       } else {
-//         setState(() {
-//           serverBookedSeats = [];
-//         });
-//       }
-//     } catch (e) {
-//       debugPrint("Error fetching booked seats: $e");
-//     }
-//   }
-//
-//   num _totalPrice() {
-//     final farePerSeat = widget.busData.bus?.fare?.toDouble() ??
-//         widget.busData.pricing?.totalFare.toDouble() ??
-//         0.0;
-//     return selectedSeats.length * farePerSeat;
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final bus = widget.busData;
-//     final layout = _seatLayout;
-//     final rows = layout['rows'] ?? 0;
-//     final cols = layout['columns'] ?? 0;
-//     final List<dynamic> map = layout['map'] ?? [];
-//
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           bus.bus?.busName ?? "Select Seats",
-//           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-//         ),
-//         backgroundColor: Colors.white,
-//         iconTheme: const IconThemeData(color: Colors.indigo),
-//       ),
-//       backgroundColor: const Color(0xFFF5F7FA),
-//       body: Padding(
-//         padding: const EdgeInsets.all(20),
-//         child: Column(
-//           children: [
-//             // Route
-//             Align(
-//               alignment: Alignment.centerLeft,
-//               child: Text(
-//                 bus.route.name.isNotEmpty
-//                     ? "Route: ${bus.route.name}"
-//                     : "Route information not available",
-//                 style: GoogleFonts.poppins(
-//                   fontSize: 15,
-//                   color: bus.route.name.isNotEmpty
-//                       ? Colors.indigo.shade900
-//                       : Colors.grey.shade600,
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(height: 8),
-//             // Selected seats
-//             Align(
-//               alignment: Alignment.centerLeft,
-//               child: Text(
-//                 "Selected Seats: ${selectedSeats.length}    Total Price: ₹${_totalPrice()}",
-//                 style: GoogleFonts.poppins(
-//                   fontSize: 14,
-//                   fontWeight: FontWeight.w600,
-//                   color: Colors.green.shade700,
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(height: 16),
-//             // Seat layout
-//             Expanded(
-//               child: ListView.builder(
-//                 itemCount: 10,
-//                 itemBuilder: (context, rowIndex) {
-//                   final rowSeats = rowIndex < map.length
-//                       ? map[rowIndex] as List<dynamic>
-//                       : [];
-//
-//                   return Padding(
-//                     padding: const EdgeInsets.only(bottom: 10),
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                       children: List.generate(4, (colIndex) { // 4 columns fixed
-//                         Map<String, dynamic> seat = {};
-//                         if (colIndex < rowSeats.length) {
-//                           seat = rowSeats[colIndex] as Map<String, dynamic>;
-//                         }
-//
-//                         final enabled = seat['enabled'] ?? false;
-//                         final label = seat['seatLabel']?.toString() ?? '';
-//                         final isBooked = serverBookedSeats.contains(label);
-//                         final isSelected = selectedSeats.contains(label);
-//
-//                         Color backgroundColor;
-//                         if (isBooked) {
-//                           backgroundColor = Colors.grey.shade400;
-//                         } else if (isSelected) {
-//                           backgroundColor = Colors.green;
-//                         } else if (!enabled) {
-//                           backgroundColor = Colors.grey.shade200;
-//                         } else {
-//                           backgroundColor = Colors.white;
-//                         }
-//
-//                         return GestureDetector(
-//                           onTap: () {
-//                             if (!enabled || isBooked) return;
-//                             setState(() {
-//                               if (isSelected) {
-//                                 selectedSeats.remove(label);
-//                               } else {
-//                                 selectedSeats.add(label);
-//                               }
-//                             });
-//                           },
-//                           child: Container(
-//                             width: 55,
-//                             height: 55,
-//                             margin: const EdgeInsets.symmetric(horizontal: 4),
-//                             alignment: Alignment.center,
-//                             decoration: BoxDecoration(
-//                               color: backgroundColor,
-//                               border: Border.all(
-//                                   color: isBooked ? Colors.grey : Colors.indigo,
-//                                   width: 1),
-//                               borderRadius: BorderRadius.circular(8),
-//                             ),
-//                             child: Text(
-//                               enabled ? label : "X",
-//                               style: TextStyle(
-//                                 fontSize: 12,
-//                                 fontWeight: FontWeight.bold,
-//                                 color: isBooked
-//                                     ? Colors.black54
-//                                     : Colors.indigo.shade900,
-//                               ),
-//                             ),
-//                           ),
-//                         );
-//                       }),
-//                     ),
-//                   );
-//                 },
-//               ),
-//             ),
-//
-//             const SizedBox(height: 10),
-//             // Continue
-//             CustomButton(
-//               backgroundColor: Colors.yellow.shade800,
-//               text:
-//               "Continue",
-//               onPressed: () {
-//                 if (selectedSeats.isEmpty) {
-//                   Get.snackbar("Error", "Please select at least one seat");
-//                 } else {
-//                   final double farePerSeat =
-//                       widget.busData.pricing?.totalFare.toDouble() ?? 0.0;
-//                   final DateTime travelDate =
-//                       widget.busData.date ?? DateTime.now();
-//
-//                   Get.to(() => PassengerDetailsScreen(
-//                     busData: widget.busData,
-//                     selectedSeats: List<String>.from(selectedSeats),
-//                     farePerSeat: farePerSeat,
-//                     travelDate: travelDate,
-//                   ));
-//                 }
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-// }
-
 import 'dart:convert';
 import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:bus_booking_app/screens/pesenger_details/pasenger_details_screen.dart';
@@ -256,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
-import '../../serives/booking_service.dart';
 import '../../widgets/custom_button.dart';
 
 class SelectSeatsScreen extends StatefulWidget {
@@ -293,26 +42,130 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadBookedSeats();
+    fetchBookedSeats();
   }
 
-  Future<void> _loadBookedSeats() async {
-    final scheduleId = widget.busData.id?.toString() ?? '';
-    if (scheduleId.isEmpty) return;
+  Future<void> fetchBookedSeats() async {
+    try {
+      final authController = Get.find<AuthController>();
+      if (authController.token.isEmpty) await authController.loadToken();
+      final token = authController.token.value;
+      if (token.isEmpty) return;
 
-    final booked = await BookingService.fetchBookedSeats(scheduleId);
+      final scheduleId = widget.busData.id;
+      final url = Uri.parse(
+        "https://api.grtourtravels.com/api/bookings/bookedSeats/$scheduleId",
+      );
 
-    if (!mounted) return;
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
-    setState(() {
-      serverBookedSeats = booked;
-    });
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          serverBookedSeats = List<String>.from(data['bookedSeats'] ?? []);
+        });
+      } else {
+        setState(() {
+          serverBookedSeats = [];
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching booked seats: $e");
+    }
+  }
+
+  /// 🔹 FARE CALCULATION: Mumbai → Moradabad jaise segment ke liye
+  double _calculateFarePerSeat() {
+    try {
+      final pricing = widget.rawBusJson['pricing'] ?? {};
+      final double baseAmount =
+      (pricing['baseAmount'] ?? 0).toDouble();
+      final double perKmRate =
+      (pricing['perKmRate'] ?? 0).toDouble();
+
+      final route = widget.rawBusJson['routeId'] ?? {};
+      final String startPoint =
+      (route['startPoint'] ?? '').toString();
+      final List<dynamic> stops =
+      (route['stops'] ?? []) as List<dynamic>;
+
+      final String source =
+      (widget.rawBusJson['searchOrigin'] ?? '').toString();
+      final String destination =
+      (widget.rawBusJson['searchDestination'] ?? '').toString();
+
+      // Agar important cheeze missing hain to backend totalFare pe fallback
+      if (source.isEmpty ||
+          destination.isEmpty ||
+          stops.isEmpty ||
+          (baseAmount == 0 && perKmRate == 0)) {
+        return widget.busData.pricing?.totalFare.toDouble() ??
+            widget.busData.bus?.fare?.toDouble() ??
+            0.0;
+      }
+
+      int sourceIndex = -1;
+      int destinationIndex = -1;
+
+      for (int i = 0; i < stops.length; i++) {
+        final stopName = (stops[i]['name'] ?? '').toString();
+        if (stopName.toLowerCase() == source.toLowerCase()) {
+          sourceIndex = i;
+        }
+        if (stopName.toLowerCase() == destination.toLowerCase()) {
+          destinationIndex = i;
+        }
+      }
+
+      // Agar source = startPoint hai aur stops[0] se match nahi ho raha tha
+      if (sourceIndex == -1 &&
+          source.toLowerCase() == startPoint.toLowerCase()) {
+        sourceIndex = 0;
+      }
+
+      // Destination galat hai ya source se pehle aa raha hai -> fallback
+      if (destinationIndex == -1 || destinationIndex < sourceIndex) {
+        return widget.busData.pricing?.totalFare.toDouble() ??
+            widget.busData.bus?.fare?.toDouble() ??
+            0.0;
+      }
+
+      double distance = 0;
+
+      if (source.toLowerCase() == startPoint.toLowerCase()) {
+        // Source = startPoint -> 0 se destinationIndex tak sum
+        for (int i = 0; i <= destinationIndex; i++) {
+          distance +=
+              (stops[i]['distanceFromPrev'] ?? 0).toDouble();
+        }
+      } else {
+        // Source = beech ka stop -> (sourceIndex + 1) se destinationIndex tak sum
+        for (int i = sourceIndex + 1; i <= destinationIndex; i++) {
+          distance +=
+              (stops[i]['distanceFromPrev'] ?? 0).toDouble();
+        }
+      }
+
+      final farePerSeat = baseAmount + (distance * perKmRate);
+      return farePerSeat;
+    } catch (e) {
+      debugPrint("Fare calculation error: $e");
+      return widget.busData.pricing?.totalFare.toDouble() ??
+          widget.busData.bus?.fare?.toDouble() ??
+          0.0;
+    }
   }
 
   num _totalPrice() {
-    final farePerSeat = widget.busData.bus?.fare?.toDouble() ??
-        widget.busData.pricing?.totalFare.toDouble() ??
-        0.0;
+    final farePerSeat = _calculateFarePerSeat();
     return selectedSeats.length * farePerSeat;
   }
 
@@ -323,6 +176,8 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
     final rows = layout['rows'] ?? 0;
     final cols = layout['columns'] ?? 0;
     final List<dynamic> map = layout['map'] ?? [];
+
+    final double farePerSeat = _calculateFarePerSeat();
 
     return Scaffold(
       appBar: AppBar(
@@ -354,6 +209,21 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
               ),
             ),
             const SizedBox(height: 8),
+
+            // Fare per seat (segment)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Fare per seat (segment): ₹${farePerSeat.toStringAsFixed(0)}",
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blueGrey.shade700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+
             // Selected seats
             Align(
               alignment: Alignment.centerLeft,
@@ -367,10 +237,11 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
             // Seat layout
             Expanded(
               child: ListView.builder(
-                itemCount: rows, // 👈 rows use karo instead of 10
+                itemCount: rows,
                 itemBuilder: (context, rowIndex) {
                   final rowSeats = rowIndex < map.length
                       ? map[rowIndex] as List<dynamic>
@@ -380,75 +251,71 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(
-                        cols, // 👈 cols use karo instead of 4
-                            (colIndex) {
-                          Map<String, dynamic> seat = {};
-                          if (colIndex < rowSeats.length) {
-                            seat =
-                            rowSeats[colIndex] as Map<String, dynamic>;
-                          }
+                      children: List.generate(cols, (colIndex) {
+                        Map<String, dynamic> seat = {};
+                        if (colIndex < rowSeats.length) {
+                          seat = rowSeats[colIndex] as Map<String, dynamic>;
+                        }
 
-                          final enabled = seat['enabled'] ?? false;
-                          final label =
-                              seat['seatLabel']?.toString() ?? '';
-                          final isBooked =
-                          serverBookedSeats.contains(label);
-                          final isSelected =
-                          selectedSeats.contains(label);
+                        final enabled = seat['enabled'] ?? false;
+                        final label =
+                            seat['seatLabel']?.toString() ?? '';
+                        final isBooked =
+                        serverBookedSeats.contains(label);
+                        final isSelected =
+                        selectedSeats.contains(label);
 
-                          Color backgroundColor;
-                          if (isBooked) {
-                            backgroundColor = Colors.grey.shade400;
-                          } else if (isSelected) {
-                            backgroundColor = Colors.green;
-                          } else if (!enabled) {
-                            backgroundColor = Colors.grey.shade200;
-                          } else {
-                            backgroundColor = Colors.white;
-                          }
+                        Color backgroundColor;
+                        if (isBooked) {
+                          backgroundColor = Colors.grey.shade400;
+                        } else if (isSelected) {
+                          backgroundColor = Colors.green;
+                        } else if (!enabled) {
+                          backgroundColor = Colors.grey.shade200;
+                        } else {
+                          backgroundColor = Colors.white;
+                        }
 
-                          return GestureDetector(
-                            onTap: () {
-                              if (!enabled || isBooked) return;
-                              setState(() {
-                                if (isSelected) {
-                                  selectedSeats.remove(label);
-                                } else {
-                                  selectedSeats.add(label);
-                                }
-                              });
-                            },
-                            child: Container(
-                              width: 55,
-                              height: 55,
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 4),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: backgroundColor,
-                                border: Border.all(
-                                  color: isBooked
-                                      ? Colors.grey
-                                      : Colors.indigo,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
+                        return GestureDetector(
+                          onTap: () {
+                            if (!enabled || isBooked) return;
+                            setState(() {
+                              if (isSelected) {
+                                selectedSeats.remove(label);
+                              } else {
+                                selectedSeats.add(label);
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 55,
+                            height: 55,
+                            margin:
+                            const EdgeInsets.symmetric(horizontal: 4),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: backgroundColor,
+                              border: Border.all(
+                                color: isBooked
+                                    ? Colors.grey
+                                    : Colors.indigo,
+                                width: 1,
                               ),
-                              child: Text(
-                                enabled ? label : "X",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: isBooked
-                                      ? Colors.black54
-                                      : Colors.indigo.shade900,
-                                ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              enabled ? label : "X",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isBooked
+                                    ? Colors.black54
+                                    : Colors.indigo.shade900,
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      }),
                     ),
                   );
                 },
@@ -456,6 +323,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
 
             const SizedBox(height: 10),
+
             // Continue
             CustomButton(
               backgroundColor: Colors.yellow.shade800,
@@ -464,8 +332,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                 if (selectedSeats.isEmpty) {
                   Get.snackbar("Error", "Please select at least one seat");
                 } else {
-                  final double farePerSeat =
-                      widget.busData.pricing?.totalFare.toDouble() ?? 0.0;
+                  final double farePerSeat = _calculateFarePerSeat();
                   final DateTime travelDate =
                       widget.busData.date ?? DateTime.now();
 

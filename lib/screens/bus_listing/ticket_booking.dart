@@ -137,28 +137,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Rating if completed
-                    if (ticket.status.toLowerCase() == "completed") ...[
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.orange, size: 18),
-                          const SizedBox(width: 4),
-                          Text(
-                            ticket.rating != null
-                                ? "${ticket.rating} / 5"
-                                : "Rate your ride",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.indigo.shade900,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                    ],
 
-                    // Action Buttons
+
                     Row(
                       children: [
                         Expanded(

@@ -6,6 +6,7 @@ import '../../controllers/bus_search_controller.dart';
 import '../../models/onboard_bus_model.dart';
 import '../../widgets/custom_button.dart';
 import '../select_seats/select_seats_screen.dart';
+
 class SearchBusScreen extends StatefulWidget {
   const SearchBusScreen({super.key});
 
@@ -299,6 +300,7 @@ class _SearchBusScreenState extends State<SearchBusScreen>
                                 ],
                               ),
                               Text(
+                                // yahan abhi bhi full totalFare dikha sakte ho
                                 "₹${pricing?.totalFare ?? 0}",
                                 style: GoogleFonts.poppins(
                                   fontSize: 15,
@@ -352,7 +354,6 @@ class _SearchBusScreenState extends State<SearchBusScreen>
   }
 }
 
-
 class BusRoutesScreen extends StatelessWidget {
   final OnboardBus busData;
 
@@ -382,9 +383,6 @@ class BusRoutesScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-
-
-
             ...route.stops.map((stop) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -440,22 +438,46 @@ class BusRoutesScreen extends StatelessWidget {
           backgroundColor: Colors.yellow.shade800,
           text: "Book Ticket",
           onPressed: () {
+            // ⬇️ Yahan se SelectSeatsScreen ko full data de rahe hain
             Get.to(
                   () => SelectSeatsScreen(
                 busData: busData,
                 rawBusJson: {
+                  "pricing": {
+                    "baseAmount": busData.pricing?.baseAmount ?? 0,
+                    "perKmRate": busData.pricing?.perKmRate ?? 0,
+                    "totalFare": busData.pricing?.totalFare ?? 0,
+                  },
+                  "routeId": {
+                    "startPoint": busData.route.startPoint,
+                    "stops": busData.route.stops.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final stop = entry.value;
+
+
+                      final prevDistance = i == 0
+                          ? 0
+                          : (stop.distanceFromStart -
+                          busData.route.stops[i - 1].distanceFromStart);
+
+                      return {
+                        "name": stop.name,
+                        "distanceFromPrev": prevDistance,
+                      };
+                    }).toList(),
+                  },
+                  "searchOrigin": busData.searchOrigin,
+                  "searchDestination": busData.searchDestination,
                   "busId": {
                     "seatLayout": busData.bus?.seatLayout ?? {},
                   },
-                }, onboardJson: {},
+                },
+                onboardJson: {},
               ),
             );
           },
         ),
-
-
       ),
     );
   }
 }
-

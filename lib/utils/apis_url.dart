@@ -25,5 +25,6 @@ class ApiUrls {
 
 
   static const String baseUrls = "https://api.grtourtravels.com/api";
-  static const String onboard = "$baseUrl/onboard";
+  static const String onboard = "$baseUrls/onboard";
+  static const String ratings = "$baseUrls/ratings";
 }

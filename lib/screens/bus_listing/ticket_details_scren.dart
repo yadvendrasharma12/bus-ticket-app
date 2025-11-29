@@ -3,18 +3,175 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../controllers/ticket_details_controller.dart';
+import '../../models/ticket.dart';
+import '../../serives/rating_services.dart';
 
-class TicketDetailsScreen extends StatelessWidget {
+class TicketDetailsScreen extends StatefulWidget {
   final String bookingId;
 
   const TicketDetailsScreen({super.key, required this.bookingId});
 
   @override
+  State<TicketDetailsScreen> createState() => _TicketDetailsScreenState();
+}
+
+class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
+  late TicketDetailsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(TicketDetailsController());
+    controller.fetchTicket(widget.bookingId);
+
+
+    Future.delayed(const Duration(seconds: 2), () {
+      final ticket = controller.ticket.value;
+      if (ticket != null && (ticket.bookingDetails.rating == null || ticket.bookingDetails.rating == 0)) {
+        _showRatingDialog(ticket);
+      }
+    });
+  }
+
+  void _showRatingDialog(Ticket ticket) {
+
+    if (ticket.bookingDetails.rating != null && ticket.bookingDetails.rating! > 0) return;
+
+    int selectedRating = 1;
+    final TextEditingController commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.orange.shade400, size: 26),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Rate your ride",
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.indigo.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Star rating selector
+                    Row(
+                      children: List.generate(5, (index) {
+                        final starIndex = index + 1;
+                        final isFilled = starIndex <= selectedRating;
+                        return GestureDetector(
+                          onTap: () => setStateDialog(() => selectedRating = starIndex),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                            child: Icon(
+                              isFilled ? Icons.star_rounded : Icons.star_border_rounded,
+                              size: 32,
+                              color: Colors.orange.shade400,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Optional comment
+                    TextField(
+                      controller: commentController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: "Comments (optional)",
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Submit & Skip buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Get.back(); // Skip rating
+                          },
+                          child: const Text("Skip"),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final scheduleId = ticket.scheduleId;
+                            if (scheduleId.isEmpty) {
+                              Get.snackbar(
+                                "Error",
+                                "Schedule ID not found",
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                              return;
+                            }
+
+                            final success = await RatingService.submitRating(
+                              scheduleId: scheduleId,
+                              rating: selectedRating,
+                              comments: commentController.text.trim(),
+                            );
+
+                            if (success) {
+                              Get.back();
+                              Get.snackbar(
+                                "Thank you!",
+                                "Your rating has been submitted.",
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.green.withOpacity(0.95),
+                                colorText: Colors.white,
+                              );
+                              controller.fetchTicket(widget.bookingId); // Refresh ticket details
+                            } else {
+                              Get.snackbar(
+                                "Error",
+                                "Failed to submit rating. Try again.",
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red.withOpacity(0.95),
+                                colorText: Colors.white,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.indigo.shade700,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          ),
+                          child: const Text("Submit", style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TicketDetailsController controller = Get.put(TicketDetailsController());
-
-    controller.fetchTicket(bookingId);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -41,14 +198,18 @@ class TicketDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Ticket Info
               _sectionTitle("🎟 Ticket Information"),
               _infoText("Booking ID", _formatBookingId(ticket.bookingId)),
+              _infoText(
+                "Schedule ID",
+                ticket.scheduleId.isNotEmpty ? ticket.scheduleId : "Not available",
+              ),
               _infoText("Reference", ticket.bookingReference),
               _infoText(
                 "Status",
                 ticket.bookingDetails.status,
-                color: ticket.bookingDetails.status.toLowerCase() == "active"
+                color: (ticket.bookingDetails.status.toLowerCase() == "active" ||
+                    ticket.bookingDetails.status.toLowerCase() == "confirmed")
                     ? Colors.green
                     : Colors.red,
               ),
@@ -143,4 +304,6 @@ class TicketDetailsScreen extends StatelessWidget {
       ),
     );
   }
+
+
 }

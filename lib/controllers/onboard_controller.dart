@@ -19,7 +19,7 @@ class OnboardController extends GetxController {
       final data = await OnboardService.fetchUpcomingBuses();
       allBuses.assignAll(data.map((e) => UpCommingBus.fromJson(e)).toList());
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Errors", e.toString());
     } finally {
       isLoading(false);
     }
