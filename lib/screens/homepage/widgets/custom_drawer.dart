@@ -34,7 +34,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Widget _drawer(double width) {
     return Column(
       children: [
-        // 🟡 Profile Header
+
         Container(
           padding: const EdgeInsets.only(top: 70),
           height: 120,

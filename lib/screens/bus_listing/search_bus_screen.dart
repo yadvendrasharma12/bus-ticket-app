@@ -1,11 +1,10 @@
+import 'package:bus_booking_app/screens/bus_listing/bus_stops_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../controllers/bus_search_controller.dart';
 import '../../models/onboard_bus_model.dart';
-import '../../widgets/custom_button.dart';
-import '../select_seats/select_seats_screen.dart';
 
 class SearchBusScreen extends StatefulWidget {
   const SearchBusScreen({super.key});
@@ -76,10 +75,10 @@ class _SearchBusScreenState extends State<SearchBusScreen>
           children: [
             _buildBusList(buses), // ALL
             _buildBusList(
-              buses.where((b) => b.bus?.acType.toLowerCase() == 'ac').toList(),
+              buses.where((b) => (b.bus?.acType.toLowerCase() ?? '') == 'ac').toList(),
             ), // AC
             _buildBusList(
-              buses.where((b) => b.bus?.acType.toLowerCase() == 'non-ac').toList(),
+              buses.where((b) => (b.bus?.acType.toLowerCase() ?? '') == 'non-ac').toList(),
             ), // NON AC
           ],
         );
@@ -183,10 +182,70 @@ class _SearchBusScreenState extends State<SearchBusScreen>
         final stopNames = route.stops.map((s) => s.name).toList();
         final stopsText = stopNames.join(" • ");
 
+        // ✅ YAHAN NEW FARE LOGIC: baseAmount + distance * perKmRate
+        double farePerSeat = 0;
+
+        if (pricing != null && route.stops.isNotEmpty) {
+          // 1) Source/destination resolve – same jaisa PassengerDetailsScreen me
+          final String source = bus.searchOrigin.isNotEmpty
+              ? bus.searchOrigin
+              : route.startPoint;
+
+          final String destination = bus.finalDestination.isNotEmpty
+              ? bus.finalDestination
+              : bus.searchDestination.isNotEmpty
+              ? bus.searchDestination
+              : route.finalDestination;
+
+          final String safeSource =
+          source.isNotEmpty ? source : route.startPoint;
+          final String safeDestination =
+          destination.isNotEmpty ? destination : route.finalDestination;
+
+          int? srcIndex;
+          int? destIndex;
+          double srcDistance = 0;
+          double destDistance = 0;
+
+          for (int i = 0; i < route.stops.length; i++) {
+            final stop = route.stops[i];
+            final stopName = stop.name.toString().trim().toLowerCase();
+
+            if (srcIndex == null &&
+                stopName == safeSource.trim().toLowerCase()) {
+              srcIndex = i;
+              srcDistance = (stop.distanceFromStart ?? 0).toDouble();
+            }
+            if (destIndex == null &&
+                stopName == safeDestination.trim().toLowerCase()) {
+              destIndex = i;
+              destDistance = (stop.distanceFromStart ?? 0).toDouble();
+            }
+          }
+
+          if (srcIndex != null && destIndex != null && destIndex > srcIndex) {
+            final legDistance = destDistance - srcDistance;
+
+            final double baseAmount =
+            (pricing.baseAmount ?? 0).toDouble();
+            final double perKmRate =
+            (pricing.perKmRate ?? 0).toDouble();
+
+            farePerSeat = baseAmount + legDistance * perKmRate;
+          } else {
+            // fallback: show full route fare
+            farePerSeat = (pricing.totalFare).toDouble();
+          }
+        } else {
+          farePerSeat = pricing?.totalFare.toDouble() ?? 0;
+        }
+
+        // 👇 yahi se aage tumhara UI same rahega
         return GestureDetector(
           onTap: () => Get.to(
-                () => BusRoutesScreen(
+                () => BusStopsScreen(
               busData: bus,
+              farePerSeat: farePerSeat,
             ),
           ),
           child: Container(
@@ -206,10 +265,10 @@ class _SearchBusScreenState extends State<SearchBusScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ... tumhara existing UI as-is ...
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Bus image / icon
                     Container(
                       height: 60,
                       width: 60,
@@ -218,7 +277,8 @@ class _SearchBusScreenState extends State<SearchBusScreen>
                         borderRadius: BorderRadius.circular(12),
                         image: bus.bus?.frontImage != null
                             ? DecorationImage(
-                          image: NetworkImage(bus.bus!.frontImage!),
+                          image:
+                          NetworkImage(bus.bus!.frontImage!),
                           fit: BoxFit.cover,
                         )
                             : null,
@@ -272,7 +332,8 @@ class _SearchBusScreenState extends State<SearchBusScreen>
                           ),
                           const SizedBox(height: 6),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
@@ -300,8 +361,7 @@ class _SearchBusScreenState extends State<SearchBusScreen>
                                 ],
                               ),
                               Text(
-                                // yahan abhi bhi full totalFare dikha sakte ho
-                                "₹${pricing?.totalFare ?? 0}",
+                                "₹${farePerSeat.toStringAsFixed(0)}",
                                 style: GoogleFonts.poppins(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -352,132 +412,5 @@ class _SearchBusScreenState extends State<SearchBusScreen>
       },
     );
   }
-}
 
-class BusRoutesScreen extends StatelessWidget {
-  final OnboardBus busData;
-
-  const BusRoutesScreen({super.key, required this.busData});
-
-  @override
-  Widget build(BuildContext context) {
-    final route = busData.route;
-    final bus = busData.bus;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          route.name.isNotEmpty ? route.name : "View routes",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.indigo.shade900,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.indigo),
-      ),
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: Padding(
-        padding: const EdgeInsets.only(bottom: 80.0),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ...route.stops.map((stop) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 14),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.15),
-                      blurRadius: 6,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.indigo),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            stop.name,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                              color: Colors.indigo.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Arrival: ${stop.arrivalTime}  |  Distance: ${stop.distanceFromStart} km",
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: CustomButton(
-          backgroundColor: Colors.yellow.shade800,
-          text: "Book Ticket",
-          onPressed: () {
-            // ⬇️ Yahan se SelectSeatsScreen ko full data de rahe hain
-            Get.to(
-                  () => SelectSeatsScreen(
-                busData: busData,
-                rawBusJson: {
-                  "pricing": {
-                    "baseAmount": busData.pricing?.baseAmount ?? 0,
-                    "perKmRate": busData.pricing?.perKmRate ?? 0,
-                    "totalFare": busData.pricing?.totalFare ?? 0,
-                  },
-                  "routeId": {
-                    "startPoint": busData.route.startPoint,
-                    "stops": busData.route.stops.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final stop = entry.value;
-
-
-                      final prevDistance = i == 0
-                          ? 0
-                          : (stop.distanceFromStart -
-                          busData.route.stops[i - 1].distanceFromStart);
-
-                      return {
-                        "name": stop.name,
-                        "distanceFromPrev": prevDistance,
-                      };
-                    }).toList(),
-                  },
-                  "searchOrigin": busData.searchOrigin,
-                  "searchDestination": busData.searchDestination,
-                  "busId": {
-                    "seatLayout": busData.bus?.seatLayout ?? {},
-                  },
-                },
-                onboardJson: {},
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
 }

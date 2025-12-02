@@ -1,22 +1,24 @@
-import 'dart:convert';
-import 'package:bus_booking_app/controllers/auth_controllers.dart';
 import 'package:bus_booking_app/screens/pesenger_details/pasenger_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 
+import '../../models/onboard_bus_model.dart';
+import '../../serives/booking_service.dart';
 import '../../widgets/custom_button.dart';
 
 class SelectSeatsScreen extends StatefulWidget {
-  final dynamic busData;
+  final OnboardBus busData;
   final Map<String, dynamic> rawBusJson;
+  final Map<String, dynamic> onboardJson;
+  final double farePerSeat; // 👈 yahi 223 aa raha hai
 
   const SelectSeatsScreen({
     super.key,
     required this.busData,
     required this.rawBusJson,
-    required Map<String, dynamic> onboardJson,
+    required this.onboardJson,
+    required this.farePerSeat,
   });
 
   @override
@@ -42,130 +44,28 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
   @override
   void initState() {
     super.initState();
-    fetchBookedSeats();
+    serverBookedSeats = List<String>.from(widget.busData.bookedSeats);
+    _loadBookedSeats();
   }
 
-  Future<void> fetchBookedSeats() async {
-    try {
-      final authController = Get.find<AuthController>();
-      if (authController.token.isEmpty) await authController.loadToken();
-      final token = authController.token.value;
-      if (token.isEmpty) return;
+  Future<void> _loadBookedSeats() async {
+    final scheduleId = widget.busData.id;
+    final seatsFromApi = await BookingService.fetchBookedSeats(scheduleId);
 
-      final scheduleId = widget.busData.id;
-      final url = Uri.parse(
-        "https://api.grtourtravels.com/api/bookings/bookedSeats/$scheduleId",
-      );
+    if (!mounted) return;
 
-      final response = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+    setState(() {
+      serverBookedSeats = {
+        ...serverBookedSeats,
+        ...seatsFromApi,
+      }.map((e) => e.trim().toUpperCase()).toSet().toList();
+    });
 
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          serverBookedSeats = List<String>.from(data['bookedSeats'] ?? []);
-        });
-      } else {
-        setState(() {
-          serverBookedSeats = [];
-        });
-      }
-    } catch (e) {
-      debugPrint("Error fetching booked seats: $e");
-    }
-  }
-
-  /// 🔹 FARE CALCULATION: Mumbai → Moradabad jaise segment ke liye
-  double _calculateFarePerSeat() {
-    try {
-      final pricing = widget.rawBusJson['pricing'] ?? {};
-      final double baseAmount =
-      (pricing['baseAmount'] ?? 0).toDouble();
-      final double perKmRate =
-      (pricing['perKmRate'] ?? 0).toDouble();
-
-      final route = widget.rawBusJson['routeId'] ?? {};
-      final String startPoint =
-      (route['startPoint'] ?? '').toString();
-      final List<dynamic> stops =
-      (route['stops'] ?? []) as List<dynamic>;
-
-      final String source =
-      (widget.rawBusJson['searchOrigin'] ?? '').toString();
-      final String destination =
-      (widget.rawBusJson['searchDestination'] ?? '').toString();
-
-      // Agar important cheeze missing hain to backend totalFare pe fallback
-      if (source.isEmpty ||
-          destination.isEmpty ||
-          stops.isEmpty ||
-          (baseAmount == 0 && perKmRate == 0)) {
-        return widget.busData.pricing?.totalFare.toDouble() ??
-            widget.busData.bus?.fare?.toDouble() ??
-            0.0;
-      }
-
-      int sourceIndex = -1;
-      int destinationIndex = -1;
-
-      for (int i = 0; i < stops.length; i++) {
-        final stopName = (stops[i]['name'] ?? '').toString();
-        if (stopName.toLowerCase() == source.toLowerCase()) {
-          sourceIndex = i;
-        }
-        if (stopName.toLowerCase() == destination.toLowerCase()) {
-          destinationIndex = i;
-        }
-      }
-
-      // Agar source = startPoint hai aur stops[0] se match nahi ho raha tha
-      if (sourceIndex == -1 &&
-          source.toLowerCase() == startPoint.toLowerCase()) {
-        sourceIndex = 0;
-      }
-
-      // Destination galat hai ya source se pehle aa raha hai -> fallback
-      if (destinationIndex == -1 || destinationIndex < sourceIndex) {
-        return widget.busData.pricing?.totalFare.toDouble() ??
-            widget.busData.bus?.fare?.toDouble() ??
-            0.0;
-      }
-
-      double distance = 0;
-
-      if (source.toLowerCase() == startPoint.toLowerCase()) {
-        // Source = startPoint -> 0 se destinationIndex tak sum
-        for (int i = 0; i <= destinationIndex; i++) {
-          distance +=
-              (stops[i]['distanceFromPrev'] ?? 0).toDouble();
-        }
-      } else {
-        // Source = beech ka stop -> (sourceIndex + 1) se destinationIndex tak sum
-        for (int i = sourceIndex + 1; i <= destinationIndex; i++) {
-          distance +=
-              (stops[i]['distanceFromPrev'] ?? 0).toDouble();
-        }
-      }
-
-      final farePerSeat = baseAmount + (distance * perKmRate);
-      return farePerSeat;
-    } catch (e) {
-      debugPrint("Fare calculation error: $e");
-      return widget.busData.pricing?.totalFare.toDouble() ??
-          widget.busData.bus?.fare?.toDouble() ??
-          0.0;
-    }
+    debugPrint("✅ Final booked seats in screen: $serverBookedSeats");
   }
 
   num _totalPrice() {
-    final farePerSeat = _calculateFarePerSeat();
+    final farePerSeat = widget.farePerSeat;
     return selectedSeats.length * farePerSeat;
   }
 
@@ -173,11 +73,11 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
   Widget build(BuildContext context) {
     final bus = widget.busData;
     final layout = _seatLayout;
-    final rows = layout['rows'] ?? 0;
-    final cols = layout['columns'] ?? 0;
+    final int rows = layout['rows'] ?? 0;
+    final int cols = layout['columns'] ?? 0;
     final List<dynamic> map = layout['map'] ?? [];
 
-    final double farePerSeat = _calculateFarePerSeat();
+    final double farePerSeat = widget.farePerSeat; // 👈 yehi aage pass hoga
 
     return Scaffold(
       appBar: AppBar(
@@ -193,7 +93,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Route
+            /// Route Name
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -210,7 +110,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 8),
 
-            // Fare per seat (segment)
+            /// Fare per seat
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -224,11 +124,11 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 4),
 
-            // Selected seats
+            /// Selected seats info
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Selected Seats: ${selectedSeats.length}    Total Price: ₹${_totalPrice()}",
+                "Selected Seats: ${selectedSeats.length}    Total Price: ₹${_totalPrice().toStringAsFixed(0)}",
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -238,7 +138,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Seat layout
+            /// Seat layout
             Expanded(
               child: ListView.builder(
                 itemCount: rows,
@@ -257,12 +157,16 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                           seat = rowSeats[colIndex] as Map<String, dynamic>;
                         }
 
-                        final enabled = seat['enabled'] ?? false;
-                        final label =
+                        final bool enabled = seat['enabled'] ?? false;
+                        final String rawLabel =
                             seat['seatLabel']?.toString() ?? '';
-                        final isBooked =
+
+                        final String label = rawLabel.trim().toUpperCase();
+
+                        final bool isBooked =
                         serverBookedSeats.contains(label);
-                        final isSelected =
+
+                        final bool isSelected =
                         selectedSeats.contains(label);
 
                         Color backgroundColor;
@@ -279,6 +183,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                         return GestureDetector(
                           onTap: () {
                             if (!enabled || isBooked) return;
+
                             setState(() {
                               if (isSelected) {
                                 selectedSeats.remove(label);
@@ -304,7 +209,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              enabled ? label : "X",
+                              enabled ? rawLabel : "X",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -324,7 +229,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
 
             const SizedBox(height: 10),
 
-            // Continue
+            /// Continue Button
             CustomButton(
               backgroundColor: Colors.yellow.shade800,
               text: "Continue",
@@ -332,7 +237,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                 if (selectedSeats.isEmpty) {
                   Get.snackbar("Error", "Please select at least one seat");
                 } else {
-                  final double farePerSeat = _calculateFarePerSeat();
                   final DateTime travelDate =
                       widget.busData.date ?? DateTime.now();
 

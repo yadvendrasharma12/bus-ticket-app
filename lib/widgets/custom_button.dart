@@ -25,7 +25,7 @@ class CustomButton extends StatelessWidget {
     double buttonWidth = MediaQuery.of(context).size.width * 0.9; // 90% width
     final Color effectiveTextColor = textColor ?? Colors.white;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
       width: buttonWidth,
       height: 45,
       child: ElevatedButton(

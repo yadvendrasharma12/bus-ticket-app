@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:bus_booking_app/utils/apis_url.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import '../controllers/auth_controllers.dart';
 
 class RatingService {
-  /// Submits a rating for a bus ride.
-  /// Returns `true` if successful, `false` otherwise.
   static Future<bool> submitRating({
     required String scheduleId,
     required int rating,
@@ -19,7 +18,7 @@ class RatingService {
       print("   rating: $rating");
       print("   comments: $comments");
 
-      // Validate scheduleId
+
       if (scheduleId.isEmpty) {
         print("❌ Error: scheduleId is empty. Cannot submit rating.");
         return false;
@@ -69,17 +68,20 @@ class RatingService {
         return true;
       } else if (response.statusCode == 400) {
         final respBody = jsonDecode(response.body);
-        print("⚠️ Cannot submit rating: ${respBody['message']}");
+        if (kDebugMode) {
+          print("⚠️ Cannot submit rating: ${respBody['message']}");
+        }
         Get.snackbar(
-          "Info",
+          padding: EdgeInsets.symmetric(horizontal: 13,vertical: 8),
+          "Attention",
           respBody['message'] ?? "Cannot submit rating",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange.withOpacity(0.95),
+          backgroundColor: Colors.yellow.shade800,
           colorText: Colors.white,
         );
         return false;
       } else {
-        print("❌ Failed to submit rating. Status code: ${response.statusCode}");
+
         return false;
       }
     } catch (e, stackTrace) {

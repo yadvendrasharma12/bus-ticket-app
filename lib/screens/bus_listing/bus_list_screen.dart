@@ -20,7 +20,7 @@ class BusListScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.indigo.shade900),
+          icon: Icon(Icons.arrow_back, color: Colors.indigo.shade900),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(

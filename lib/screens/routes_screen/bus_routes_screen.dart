@@ -526,10 +526,44 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction, // realtime
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "$safeSource → $safeDestination",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.indigo.shade900,
+                  ),
+                ),
+              ),
 
+              const SizedBox(height: 8),
+              Row(children: [
+                Text(
+                  "Seats: ${widget.selectedSeats.join(", ")}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green.shade700,
+                  ),
+                ),
 
+                const SizedBox(width:6),
+                Text(
+                  "Total: ₹${totalFare.toStringAsFixed(0)}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green.shade700,
+                  ),
+                ),
 
+              ],),
+
+              SizedBox(height: 20,),
               TextFormField(
                 controller: nameController,
                 decoration: InputDecoration(

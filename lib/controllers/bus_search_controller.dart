@@ -15,7 +15,13 @@ class BusSearchController extends GetxController {
   var isLoading = false.obs;
   var busList = <OnboardBus>[].obs;
 
+  RxList<OnboardBus> recentSearches = <OnboardBus>[].obs;
 
+  void addRecentSearch(OnboardBus bus) {
+    recentSearches.removeWhere((b) => b.id == bus.id); // Duplicate avoid
+    recentSearches.insert(0, bus); // Latest on top
+    if (recentSearches.length > 5) recentSearches.removeLast();
+  }
   Future<void> searchBuses({
     required String origin,
     required String destination,

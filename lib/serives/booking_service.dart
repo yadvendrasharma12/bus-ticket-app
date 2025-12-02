@@ -1,5 +1,5 @@
 
-// lib/services/booking_service.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../controllers/auth_controllers.dart';
 
 class BookingService {
-  /// Schedule ke liye booked seats laane wali API
+
   static Future<List<String>> fetchBookedSeats(String scheduleId) async {
     try {
       final authController = Get.find<AuthController>();

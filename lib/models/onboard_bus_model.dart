@@ -11,6 +11,7 @@ class OnboardBus {
   final String originalDepartureTime;
 
   final RouteData route;
+  final List<String> bookedSeats;
 
   OnboardBus({
     required this.id,
@@ -23,6 +24,7 @@ class OnboardBus {
     this.searchDestination = '',
     this.finalDestination = '',
     this.originalDepartureTime = '',
+    this.bookedSeats = const [],
   });
 
   factory OnboardBus.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,10 @@ class OnboardBus {
       searchDestination: json['searchDestination']?.toString() ?? '',
       finalDestination: routeData.finalDestination,
       originalDepartureTime: routeData.originalDepartureTime,
+      bookedSeats: (json['bookedSeats'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          [],
     );
   }
 }
@@ -66,6 +72,9 @@ class Pricing {
 }
 
 class Bus {
+
+
+
   final String id;
   final String busName;
   final String busNumber;
@@ -75,7 +84,7 @@ class Bus {
   final String? frontImage;
   final num? fare;
 
-  final Map<String, dynamic>? seatLayout; // ✅ add this
+  final Map<String, dynamic>? seatLayout;
 
   Bus({
     required this.id,
@@ -86,7 +95,7 @@ class Bus {
     required this.acType,
     this.frontImage,
     this.fare,
-    this.seatLayout, // ✅ add this
+    this.seatLayout,
   });
 
   factory Bus.fromJson(Map<String, dynamic> json) {

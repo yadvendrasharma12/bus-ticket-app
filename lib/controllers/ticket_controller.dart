@@ -33,7 +33,7 @@ class TicketController extends GetxController {
           "Content-Type": "application/json"
         },
       );
-
+      print(response.body);
       final data = json.decode(response.body);
 
       if (data["success"] == true) {

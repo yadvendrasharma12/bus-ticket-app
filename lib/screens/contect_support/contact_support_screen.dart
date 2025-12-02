@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart';
+
+import '../../models/contect_info_model.dart';
+import '../../serives/contect_service.dart';
 
 class ContactSupportScreen extends StatefulWidget {
   const ContactSupportScreen({super.key});
@@ -12,280 +17,137 @@ class ContactSupportScreen extends StatefulWidget {
 }
 
 class _ContactSupportScreenState extends State<ContactSupportScreen> {
-  final String companyName = "GR Tour & Travel";
-  final String contactNumber = "+91 9876543210";
-  final String whatsappNumber = "+91 9876543210";
+  bool isLoading = true;
+  ContactInfo? contactInfo;
 
-  final TextEditingController addressLineController =
-  TextEditingController(text: "123, Tech Park Building");
-  final TextEditingController cityController =
-  TextEditingController(text: "New Delhi");
-  final TextEditingController stateController =
-  TextEditingController(text: "Delhi");
-  final TextEditingController pinCodeController =
-  TextEditingController(text: "110001");
-
+  // Example social URLs (replace with your API values)
   final String facebookUrl = "https://facebook.com";
   final String instagramUrl = "https://instagram.com";
   final String youtubeUrl = "https://youtube.com";
   final String xUrl = "https://x.com";
   final String linkedinUrl = "https://linkedin.com";
-  final String mediaUrl = "https://whatsapp.com";
+  final String mediaUrl = "https://wa.me/9876543210";
 
-  // 📞 Call
-  Future<void> _makePhoneCall(String number) async {
-    final Uri url = Uri.parse('tel:$number');
-    if (!await launchUrl(url)) throw 'Could not launch $url';
+  @override
+  void initState() {
+    super.initState();
+    _loadContactInfo();
   }
 
-  // 💬 WhatsApp
-  Future<void> _openWhatsApp(String number) async {
-    final Uri url = Uri.parse("https://wa.me/${number.replaceAll('+', '')}");
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Could not open WhatsApp';
-    }
+  Future<void> _loadContactInfo() async {
+    final data = await ContactService.fetchContactInfo();
+    setState(() {
+      contactInfo = data;
+      isLoading = false;
+    });
   }
-
-  // 🌐 Open Social Link
-  Future<void> _openLink(String link) async {
-    final Uri url = Uri.parse(link);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $link';
-    }
-  }
-
-  // ✅ Validation methods
-  bool _isValidCity(String city) => RegExp(r'^[a-zA-Z\s]+$').hasMatch(city);
-  bool _isValidState(String state) => RegExp(r'^[a-zA-Z\s]+$').hasMatch(state);
-  bool _isValidPin(String pin) => RegExp(r'^[0-9]{6}$').hasMatch(pin);
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (contactInfo == null) {
+      return const Scaffold(
+        body: Center(child: Text("Failed to load contact info")),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-        ),
-        title: Text(
-          "Contact Support",
-          style: GoogleFonts.poppins(
-              color: Colors.white, fontWeight: FontWeight.w500),
-        ),
-        centerTitle: true,
+        leading: IconButton(onPressed: (){
+          Get.back();
+        }, icon: Icon(Icons.arrow_back,color: Colors.white,)),
+        title: Text("Contact Support", style: GoogleFonts.poppins(
+          color: Colors.white
+        )),
         backgroundColor: Colors.indigo.shade800,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            // 🏢 Company Name
-            Center(
-              child: Text(
-                companyName,
-                style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black),
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: ListView(
+                children: [
+                  Center(
+                    child: Text(
+                      contactInfo!.businessName,
+                      style: GoogleFonts.poppins(
+                          fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  _buildContactRow(
+                    title: "Phone",
+                    value: contactInfo!.contactNumber,
+                    icon: Icons.call,
+                    buttonText: "Call",
+                    onPressed: () => _makePhoneCall(contactInfo!.contactNumber),
+                  ),
+                  const Divider(),
+                  _buildContactRow(
+                    title: "WhatsApp",
+                    value: contactInfo!.whatsappNumber,
+                    icon: FontAwesomeIcons.whatsapp,
+                    buttonText: "Chat",
+                    buttonColor: Colors.green,
+                    onPressed: () => _openWhatsApp(contactInfo!.whatsappNumber),
+                  ),
+                  const Divider(height: 30),
+                  Text("Address Details",
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  _buildAddressField(
+                      "Address Line 1", contactInfo!.address.addressLine1),
+                  _buildAddressField("City", contactInfo!.address.city),
+                  _buildAddressField("State", contactInfo!.address.state),
+                  _buildAddressField("Pincode", contactInfo!.address.pincode),
+                  _buildAddressField("Country", contactInfo!.address.country),
+                  const SizedBox(height: 30),
+                  Align(
+                    alignment: Alignment.center,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        double screenWidth = constraints.maxWidth;
+                        double buttonWidth = (screenWidth - 60) / 3;
+
+                        return Wrap(
+                          spacing: 20,
+                          runSpacing: 15,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            _socialButton("Facebook", facebookUrl,
+                                Colors.blueAccent, FontAwesomeIcons.facebook, buttonWidth),
+                            _socialButton("Instagram", instagramUrl,
+                                Colors.indigo.shade800, FontAwesomeIcons.instagram, buttonWidth),
+                            _socialButton("YouTube", youtubeUrl,
+                                Colors.red, FontAwesomeIcons.youtube, buttonWidth),
+                            _socialButton("X", xUrl,
+                                Colors.black, FontAwesomeIcons.xTwitter, buttonWidth),
+                            _socialButton("LinkedIn", linkedinUrl,
+                                Colors.blue, FontAwesomeIcons.linkedin, buttonWidth),
+                            _socialButton("WhatsApp", mediaUrl,
+                                Colors.green, FontAwesomeIcons.whatsapp, buttonWidth),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 25),
-
-            // ☎️ Contact Number
-            _buildContactRow(
-              title: "Contact Number",
-              value: contactNumber,
-              icon: Icons.call,
-              buttonText: "Call",
-              onPressed: () => _makePhoneCall(contactNumber),
-            ),
-            const Divider(),
-
-            // 💬 WhatsApp Number
-            _buildContactRow(
-              title: "WhatsApp Number",
-              value: whatsappNumber,
-              icon: FontAwesomeIcons.whatsapp,
-              buttonText: "Chat",
-              buttonColor: Colors.green,
-              onPressed: () => _openWhatsApp(whatsappNumber),
-            ),
-            const Divider(height: 30),
-
-            // 📍 Address Section
-            Text(
-              "Address Details",
-              style: GoogleFonts.poppins(
-                  fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
-            _buildInputField(
-              "Address Line 1",
-              controller: addressLineController,
-              hint: "Enter address (letters, numbers, symbols)",
-              keyboardType: TextInputType.text,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s,.-/]'))
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            _buildInputField(
-              "State",
-              controller: stateController,
-              hint: "Enter state (letters only)",
-              keyboardType: TextInputType.text,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))
-              ],
-              validator: _isValidState,
-            ),
-            const SizedBox(height: 10),
-
-            _buildInputField(
-              "City",
-              controller: cityController,
-              hint: "Enter city (letters only)",
-              keyboardType: TextInputType.text,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))
-              ],
-              validator: _isValidCity,
-            ),
-            const SizedBox(height: 10),
-
-            _buildInputField(
-              "Pincode",
-              controller: pinCodeController,
-              hint: "Enter 6-digit pincode",
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(6),
-              ],
-              validator: _isValidPin,
-            ),
-            const Divider(height: 30),
-
-            // 🌐 Social Media
-            Text(
-              "Follow us on",
-              style: GoogleFonts.poppins(
-                  fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
-            Align(
-              alignment: Alignment.center,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Determine button width dynamically (3 per row ideally)
-                  double screenWidth = constraints.maxWidth;
-                  double buttonWidth = (screenWidth - 60) / 3; // 3 per row with spacing
-
-                  return Wrap(
-                    spacing: 20,
-                    runSpacing: 15,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _socialButton("Facebook", facebookUrl, Colors.blueAccent,
-                          FontAwesomeIcons.facebook, buttonWidth),
-                      _socialButton("Instagram", instagramUrl, Colors.indigo.shade800,
-                          FontAwesomeIcons.instagram, buttonWidth),
-                      _socialButton("YouTube", youtubeUrl, Colors.red,
-                          FontAwesomeIcons.youtube, buttonWidth),
-                      _socialButton("X", xUrl, Colors.black,
-                          FontAwesomeIcons.xTwitter, buttonWidth),
-                      _socialButton("LinkedIn", linkedinUrl, Colors.blue,
-                          FontAwesomeIcons.linkedin, buttonWidth),
-                      _socialButton("WhatsApp", mediaUrl, Colors.green,
-                          FontAwesomeIcons.whatsapp, buttonWidth),
-                    ],
-                  );
-                },
-              ),
-            ),
-
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  // 🧩 Contact Row Widget
-  Widget _buildContactRow({
-    required String title,
-    required String value,
-    required IconData icon,
-    required String buttonText,
-    required VoidCallback onPressed,
-    Color buttonColor = Colors.indigo,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: buttonColor, size: 28),
-      title: Text(title,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-      subtitle: Text(value, style: GoogleFonts.poppins(fontSize: 15)),
-      trailing: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: buttonColor,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: Text(buttonText,
-            style: GoogleFonts.poppins(color: Colors.white, fontSize: 13)),
-      ),
-    );
-  }
-// 🧩 Address / Input Field Widget
-  Widget _buildInputField(
-      String label, {
-        required TextEditingController controller,
-        required String hint,
-        required TextInputType keyboardType,
-        required List<TextInputFormatter> inputFormatters,
-        bool Function(String)? validator,
-      }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 5),
-
-
-        Container(
-          height: 45,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            controller.text,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  // 🧩 Social Button Widget
   Widget _socialButton(
       String name, String link, Color color, IconData icon, double width) {
     return InkWell(
@@ -319,4 +181,71 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
     );
   }
 
+  Widget _buildContactRow({
+    required String title,
+    required String value,
+    required IconData icon,
+    required String buttonText,
+    required VoidCallback onPressed,
+    Color buttonColor = Colors.indigo,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: buttonColor, size: 28),
+      title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+      subtitle: Text(value, style: GoogleFonts.poppins(fontSize: 15)),
+      trailing: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: buttonColor,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        child: Text(buttonText,
+            style: GoogleFonts.poppins(color: Colors.white, fontSize: 13)),
+      ),
+    );
+  }
+
+  Widget _buildAddressField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 5),
+          Container(
+            height: 45,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _makePhoneCall(String number) async {
+    final Uri url = Uri.parse('tel:$number');
+    if (!await launchUrl(url)) throw 'Could not launch $url';
+  }
+
+  Future<void> _openWhatsApp(String number) async {
+    final Uri url = Uri.parse("https://wa.me/${number.replaceAll('+', '')}");
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) throw 'Could not open WhatsApp';
+  }
+
+  Future<void> _openLink(String link) async {
+    final Uri url = Uri.parse(link);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) throw 'Could not launch $link';
+  }
 }

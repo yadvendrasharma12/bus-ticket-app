@@ -16,8 +16,7 @@ class TicketBookingScreen extends StatefulWidget {
 
 class _TicketBookingScreenState extends State<TicketBookingScreen> {
   final TicketController controller = Get.put(TicketController());
-  final CancelBookingController cancelController =
-  Get.put(CancelBookingController());
+  final CancelBookingController cancelController = Get.put(CancelBookingController());
 
   @override
   void initState() {
@@ -62,6 +61,19 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           itemCount: controller.tickets.length,
           itemBuilder: (context, index) {
             final ticket = controller.tickets[index];
+
+            final status = ticket.status.toString().toLowerCase();
+            final num rating = (ticket.rating ?? 0);
+
+            final bool isCancelled = status == "cancelled" || status == "canceled";
+            final bool isActive = status == "active";
+            final bool isConfirmed = status == "confirmed";
+
+
+            final bool canShowPostReviewButton = isConfirmed && rating == 0;
+
+            /// Active / Cancelled par Cancel Ticket
+            final bool canShowCancelButton = isActive || isCancelled;
 
             return Card(
               shape: RoundedRectangleBorder(
@@ -137,16 +149,19 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     const SizedBox(height: 12),
 
-
-
+                    // Buttons Row
                     Row(
                       children: [
+
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              Get.to(() => TicketDetailsScreen(
-                                bookingId: ticket.bookingId,
-                              ));
+                              Get.to(
+                                    () => TicketDetailsScreen(
+                                  bookingId: ticket.bookingId,
+                                  openRatingDirectly: false,
+                                ),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.indigo.shade800,
@@ -167,37 +182,69 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (ticket.status.toLowerCase() != "cancelled" &&
-                                  ticket.status.toLowerCase() != "canceled") {
-                                _handleCancelBooking(ticket);
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                              (ticket.status.toLowerCase() == "cancelled" ||
-                                  ticket.status.toLowerCase() == "canceled")
-                                  ? Colors.red.shade200
-                                  : Colors.red.shade700,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+
+                        // Middle Button Logic
+                        if (canShowPostReviewButton) ...[
+                          // Post Review
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Get.to(
+                                      () => TicketDetailsScreen(
+                                    bookingId: ticket.bookingId,
+                                    openRatingDirectly: true,
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade700,
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              "Cancel Ticket",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                              child: Text(
+                                "Post Review",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ] else if (canShowCancelButton) ...[
+                          // Cancel Ticket
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _handleCancelBooking(ticket);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade700,
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                "Cancel Ticket",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ] else
+                          const SizedBox.shrink(), // Hide middle button
+
                         const SizedBox(width: 8),
+
+                        // Call bus staff - hamesha
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
@@ -261,21 +308,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
 
   // Cancel booking dialog
   void _handleCancelBooking(dynamic ticket) {
-    final status = ticket.status.toString().toLowerCase();
-
-    if (status == "cancelled" || status == "canceled") {
-      Get.snackbar(
-        "Ticket Information",
-        "Your ticket is already cancelled.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.withOpacity(0.95),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 8,
-      );
-      return;
-    }
-
     TextEditingController reasonController = TextEditingController();
 
     showDialog(
@@ -293,7 +325,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           ),
           content: TextField(
             controller: reasonController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: "Enter cancellation reason",
             ),
           ),
@@ -324,9 +356,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     return;
                   }
 
-                  cancelController
-                      .cancelBooking(ticket.bookingId, reason)
-                      .then((_) {
+                  cancelController.cancelBooking(ticket.bookingId, reason).then((_) {
                     Navigator.pop(context);
                     controller.fetchTickets(); // refresh list
                   });
