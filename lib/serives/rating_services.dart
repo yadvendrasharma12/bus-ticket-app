@@ -98,4 +98,50 @@ class RatingService {
       return false;
     }
   }
-}
+
+  static Future<bool> updateRating({
+    required String ratingId,
+    required int rating,
+    required String comments,
+  }) async {
+    try {
+      final authController = Get.find<AuthController>();
+
+      if (authController.token.isEmpty) {
+        await authController.loadToken();
+      }
+
+      final token = authController.token.value;
+
+      final uri = Uri.parse("${ApiUrls.ratings}/$ratingId");
+
+      final bodyMap = {
+        "rating": rating,
+        "comments": comments,
+      };
+
+      final response = await http.put(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(bodyMap),
+      );
+
+      if (response.statusCode == 200) {
+        print("⭐ Rating Updated Successfully!");
+        return true;
+      }
+
+      print("❌ Failed to update rating");
+      return false;
+    } catch (e) {
+      print("❌ Exception in updateRating: $e");
+      return false;
+    }
+  }
+
+  }
+
+
