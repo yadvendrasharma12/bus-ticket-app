@@ -7,6 +7,7 @@ class Ticket {
   final BusDetails bus;
   final BookingDetails bookingDetails;
   final CrewDetails crew;
+  final String? ratingId;
 
   Ticket({
     required this.bookingId,
@@ -14,6 +15,7 @@ class Ticket {
     required this.bookingReference,
     required this.passenger,
     required this.travel,
+    required this.ratingId, // ✅
     required this.bus,
     required this.bookingDetails,
     required this.crew,
@@ -22,6 +24,7 @@ class Ticket {
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
       bookingId: json['bookingId'] ?? '',
+      ratingId: json['ratingId']?.toString(),
       scheduleId: json['scheduleId'] ??
           json['bookingDetails']?['scheduleId'] ??
           '', // top-level first, fallback to bookingDetails

@@ -98,28 +98,49 @@ class RatingService {
       return false;
     }
   }
-
   static Future<bool> updateRating({
     required String ratingId,
     required int rating,
     required String comments,
   }) async {
     try {
-      final authController = Get.find<AuthController>();
+      print("📝 RatingService: updateRating called");
+      print("   ratingId: $ratingId");
+      print("   rating: $rating");
+      print("   comments: $comments");
 
+      if (ratingId.isEmpty) {
+        print("❌ Error: ratingId is empty. Cannot update rating.");
+        return false;
+      }
+
+      // ✅ Get Auth Controller
+      final authController = Get.find<AuthController>();
+      print("🔐 AuthController found");
+
+      // ✅ Load token if empty
       if (authController.token.isEmpty) {
+        print("ℹ️ Token is empty. Loading token...");
         await authController.loadToken();
       }
 
       final token = authController.token.value;
+      print("✅ Token retrieved: ${token.isNotEmpty ? 'AVAILABLE' : 'EMPTY'}");
 
+      // ✅ API URL with ratingId
       final uri = Uri.parse("${ApiUrls.ratings}/$ratingId");
 
+      // ✅ BODY (Only rating + comments)
       final bodyMap = {
         "rating": rating,
         "comments": comments,
       };
 
+      print("📡 Sending PUT request to Update Rating API...");
+      print("   URL  : $uri");
+      print("   Body : ${jsonEncode(bodyMap)}");
+
+      // ✅ HTTP PUT CALL
       final response = await http.put(
         uri,
         headers: {
@@ -129,18 +150,48 @@ class RatingService {
         body: jsonEncode(bodyMap),
       );
 
+      print("📶 Response received");
+      print("   Status code: ${response.statusCode}");
+      print("   Body       : ${response.body}");
+
       if (response.statusCode == 200) {
-        print("⭐ Rating Updated Successfully!");
+        print("✅ Rating updated successfully!");
         return true;
       }
+      else if (response.statusCode == 400) {
+        final respBody = jsonDecode(response.body);
 
-      print("❌ Failed to update rating");
-      return false;
-    } catch (e) {
-      print("❌ Exception in updateRating: $e");
+        Get.snackbar(
+          "Attention",
+          respBody['message'] ?? "Cannot update rating",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.yellow.shade800,
+          colorText: Colors.white,
+        );
+        return false;
+      }
+      else {
+        print("❌ Failed to update rating");
+        return false;
+      }
+
+    } catch (e, stackTrace) {
+      print("❌ Exception in RatingService.updateRating:");
+      print("   Error: $e");
+      print("   StackTrace: $stackTrace");
+
+      Get.snackbar(
+        "Error",
+        "An unexpected error occurred while updating rating",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.95),
+        colorText: Colors.white,
+      );
       return false;
     }
   }
+
+
 
   }
 

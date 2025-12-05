@@ -301,34 +301,42 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                         const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () async {
-                            final scheduleId = ticket.scheduleId;
-                            if (scheduleId.isEmpty) {
+                            final ratingId = ticket.ratingId;
+
+                            if (ratingId == null || ratingId.isEmpty) {
                               Get.snackbar(
                                 "Error",
-                                "Schedule ID not found",
+                                "Rating ID not found",
                                 snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red.withOpacity(0.95),
+                                colorText: Colors.white,
                               );
                               return;
                             }
 
-                            final success = await RatingService.submitRating(
-                              scheduleId: scheduleId,
+                            final success = await RatingService.updateRating(
+                              ratingId: ratingId, // ✅ MODAL SE AAYA
                               rating: selectedRating,
                               comments: commentController.text.trim(),
+
                             );
 
                             if (success) {
+                              _hasShownRatingDialog = true;
                               Get.back();
+
                               Get.snackbar(
                                 "Thank you!",
-                                "Your rating has been submitted.",
+                                "Your rating has been updated successfully.",
                                 snackPosition: SnackPosition.BOTTOM,
                                 backgroundColor: Colors.green.withOpacity(0.95),
                                 colorText: Colors.white,
                               );
-                              controller.fetchTicket(widget.bookingId);
+
+                              controller.fetchTicket(widget.bookingId); // ✅ Refresh
                             }
                           },
+
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.indigo.shade700,
                             shape: RoundedRectangleBorder(
