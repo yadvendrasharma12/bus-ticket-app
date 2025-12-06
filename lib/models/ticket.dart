@@ -1,13 +1,13 @@
 class Ticket {
   final String bookingId;
-  final String scheduleId; // Top-level scheduleId
+  final String scheduleId;
   final String bookingReference;
   final PassengerDetails passenger;
   final TravelDetails travel;
   final BusDetails bus;
   final BookingDetails bookingDetails;
   final CrewDetails crew;
-  final String? ratingId;
+   String? ratingId;
 
   Ticket({
     required this.bookingId,
@@ -15,7 +15,7 @@ class Ticket {
     required this.bookingReference,
     required this.passenger,
     required this.travel,
-    required this.ratingId, // ✅
+     this.ratingId, // ✅
     required this.bus,
     required this.bookingDetails,
     required this.crew,

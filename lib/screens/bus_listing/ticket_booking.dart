@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../controllers/cancle_booking_controller.dart';
 import '../../controllers/ticket_controller.dart';
+import '../../serives/rating_services.dart';
 
 class TicketBookingScreen extends StatefulWidget {
   const TicketBookingScreen({super.key});
@@ -69,8 +70,9 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             final bool isActive = status == "active";
             final bool isConfirmed = status == "confirmed";
 
+            final bool canShowPostReviewButton = isConfirmed && (ticket.rating ?? 0) == 0;
+            final bool canEditReviewButton = isConfirmed && (ticket.rating ?? 0) > 0;
 
-            final bool canShowPostReviewButton = isConfirmed && rating == 0;
 
             /// Active / Cancelled par Cancel Ticket
             final bool canShowCancelButton = isActive || isCancelled;
@@ -150,135 +152,139 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     const SizedBox(height: 12),
 
                     // Buttons Row
-                    Row(
+                    Column(
                       children: [
 
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Get.to(
-                                    () => TicketDetailsScreen(
-                                  bookingId: ticket.bookingId,
-                                  openRatingDirectly: false,
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.indigo.shade800,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                              "View Ticket",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
+                        Row(
+                          children: [
 
-                        // Middle Button Logic
-                        if (canShowPostReviewButton) ...[
-                          // Post Review
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Get.to(
-                                      () => TicketDetailsScreen(
-                                    bookingId: ticket.bookingId,
-                                    openRatingDirectly: true,
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Get.to(
+                                        () => TicketDetailsScreen(
+                                      bookingId: ticket.bookingId,
+                                      openRatingDirectly: true,
+                                          ratingId: ticket.ratingId,
+
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo.shade800,
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.shade700,
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ),
-                              child: Text(
-                                "Post Review",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                                child: Text(
+                                  "View Ticket",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ] else if (canShowCancelButton) ...[
-                          // Cancel Ticket
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _handleCancelBooking(ticket);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red.shade700,
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                "Cancel Ticket",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ] else
-                          const SizedBox.shrink(), // Hide middle button
+                            const SizedBox(width: 8),
 
-                        const SizedBox(width: 8),
+                            // Middle Button Logic
+                            if (canShowPostReviewButton || canEditReviewButton) ...[
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // Post ya Edit dono yahi function se handle hoga
+                                    _showEditRatingDialog(ticket);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: canShowPostReviewButton
+                                        ? Colors.green.shade700
+                                        : Colors.blue.shade700,
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    canShowPostReviewButton ? "Post Review" : "Edit Review",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else if (canShowCancelButton) ...[
+                              // Cancel Ticket button
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    _handleCancelBooking(ticket);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red.shade700,
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Cancel Ticket",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else
+                              const SizedBox.shrink(), // Hide middle button
 
-                        // Call bus staff - hamesha
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final phoneNumber = ticket.driverNumber;
+                            const SizedBox(width: 8),
 
-                              if (phoneNumber != null && phoneNumber.isNotEmpty) {
-                                _callBusStaff(phoneNumber); // ✅ CALL HOGA YAHA SE
-                              } else {
-                                Get.snackbar(
-                                  "Not Available",
-                                  "Driver number not available",
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              }
-                            }, // ✅ <-- YE BRACKET MISSING THA
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.yellow.shade800,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                            // Call bus staff - hamesha
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  final phoneNumber = ticket.driverNumber;
+
+                                  if (phoneNumber != null && phoneNumber.isNotEmpty) {
+                                    _callBusStaff(phoneNumber);
+                                  } else {
+                                    Get.snackbar(
+                                      "Not Available",
+                                      "Driver number not available",
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.yellow.shade800,
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Call Bus Staff",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ),
-                            child: Text(
-                              "Call Bus Staff",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
+
+                          ],
                         ),
-
                       ],
                     ),
                   ],
@@ -391,4 +397,100 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       );
     }
   }
+
+
+  void _showEditRatingDialog(dynamic ticket) async {
+    if (ticket.ratingId == null) return;
+
+
+    int selectedRating = 1;
+    final commentController = TextEditingController();
+
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text(
+                "Edit Rating",
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starIndex = index + 1;
+                      return IconButton(
+                        onPressed: () => setStateDialog(() => selectedRating = starIndex),
+                        icon: Icon(
+                          starIndex <= selectedRating ? Icons.star_rounded : Icons.star_border_rounded,
+                          color: Colors.orange,
+                          size: 32,
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: commentController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: "Comments",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final success = await RatingService.updateRating(
+                      ratingId: ticket.ratingId!,
+                      rating: selectedRating,
+                      comments: commentController.text.trim(),
+                    );
+
+                    if (success) {
+                      Navigator.pop(context);
+                      Get.snackbar(
+                        "Success",
+                        "Rating updated successfully!",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green.withOpacity(0.95),
+                        colorText: Colors.white,
+                      );
+
+                      // Refresh tickets if needed
+                      controller.fetchTickets();
+                    } else {
+                      Get.snackbar(
+                        "Error",
+                        "Failed to update rating. Try again.",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red.withOpacity(0.95),
+                        colorText: Colors.white,
+                      );
+                    }
+                  },
+                  child: const Text("Update"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
 }

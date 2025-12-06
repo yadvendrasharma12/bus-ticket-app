@@ -9,11 +9,12 @@ import '../../serives/rating_services.dart';
 class TicketDetailsScreen extends StatefulWidget {
   final String bookingId;
   final bool openRatingDirectly;
+  final String? ratingId;
 
   const TicketDetailsScreen({
     super.key,
     required this.bookingId,
-    this.openRatingDirectly = false,
+    this.openRatingDirectly = false, this.ratingId,
   });
 
   @override
@@ -29,29 +30,27 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     super.initState();
     controller = Get.put(TicketDetailsController());
     controller.fetchTicket(widget.bookingId);
+    print("✅ PASSED ratingId from previous screen = ${widget.ratingId}");
 
     ever(controller.ticket, (ticket) {
       if (ticket == null) return;
 
       final status = ticket.bookingDetails.status.toLowerCase();
-      final rating = ticket.bookingDetails.rating ?? 0;
+      final ticketRatingId = ticket.ratingId;
 
       final bool isConfirmed = status == "confirmed";
 
-      // अगर rating पहले ही दी जा चुकी या dialog पहले ही दिखा दिया गया
-      if (_hasShownRatingDialog || rating > 0) return;
+      if (_hasShownRatingDialog || ticketRatingId != null && ticketRatingId.isNotEmpty) return;
 
       if (isConfirmed) {
-        _hasShownRatingDialog = true; // dialog सिर्फ एक बार show होगा
-        if (widget.openRatingDirectly) {
-          _showRatingDialog(ticket);
-        } else {
-          Future.delayed(const Duration(milliseconds: 300), () {
-            _showRatingDialog(ticket);
-          });
-        }
+        _hasShownRatingDialog = true;
+
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _showRatingOrEditDialog(ticket);
+        });
       }
     });
+
   }
 
 
@@ -201,166 +200,121 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     );
   }
 
-  void _showRatingDialog(Ticket ticket) {
+
+  void _showRatingOrEditDialog(Ticket ticket) async {
     final status = ticket.bookingDetails.status.toLowerCase();
-    final rating = ticket.bookingDetails.rating ?? 0;
+    final String? ratingId = widget.ratingId;
 
-
-    if (status != "confirmed") return;
-    if (rating > 0) return;
+    if (status != "confirmed" ) return;
 
     int selectedRating = 1;
     final TextEditingController commentController = TextEditingController();
 
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            return AlertDialog(
+              title: Text(
+                ratingId == null ? "Rate Your Ride" : "Edit Rating",
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: Colors.orange.shade400,
-                          size: 26,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starIndex = index + 1;
+                      return IconButton(
+                        onPressed: () =>
+                            setStateDialog(() => selectedRating = starIndex),
+                        icon: Icon(
+                          starIndex <= selectedRating
+                              ? Icons.star_rounded
+                              : Icons.star_border_rounded,
+                          color: Colors.orange,
+                          size: 32,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Rate your ride",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.indigo.shade900,
-                          ),
-                        ),
-                      ],
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: commentController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: "Comments",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Stars
-                    Row(
-                      children: List.generate(5, (index) {
-                        final starIndex = index + 1;
-                        final isFilled = starIndex <= selectedRating;
-                        return GestureDetector(
-                          onTap: () =>
-                              setStateDialog(() => selectedRating = starIndex),
-                          child: Padding(
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 2),
-                            child: Icon(
-                              isFilled
-                                  ? Icons.star_rounded
-                                  : Icons.star_border_rounded,
-                              size: 32,
-                              color: Colors.orange.shade400,
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      controller: commentController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: "Comments (optional)",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            _hasShownRatingDialog = true;
-                            Get.back();
-                          },
-                          child: const Text("Skip"),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final ratingId = ticket.ratingId;
-
-                            if (ratingId == null || ratingId.isEmpty) {
-                              Get.snackbar(
-                                "Error",
-                                "Rating ID not found",
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.red.withOpacity(0.95),
-                                colorText: Colors.white,
-                              );
-                              return;
-                            }
-
-                            final success = await RatingService.updateRating(
-                              ratingId: ratingId, // ✅ MODAL SE AAYA
-                              rating: selectedRating,
-                              comments: commentController.text.trim(),
-
-                            );
-
-                            if (success) {
-                              _hasShownRatingDialog = true;
-                              Get.back();
-
-                              Get.snackbar(
-                                "Thank you!",
-                                "Your rating has been updated successfully.",
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.green.withOpacity(0.95),
-                                colorText: Colors.white,
-                              );
-
-                              controller.fetchTicket(widget.bookingId); // ✅ Refresh
-                            }
-                          },
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.indigo.shade700,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 10,
-                            ),
-                          ),
-                          child: const Text(
-                            "Submit",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
                 ),
-              ),
+                ElevatedButton(
+                  onPressed: () async {
+                    bool success = false;
+
+
+                    if (ratingId != null && ratingId.isNotEmpty) {
+                      success = await RatingService.updateRating(
+                        ratingId: ratingId,
+                        rating: selectedRating,
+                        comments: commentController.text.trim(),
+                      );
+                    }
+
+
+                    else {
+                      final newRatingId = await RatingService.submitRating(
+                        scheduleId: ticket.scheduleId,
+                        rating: selectedRating,
+                        comments: commentController.text.trim(),
+                      );
+
+                      success = newRatingId != null;
+                    }
+
+                    if (success) {
+                      Navigator.pop(context);
+
+                      Get.snackbar(
+                        "Success",
+                        ratingId == null
+                            ? "Rating submitted successfully!"
+                            : "Rating updated successfully!",
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                        snackPosition: SnackPosition.BOTTOM,
+
+                      );
+
+                      controller.fetchTicket(widget.bookingId); // ✅ REFRESH
+                    } else {
+                      Get.snackbar(
+                        "Error",
+                        "Something went wrong. Try again.",
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  },
+                  child: Text(ratingId == null ? "Submit" : "Update"), // ✅ AUTO TEXT
+                ),
+              ],
             );
           },
         );
       },
     );
   }
+
 }

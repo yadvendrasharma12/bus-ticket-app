@@ -1,55 +1,35 @@
 import 'dart:convert';
-import 'package:bus_booking_app/utils/apis_url.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:bus_booking_app/utils/apis_url.dart';
 import '../controllers/auth_controllers.dart';
 
 class RatingService {
-  static Future<bool> submitRating({
+
+
+  static Future<String?> submitRating({
     required String scheduleId,
     required int rating,
     required String comments,
   }) async {
     try {
-      print("📝 RatingService: submitRating called");
-      print("   scheduleId: $scheduleId");
-      print("   rating: $rating");
-      print("   comments: $comments");
+      debugPrint("🟡 [POST] submitRating CALLED");
 
-
-      if (scheduleId.isEmpty) {
-        print("❌ Error: scheduleId is empty. Cannot submit rating.");
-        return false;
-      }
-
-      // Get AuthController
       final authController = Get.find<AuthController>();
-      print("🔐 AuthController found");
-
-      // Load token if empty
-      if (authController.token.isEmpty) {
-        print("ℹ️ Token is empty. Loading token...");
+      if (authController.token.value.isEmpty) {
         await authController.loadToken();
       }
-      final token = authController.token.value;
-      print("✅ Token retrieved: ${token.isNotEmpty ? 'AVAILABLE' : 'EMPTY'}");
 
-      // Prepare request
+      final token = authController.token.value;
       final uri = Uri.parse(ApiUrls.ratings);
+
       final bodyMap = {
         "scheduleId": scheduleId,
         "rating": rating,
         "comments": comments,
       };
 
-      print("📡 Sending POST request to Rating API...");
-      print("   URL  : $uri");
-      print("   Body : ${jsonEncode(bodyMap)}");
-      print("   Headers: Authorization Bearer token");
-
-      // Send HTTP POST
       final response = await http.post(
         uri,
         headers: {
@@ -59,140 +39,68 @@ class RatingService {
         body: jsonEncode(bodyMap),
       );
 
-      print("📶 Response received");
-      print("   Status code: ${response.statusCode}");
-      print("   Body       : ${response.body}");
+      debugPrint("✅ STATUS: ${response.statusCode}");
+      debugPrint("📩 RESPONSE: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("✅ Rating submitted successfully!");
-        return true;
-      } else if (response.statusCode == 400) {
-        final respBody = jsonDecode(response.body);
-        if (kDebugMode) {
-          print("⚠️ Cannot submit rating: ${respBody['message']}");
-        }
-        Get.snackbar(
-          padding: EdgeInsets.symmetric(horizontal: 13,vertical: 8),
-          "Attention",
-          respBody['message'] ?? "Cannot submit rating",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.yellow.shade800,
-          colorText: Colors.white,
-        );
-        return false;
-      } else {
+        final decoded = jsonDecode(response.body);
+        final String ratingId = decoded['data']['_id'];
 
-        return false;
+        debugPrint("✅ NEW RATING ID: $ratingId");
+        return ratingId; // ✅ VERY IMPORTANT
       }
-    } catch (e, stackTrace) {
-      print("❌ Exception in RatingService.submitRating:");
-      print("   Error: $e");
-      print("   StackTrace: $stackTrace");
-      Get.snackbar(
-        "Error",
-        "An unexpected error occurred while submitting rating",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.95),
-        colorText: Colors.white,
-      );
-      return false;
+
+      return null;
+    } catch (e, s) {
+      debugPrint("❌ submitRating ERROR: $e");
+      debugPrint("📛 $s");
+      return null;
     }
   }
+
+
+  static const baseUrl = 'https://api.grtourtravels.com/api/ratings';
   static Future<bool> updateRating({
     required String ratingId,
     required int rating,
     required String comments,
   }) async {
+    final authController = Get.find<AuthController>();
+    if (authController.token.value.isEmpty) {
+      await authController.loadToken();
+    }
+    final token = authController.token.value;
+
+    final url = Uri.parse('$baseUrl/$ratingId');
+
     try {
-      print("📝 RatingService: updateRating called");
-      print("   ratingId: $ratingId");
-      print("   rating: $rating");
-      print("   comments: $comments");
-
-      if (ratingId.isEmpty) {
-        print("❌ Error: ratingId is empty. Cannot update rating.");
-        return false;
-      }
-
-      // ✅ Get Auth Controller
-      final authController = Get.find<AuthController>();
-      print("🔐 AuthController found");
-
-      // ✅ Load token if empty
-      if (authController.token.isEmpty) {
-        print("ℹ️ Token is empty. Loading token...");
-        await authController.loadToken();
-      }
-
-      final token = authController.token.value;
-      print("✅ Token retrieved: ${token.isNotEmpty ? 'AVAILABLE' : 'EMPTY'}");
-
-      // ✅ API URL with ratingId
-      final uri = Uri.parse("${ApiUrls.ratings}/$ratingId");
-
-      // ✅ BODY (Only rating + comments)
-      final bodyMap = {
-        "rating": rating,
-        "comments": comments,
-      };
-
-      print("📡 Sending PUT request to Update Rating API...");
-      print("   URL  : $uri");
-      print("   Body : ${jsonEncode(bodyMap)}");
-
-      // ✅ HTTP PUT CALL
       final response = await http.put(
-        uri,
+        url,
         headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // 🔹 TOKEN ADDED
         },
-        body: jsonEncode(bodyMap),
+        body: jsonEncode({
+          "rating": rating,
+          "comments": comments,
+        }),
       );
-
-      print("📶 Response received");
-      print("   Status code: ${response.statusCode}");
-      print("   Body       : ${response.body}");
 
       if (response.statusCode == 200) {
-        print("✅ Rating updated successfully!");
-        return true;
-      }
-      else if (response.statusCode == 400) {
-        final respBody = jsonDecode(response.body);
+        final data = jsonDecode(response.body);
 
-        Get.snackbar(
-          "Attention",
-          respBody['message'] ?? "Cannot update rating",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.yellow.shade800,
-          colorText: Colors.white,
-        );
+        print(response.body);
+        print(response.statusCode);
+        return data['success'] == true;
+      } else {
+        debugPrint('❌ Update failed: ${response.body}');
         return false;
       }
-      else {
-        print("❌ Failed to update rating");
-        return false;
-      }
-
-    } catch (e, stackTrace) {
-      print("❌ Exception in RatingService.updateRating:");
-      print("   Error: $e");
-      print("   StackTrace: $stackTrace");
-
-      Get.snackbar(
-        "Error",
-        "An unexpected error occurred while updating rating",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.95),
-        colorText: Colors.white,
-      );
+    } catch (e) {
+      debugPrint('❌ Error updating rating: $e');
       return false;
     }
   }
 
 
-
-  }
-
-
+}

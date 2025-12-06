@@ -11,7 +11,7 @@ class TicketModel {
   final String status;
   final double? rating;
 
-  // ✅ NEW FIELDS
+  // ✅ Driver & Rating Fields
   final String? ratingId;
   final String? driverName;
   final String? driverNumber;
@@ -38,6 +38,8 @@ class TicketModel {
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
+    final driverDetails = json['driverDetails'] ?? {};
+
     return TicketModel(
       bookingId: json['bookingId']?.toString() ?? '',
       scheduleId: json['scheduleId']?.toString()
@@ -57,12 +59,12 @@ class TicketModel {
           ? double.tryParse(json['rating'].toString())
           : null,
 
-      // ✅ NEW MAPPINGS
+      // ✅ SAFE Driver Mapping
       ratingId: json['ratingId']?.toString(),
-      driverName: json['driverDetails']?['driverName'],
-      driverNumber: json['driverDetails']?['driverNumber'],
-      conductorName: json['driverDetails']?['conductorName'],
-      conductorNumber: json['driverDetails']?['conductorNumber'],
+      driverName: driverDetails['driverName']?.toString(),
+      driverNumber: driverDetails['driverNumber']?.toString(),
+      conductorName: driverDetails['conductorName']?.toString(),
+      conductorNumber: driverDetails['conductorNumber']?.toString(),
     );
   }
 }

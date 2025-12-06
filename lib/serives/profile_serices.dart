@@ -51,7 +51,6 @@ class ProfileService {
         print("📥 Raw Response Body: ${response.body}");
       }
 
-      // 🔸 Step 5: Handle success
       if (response.statusCode == 200) {
         if (kDebugMode) {
           print("🔹 Response Code: ${response.statusCode}");

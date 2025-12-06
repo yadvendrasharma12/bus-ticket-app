@@ -9,6 +9,8 @@ class ApiUrls {
   static const String resetPassword = "$baseUrl/reset-password";
   static const String resendOTP = "$baseUrl/resend-otp";
   static const String profile = "$baseUrl/me";
+  static const String Updateprofile = "$baseUrl/update-profile";
+
 
   // 🔹 Onboard APIs
   static const String onboardBaseUrl = "https://api.grtourtravels.com/api/onboard";
