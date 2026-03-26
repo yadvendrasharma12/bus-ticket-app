@@ -1,3 +1,4 @@
+import 'package:bus_booking_app/core/constant/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,11 +17,14 @@ class BusListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+
         titleSpacing: 0,
         elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.indigo.shade900),
+          icon: Icon(Icons.arrow_back_ios_new_outlined, color: AppColors.textBlack),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(

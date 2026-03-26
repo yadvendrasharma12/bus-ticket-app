@@ -18,8 +18,8 @@ class BusSearchController extends GetxController {
   RxList<OnboardBus> recentSearches = <OnboardBus>[].obs;
 
   void addRecentSearch(OnboardBus bus) {
-    recentSearches.removeWhere((b) => b.id == bus.id); // Duplicate avoid
-    recentSearches.insert(0, bus); // Latest on top
+    recentSearches.removeWhere((b) => b.id == bus.id);
+    recentSearches.insert(0, bus);
     if (recentSearches.length > 5) recentSearches.removeLast();
   }
   Future<void> searchBuses({
@@ -105,7 +105,7 @@ class BusSearchController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
-      isLoading(false);
+      isLoading.isFalse;
     }
   }
 }

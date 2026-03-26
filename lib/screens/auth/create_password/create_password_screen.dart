@@ -25,7 +25,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   @override
   void initState() {
     super.initState();
-    email = Get.arguments?['email'] ?? ''; // ✅ Safe initialization
+    email = Get.arguments?['email'] ?? '';
     passwordController.addListener(_checkInput);
     cPasswordController.addListener(_checkInput);
   }
@@ -102,7 +102,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
         actions: [
           IconButton(
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.close),
+            icon:  Icon(Icons.close,color: AppColors.textBlack,),
           ),
         ],
       ),

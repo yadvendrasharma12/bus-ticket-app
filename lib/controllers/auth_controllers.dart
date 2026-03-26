@@ -36,7 +36,6 @@ class AuthController extends GetxController {
     );
   }
 
-  // ✅ REGISTER USER
 
   Future<void> registerUser({
     required String name,

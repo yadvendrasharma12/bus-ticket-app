@@ -30,14 +30,27 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-
   bool _isValidEmail(String email) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return emailRegex.hasMatch(email);
   }
 
+  // 🔹 Safe snackbar method to avoid Overlay error
+  void _showError(String message) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.snackbar(
+        "Error",
+        message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+        duration: const Duration(seconds: 2),
+      );
+    });
+  }
 
-  bool isloading = false;
   void _validateAndLogin() {
     FocusScope.of(context).unfocus();
 
@@ -45,40 +58,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar(
-        "Error",
-        "Please fill in both email and password.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        borderRadius: 10, // rounded corners
-        snackStyle: SnackStyle.FLOATING,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-        maxWidth: 330,
-        duration: const Duration(seconds: 2),
-      );
+      _showError("Please fill in both email and password");
       return;
     }
 
     if (!_isValidEmail(email)) {
-      Get.snackbar(
-        "Error",
-        "Please enter a valid email address.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        borderRadius: 10,
-        snackStyle: SnackStyle.FLOATING,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        maxWidth: 300,
-        duration: const Duration(seconds: 2),
-      );
+      _showError("Please enter a valid email address");
       return;
     }
 
-    // ✅ Call API
     authController.loginUser(
       email: email,
       password: password,
@@ -88,7 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,10 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
         title: GestureDetector(
-          onTap: () {
-            Get.to(() => const SignUpScreen());
-          },
-          child: Text("Sign Up", style: AppStyle.appBarText()),
+          onTap: () => Get.to(() => const SignUpScreen()),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text("Sign Up", style: AppStyle.appBarText()),
+          ),
         ),
         actions: [
           IconButton(
@@ -115,7 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🔹 Header
               Text(
                 "Sign in to your\nGR Tour & Travel",
                 style: AppStyle.userText1(),
@@ -137,8 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: passwordController,
                 isPassword: true,
               ),
-
-              // 🔹 Forget password
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -156,7 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 40),
 
-              // 🔹 Info Text
               Center(
                 child: Text(
                   "Let's search and book your travel ticket\nGR Tour & Travel.",
@@ -167,20 +151,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 25),
 
-              // 🔹 Button
-            Obx(
-                  () => CustomButton(
-                text: "Sign In",
-                backgroundColor: Colors.yellow.shade800,
-                textColor: Colors.black,
-                isLoading: authController.isLoading.value,
-                onPressed: authController.isLoading.value
-                    ? () {}
-                    : _validateAndLogin,
+              Obx(
+                    () => CustomButton(
+                  text: "Sign In",
+                  backgroundColor: Colors.yellow.shade800,
+                  textColor: Colors.black,
+                  isLoading: authController.isLoading.value,
+                  onPressed:  _validateAndLogin,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),

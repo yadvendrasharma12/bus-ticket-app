@@ -35,7 +35,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         onSuccess: (data) {
           Get.offAll(() => const OtpScreen(), arguments: {
             'email': email,
-            'otp': data['otp'], // optional: for debugging or autofill
+            'otp': data['otp'],
           });
         },
         onError: (error) {
@@ -57,8 +57,10 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         backgroundColor: AppColors.background,
         title: Text("Forget Password", style: AppStyle.appBarText()),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
+          icon:  Icon(Icons.arrow_back,color: AppColors.textBlack,),
+          onPressed: (){
+            Get.back();
+          },
         ),
       ),
       backgroundColor: AppColors.background,

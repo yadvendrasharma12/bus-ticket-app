@@ -1,3 +1,4 @@
+import 'package:bus_booking_app/core/constant/app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,6 +40,13 @@ class _DriverScreenState extends State<DriverScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+
+        leading: GestureDetector(
+          onTap: (){
+            Navigator.pop(context);
+          },
+            child: Icon(Icons.arrow_back_ios_new_outlined,color: AppColors.textBlack,)),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -50,7 +58,8 @@ class _DriverScreenState extends State<DriverScreen> {
             color: Colors.indigo[900],
           ),
         ),
-      ),body: _loading
+      ),
+      body: _loading
         ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
         : _drivers.isEmpty
         ? const Center(child: Text("No drivers found"))

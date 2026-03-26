@@ -317,64 +317,54 @@ class _HomeScreenState extends State<HomeScreen> {
                           return;
                         }
 
-                        // Save recent journey
                         String from = fromController.text.trim();
                         String to = toController.text.trim();
 
-                        bool exists = false;
-                        for (int i = 0; i < recentFrom.length; i++) {
-                          if (recentFrom[i] == from && recentTo[i] == to) {
-                            exists = true;
-                            break;
-                          }
-                        }
 
-                        if (!exists) {
-                          recentFrom.insert(0, from);
-                          recentTo.insert(0, to);
-
-                          if (recentFrom.length > 5) recentFrom = recentFrom.sublist(0, 5);
-                          if (recentTo.length > 5) recentTo = recentTo.sublist(0, 5);
-
-                          _saveRecentJourneys();
-                        }
 
                         String date;
                         final now = DateTime.now();
                         if (selectedOption == "Today") {
-                          date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
+                        date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
                         } else if (selectedOption == "Tomorrow") {
-                          final tomorrow = now.add(Duration(days: 1));
-                          date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2,'0')}-${tomorrow.day.toString().padLeft(2,'0')}";
+                        final tomorrow = now.add(Duration(days: 1));
+                        date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2,'0')}-${tomorrow.day.toString().padLeft(2,'0')}";
                         } else if (selectedDate != null) {
-                          date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
+                        date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
                         } else {
-                          Get.snackbar("Error", "Please select a date", snackPosition: SnackPosition.BOTTOM);
-                          return;
+                        Get.snackbar("Error", "Please select a date", snackPosition: SnackPosition.BOTTOM);
+                        return;
                         }
 
-                        final token = authController.token.value;
+                        // Show Circular Loader
+                        Get.dialog(
+                        const Center(child: CircularProgressIndicator()),
+                        barrierDismissible: false,
+                        );
 
-                        Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+                        // Auto hide after 3 seconds in case API takes too long
+                        Future.delayed(const Duration(seconds: 3), () {
+                        if (Get.isDialogOpen ?? false) Get.back();
+                        });
 
                         try {
-                          await busController.searchBuses(
-                            origin: from,
-                            destination: to,
-                            date: date,
-                            token: token,
-                          );
+                        await busController.searchBuses(
+                        origin: from,
+                        destination: to,
+                        date: date,
+                        token: authController.token.value,
+                        );
 
-                          if (busController.busList.isNotEmpty) {
-                            if (Get.isDialogOpen ?? false) Get.back();
-                            Get.to(() => const SearchBusScreen());
-                          } else {
-                            if (Get.isDialogOpen ?? false) Get.back();
-                            Get.snackbar("No Buses", "No buses found for selected route and date.", snackPosition: SnackPosition.BOTTOM);
-                          }
+                        if (Get.isDialogOpen ?? false) Get.back(); // close loader
+
+                        if (busController.busList.isNotEmpty) {
+                        Get.to(() => const SearchBusScreen());
+                        } else {
+                        Get.snackbar("No Buses", "No buses found for selected route and date.", snackPosition: SnackPosition.BOTTOM);
+                        }
                         } catch (e) {
-                          if (Get.isDialogOpen ?? false) Get.back();
-                          Get.snackbar("Error", "Something went wrong while searching buses", snackPosition: SnackPosition.BOTTOM);
+                        if (Get.isDialogOpen ?? false) Get.back();
+                        Get.snackbar("Error", "Something went wrong while searching buses", snackPosition: SnackPosition.BOTTOM);
                         }
                       },
                     ),

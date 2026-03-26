@@ -74,7 +74,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             final bool canEditReviewButton = isConfirmed && (ticket.rating ?? 0) > 0;
 
 
-            /// Active / Cancelled par Cancel Ticket
             final bool canShowCancelButton = isActive || isCancelled;
 
             return Card(
@@ -108,7 +107,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Time Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -127,7 +125,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Price Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -151,7 +148,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Buttons Row
                     Column(
                       children: [
 
@@ -190,12 +186,10 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                             ),
                             const SizedBox(width: 8),
 
-                            // Middle Button Logic
                             if (canShowPostReviewButton || canEditReviewButton) ...[
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    // Post ya Edit dono yahi function se handle hoga
                                     _showEditRatingDialog(ticket);
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -219,7 +213,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 ),
                               ),
                             ] else if (canShowCancelButton) ...[
-                              // Cancel Ticket button
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () {
@@ -244,11 +237,10 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 ),
                               ),
                             ] else
-                              const SizedBox.shrink(), // Hide middle button
+                              const SizedBox.shrink(),
 
                             const SizedBox(width: 8),
 
-                            // Call bus staff - hamesha
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
@@ -297,7 +289,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
     );
   }
 
-  // Time column
+
   Widget _timeColumn(String time, String city) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,8 +313,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       ],
     );
   }
-
-  // Cancel booking dialog
   void _handleCancelBooking(dynamic ticket) {
     TextEditingController reasonController = TextEditingController();
 
@@ -385,8 +375,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       },
     );
   }
-
-  // Call bus staff
   void _callBusStaff(String phoneNumber) async {
     final Uri callUri = Uri(scheme: 'tel', path: phoneNumber);
     if (await canLaunchUrl(callUri)) {
@@ -397,8 +385,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       );
     }
   }
-
-
   void _showEditRatingDialog(dynamic ticket) async {
     if (ticket.ratingId == null) return;
 

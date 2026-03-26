@@ -20,7 +20,6 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
   bool isLoading = true;
   ContactInfo? contactInfo;
 
-  // Example social URLs (replace with your API values)
   final String facebookUrl = "https://facebook.com";
   final String instagramUrl = "https://instagram.com";
   final String youtubeUrl = "https://youtube.com";
@@ -58,14 +57,15 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         automaticallyImplyLeading: false,
         leading: IconButton(onPressed: (){
-          Get.back();
-        }, icon: Icon(Icons.arrow_back,color: Colors.white,)),
+          Navigator.pop(context);
+        }, icon: Icon(Icons.arrow_back_ios_new_outlined,color: Colors.black,)),
         title: Text("Contact Support", style: GoogleFonts.poppins(
-          color: Colors.white
+          color: Colors.indigo.shade900
         )),
-        backgroundColor: Colors.indigo.shade800,
+        backgroundColor: Colors.white,
       ),
       body: Column(
         children: [

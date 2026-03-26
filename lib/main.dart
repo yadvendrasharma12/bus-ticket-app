@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeService().theme,
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
-      home: const SplashScreen(),
+      home:  SplashScreen(),
     );
   }
 }
