@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../core/constant/app_colors.dart';
 import '../../../core/constant/app_style.dart';
 import '../../../widgets/custom_button.dart';
+import '../../../widgets/custom_toast.dart';
 import '../create_password/create_password_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _OtpScreenState extends State<OtpScreen> {
   final String? otpFromServer = Get.arguments?['otp'];
 
   Timer? _timer;
-  int _remainingSeconds = 59; // 59-second countdown
+  int _remainingSeconds = 59;
   bool isOtpExpired = false;
 
   @override
@@ -58,18 +59,12 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void _validateAndProceed() {
     if (otpCode.isEmpty || otpCode.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please enter a valid 6-digit OTP"),
-        backgroundColor: Colors.redAccent,
-      ));
+      AppToast.showError(context, "Please enter a valid 6-digit OTP");
       return;
     }
 
     if (isOtpExpired) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("OTP has expired. Please request a new one."),
-        backgroundColor: Colors.redAccent,
-      ));
+      AppToast.showError(context, "OTP has expired. Please request a new one.");
       return;
     }
 
@@ -77,32 +72,20 @@ class _OtpScreenState extends State<OtpScreen> {
       email: email,
       otp: int.tryParse(otpCode) ?? 0,
       onSuccess: () {
+        AppToast.showSuccess(context, "OTP Verified ✅");
+
         Get.to(() => const CreatePasswordScreen(),
-          arguments: {'email': email},
-        );
+            arguments: {'email': email});
       },
       onError: (error) {
-        Get.snackbar(
-          "Error",
-          error.toString(),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        AppToast.showError(context, error.toString());
       },
     );
   }
 
-  /// 🔹 Function to resend OTP
+
   void _resendOtp() async {
-    // Show "Please wait..." SnackBar immediately
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Text("Please wait..."),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    AppToast.showInfo(context, "Please wait...");
 
     setState(() => isResending = true);
 
@@ -111,27 +94,13 @@ class _OtpScreenState extends State<OtpScreen> {
         email: email,
         onSuccess: (data) {
           setState(() => isResending = false);
-          _startOtpCountdown(); // restart timer on resend
+          _startOtpCountdown();
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              content: const Text("OTP Resent Successfully"),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          AppToast.showSuccess(context, "OTP Resent Successfully");
         },
         onError: (error) {
           setState(() => isResending = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              content: Text("Failed to resend OTP: $error"),
-              backgroundColor: Colors.redAccent,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          AppToast.showError(context, "Failed to resend OTP");
         },
       );
     } catch (e) {
@@ -144,6 +113,7 @@ class _OtpScreenState extends State<OtpScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        centerTitle: false,
         automaticallyImplyLeading: false,
 
         backgroundColor: AppColors.background,
@@ -152,7 +122,7 @@ class _OtpScreenState extends State<OtpScreen> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon:  Icon(Icons.arrow_back_ios_new_outlined, color: Colors.black),
         ),
         elevation: 0,
       ),
@@ -161,11 +131,10 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Verify OTP\nGR Tour & Travel",
+            Text("Verify OTP GR Tour & Travel",
                 style: AppStyle.userText1()),
             const SizedBox(height: 30),
 
-            // OTP Input Fields
             PinCodeFields(
               onChange: (value) {
                 setState(() {
@@ -184,15 +153,12 @@ class _OtpScreenState extends State<OtpScreen> {
               fieldWidth: 45,
               keyboardType: TextInputType.number,
               activeBorderColor: Colors.yellow.shade800,
-              textStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              textStyle: AppStyle.textblue()
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
 
-            // Verify Button
+
             Obx(() => CustomButton(
               text: "Verify OTP",
               isLoading: authController.isLoading.value,
@@ -202,29 +168,39 @@ class _OtpScreenState extends State<OtpScreen> {
                   ? () {}
                   : _validateAndProceed,
             )),
+            SizedBox(height: 8,),
+            // Center(
+            //   child: isOtpExpired
+            //       ? TextButton(
+            //     onPressed: isResending ? null : _resendOtp,
+            //     child: Text(
+            //       "Resend OTP",
+            //       style: AppStyle.textblack(),
+            //     ),
+            //   )
+            //       : Text(
+            //     "Expires in 00:${_remainingSeconds.toString().padLeft(2, '0')}",
+            //     style: AppStyle.textblack(),
+            //   ),
+            // )
 
-            Center(
-              child: isOtpExpired
-                  ? TextButton(
-                onPressed: isResending ? null : _resendOtp,
-                child: const Text(
-                  "Resend OTP",
-                  style: TextStyle(
-                    color: Colors.indigo,
-                    fontWeight: FontWeight.w600,
+            SizedBox(
+              height: 40, // ✅ fixed height (important)
+              child: Center(
+                child: isOtpExpired
+                    ? TextButton(
+                  onPressed: isResending ? null : _resendOtp,
+                  child: Text(
+                    "Resend OTP",
+                    style: AppStyle.textblack(),
                   ),
-                ),
-              )
-                  : Text(
-                "Expires in 00:${_remainingSeconds.toString().padLeft(2, '0')}",
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w600,
+                )
+                    : Text(
+                  "Expires in 00:${_remainingSeconds.toString().padLeft(2, '0')}",
+                  style: AppStyle.textblack(),
                 ),
               ),
             )
-
-
           ],
         ),
       ),

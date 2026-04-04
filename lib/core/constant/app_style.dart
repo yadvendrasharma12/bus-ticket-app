@@ -21,7 +21,7 @@ class AppStyle{
     );
 
   }
-  static TextStyle userText1({double size = 26, FontWeight weight = FontWeight.w700}) {
+  static TextStyle userText1({double size = 22, FontWeight weight = FontWeight.w700}) {
     return GoogleFonts.poppins(
       fontSize: size,
       fontWeight: weight,
@@ -30,6 +30,24 @@ class AppStyle{
 
   }
   static TextStyle userText2({double size = 14, FontWeight weight = FontWeight.w500}) {
+    return GoogleFonts.poppins(
+      fontSize: size,
+      fontWeight: weight,
+      color: AppColors.textBlack,
+    );
+
+  }
+
+  static TextStyle textblue({double size = 20, FontWeight weight = FontWeight.w500}) {
+    return GoogleFonts.poppins(
+      fontSize: size,
+      fontWeight: weight,
+      color: AppColors.textBlack,
+    );
+
+  }
+
+  static TextStyle textblack({double size = 14, FontWeight weight = FontWeight.w500}) {
     return GoogleFonts.poppins(
       fontSize: size,
       fontWeight: weight,

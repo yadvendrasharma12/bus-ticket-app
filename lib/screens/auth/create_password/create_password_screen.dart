@@ -6,6 +6,7 @@ import '../../../core/constant/app_colors.dart';
 import '../../../core/constant/app_style.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_textfield.dart';
+import '../../../widgets/custom_toast.dart';
 
 class CreatePasswordScreen extends StatefulWidget {
   const CreatePasswordScreen({super.key});
@@ -37,57 +38,99 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     });
   }
 
+  // void _validateAndReset() {
+  //   FocusScope.of(context).unfocus();
+  //
+  //   final password = passwordController.text.trim();
+  //   final confirmPassword = cPasswordController.text.trim();
+  //
+  //   if (password.isEmpty || confirmPassword.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //       backgroundColor: Colors.redAccent,
+  //       content: Text("Please fill in both password fields."),
+  //     ));
+  //     return;
+  //   }
+  //
+  //   if (password != confirmPassword) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //       backgroundColor: Colors.redAccent,
+  //       content: Text("Passwords do not match. Please try again."),
+  //     ));
+  //     return;
+  //   }
+  //
+  //   if (email.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //       backgroundColor: Colors.redAccent,
+  //       content: Text("Something went wrong. Email not found."),
+  //     ));
+  //     return;
+  //   }
+  //
+  //   // ✅ Call reset password API
+  //   authController.resetPassword(
+  //     email: email,
+  //     newPassword: password,
+  //     onSuccess: () {
+  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         backgroundColor: Colors.green,
+  //         content: Text("Password successfully reset!"),
+  //       ));
+  //       Future.delayed(const Duration(seconds: 1), () {
+  //         Get.offAll(() => const LoginScreen());
+  //       });
+  //     },
+  //     onError: (error) {
+  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  //         backgroundColor: Colors.redAccent,
+  //         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+  //
+  //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
+  //         content: Text(error.toString()),
+  //       ));
+  //     },
+  //   );
+  // }
+
   void _validateAndReset() {
     FocusScope.of(context).unfocus();
 
     final password = passwordController.text.trim();
     final confirmPassword = cPasswordController.text.trim();
 
-    if (password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.redAccent,
-        content: Text("Please fill in both password fields."),
-      ));
+    if (password.isEmpty) {
+      AppToast.showError(context, "Password is required");
+      return;
+    }
+
+    if (confirmPassword.isEmpty) {
+      AppToast.showError(context, "Confirm password is required");
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.redAccent,
-        content: Text("Passwords do not match. Please try again."),
-      ));
+      AppToast.showError(context, "Passwords do not match");
       return;
     }
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.redAccent,
-        content: Text("Something went wrong. Email not found."),
-      ));
+      AppToast.showError(context, "Something went wrong. Email not found");
       return;
     }
 
-    // ✅ Call reset password API
     authController.resetPassword(
       email: email,
       newPassword: password,
       onSuccess: () {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text("Password successfully reset!"),
-        ));
+        AppToast.showSuccess(context, "Password reset successfully ✅");
+
         Future.delayed(const Duration(seconds: 1), () {
           Get.offAll(() => const LoginScreen());
         });
       },
       onError: (error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.redAccent,
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), // content padding
-          content: Text(error.toString()),
-        ));
+        AppToast.showError(context, error.toString());
       },
     );
   }
@@ -96,15 +139,14 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
         title: Text("Create New Password", style: AppStyle.appBarText()),
-        actions: [
-          IconButton(
-            onPressed: () => Get.back(),
-            icon:  Icon(Icons.close,color: AppColors.textBlack,),
-          ),
-        ],
+        leading:  IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon:  Icon(Icons.arrow_back_ios_new_outlined,color: AppColors.textBlack,),
+        ),
       ),
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
@@ -113,7 +155,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Reset Password\nGR Tour & Travel",
+              "Reset Password GR Tour & Travel",
               style: AppStyle.userText1(),
               maxLines: 2,
               textAlign: TextAlign.start,
@@ -145,6 +187,17 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
               onPressed:
               authController.isLoading.value ? () {} : _validateAndReset,
             )),
+
+            // Obx(() => CustomButton(
+            //   text: "Reset Password",
+            //   isLoading: authController.isLoading.value,
+            //   backgroundColor: Colors.yellow.shade800,
+            //   textColor: Colors.black,
+            //   onPressed: (!isInputNotEmpty ||
+            //       authController.isLoading.value)
+            //       ? null
+            //       : _validateAndReset,
+            // )),
           ],
         ),
       ),

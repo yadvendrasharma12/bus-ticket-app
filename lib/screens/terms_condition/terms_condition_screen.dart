@@ -1,3 +1,4 @@
+import 'package:bus_booking_app/core/constant/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -33,18 +34,18 @@ class _TermsConditionScreenState extends State<TermsConditionScreen> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back_ios),
+          icon:  Icon(Icons.arrow_back_ios,color: AppColors.textBlack,),
         ),
         title: Text(
           "Terms & Conditions",
           style: GoogleFonts.poppins(
-            color: Colors.indigo.shade900,
+            color: Colors.black,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.indigo),
+        iconTheme:  IconThemeData(color: Colors.indigo),
       ),
       body: isLoading
           ? const Center(

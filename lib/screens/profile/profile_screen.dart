@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../serives/profile_serices.dart';
+import '../../widgets/custom_toast.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -107,14 +108,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Future<void> _saveProfile() async {
+  //   if (_nameController.text.trim().isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text("Please enter your name"),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   setState(() {
+  //     _loading = true;
+  //   });
+  //
+  //   String dobString = "";
+  //   if (_selectedDate != null) {
+  //     dobString = _selectedDate!.toIso8601String();
+  //   }
+  //
+  //   // Local SharedPreference me save
+  //   await SharedPreferenceProfile.saveProfileData(
+  //     name: _nameController.text.trim(),
+  //     email: _emailController.text.trim(),
+  //     mobile: _mobileController.text.trim(),
+  //     address: _addressController.text.trim(),
+  //     gender: _selectedGender,
+  //     dob: dobString,
+  //   );
+  //
+  //   // Optional: API update
+  //   /*
+  //   await ProfileService.updateProfile(
+  //     name: _nameController.text.trim(),
+  //     email: _emailController.text.trim(),
+  //     mobile: _mobileController.text.trim(),
+  //     address: _addressController.text.trim(),
+  //     gender: _selectedGender,
+  //     dob: dobString,
+  //     imagePath: _imageFile?.path,
+  //   );
+  //   */
+  //
+  //   if (!mounted) return;
+  //
+  //   setState(() {
+  //     _loading = false;
+  //   });
+  //
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       behavior: SnackBarBehavior.floating,
+  //       backgroundColor: Colors.green,
+  //       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(12),
+  //       ),
+  //       content: Row(
+  //         children: [
+  //           const Icon(Icons.check_circle, color: Colors.white),
+  //           const SizedBox(width: 10),
+  //           Text(
+  //             "Profile updated successfully",
+  //             style: GoogleFonts.poppins(
+  //               color: Colors.white,
+  //               fontSize: 14,
+  //               fontWeight: FontWeight.w600,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       duration: const Duration(seconds: 2),
+  //     ),
+  //   );
+  //
+  // }
   Future<void> _saveProfile() async {
-    if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter your name"),
-          backgroundColor: Colors.red,
-        ),
-      );
+    FocusScope.of(context).unfocus();
+
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final mobile = _mobileController.text.trim();
+
+    if (name.isEmpty) {
+      AppToast.showError(context, "Name is required");
+      return;
+    }
+
+    if (email.isEmpty) {
+      AppToast.showError(context, "Email is required");
+      return;
+    }
+
+    final emailRegex =
+    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+    if (!emailRegex.hasMatch(email)) {
+      AppToast.showError(context, "Enter valid email");
+      return;
+    }
+
+    if (mobile.isNotEmpty && mobile.length != 10) {
+      AppToast.showError(context, "Mobile must be 10 digits");
       return;
     }
 
@@ -127,28 +223,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       dobString = _selectedDate!.toIso8601String();
     }
 
-    // Local SharedPreference me save
     await SharedPreferenceProfile.saveProfileData(
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      mobile: _mobileController.text.trim(),
+      name: name,
+      email: email,
+      mobile: mobile,
       address: _addressController.text.trim(),
       gender: _selectedGender,
       dob: dobString,
     );
-
-    // Optional: API update
-    /*
-    await ProfileService.updateProfile(
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      mobile: _mobileController.text.trim(),
-      address: _addressController.text.trim(),
-      gender: _selectedGender,
-      dob: dobString,
-      imagePath: _imageFile?.path,
-    );
-    */
 
     if (!mounted) return;
 
@@ -156,34 +238,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.green,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 10),
-            Text(
-              "Profile updated successfully",
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
+    // ✅ Success Toast
+    AppToast.showSuccess(context, "Profile updated successfully ✅");
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

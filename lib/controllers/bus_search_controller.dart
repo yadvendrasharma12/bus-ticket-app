@@ -34,12 +34,7 @@ class BusSearchController extends GetxController {
       final savedToken = token ?? await MySharedPref.getToken();
 
       if (savedToken == null || savedToken.isEmpty) {
-        Get.snackbar(
-          "Error",
-          "Missing authentication token. Please login again.",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return;
+        throw Exception("Session expired. Please login again.");
       }
 
       final url = Uri.parse(
@@ -50,11 +45,6 @@ class BusSearchController extends GetxController {
             "&page=1&limit=10",
       );
 
-      if (kDebugMode) {
-        print("🔹 Calling API: $url");
-        print("🔹 Token: $savedToken");
-      }
-
       final response = await http.get(
         url,
         headers: {
@@ -63,49 +53,23 @@ class BusSearchController extends GetxController {
         },
       );
 
-      if (kDebugMode) {
-        print("🔹 Response Code: ${response.statusCode}");
-        print("🔹 Response Body: ${response.body}");
-      }
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         if (data["success"] == true && data["data"] != null) {
           busList.value = List<Map<String, dynamic>>.from(data["data"])
-              .map((json) => OnboardBus.fromJson(Map<String, dynamic>.from(json)))
+              .map((json) => OnboardBus.fromJson(json))
               .toList();
-          if (kDebugMode) print("✅ Bus list loaded: ${busList.length} items");
         } else {
           busList.clear();
-          Get.snackbar(
-            "No Buses",
-            "No buses found for this route",
-            snackPosition: SnackPosition.BOTTOM,
-          );
         }
-      } else if (response.statusCode == 401) {
-        Get.snackbar(
-          "Unauthorized",
-          "Session expired. Please login again.",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        await MySharedPref.clearToken();
       } else {
-        Get.snackbar(
-          "Error",
-          "Something went wrong: ${response.statusCode}",
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        throw Exception("Server error: ${response.statusCode}");
       }
     } catch (e) {
-      if (kDebugMode) print("❌ Exception: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch buses: $e",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      rethrow;
     } finally {
-      isLoading.isFalse;
+      isLoading(false);
     }
   }
 }

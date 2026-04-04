@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../serives/route_service.dart';
+import '../../widgets/custom_toast.dart';
 import '../bus_listing/search_bus_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -84,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
 
-            // Top Banner
+
             Stack(
               children: [
                 Container(
@@ -309,64 +310,125 @@ class _HomeScreenState extends State<HomeScreen> {
                     CustomButton(
                       backgroundColor: Colors.yellow.shade800,
                       text: "Let's check!",
-                      onPressed: () async {
-                        FocusScope.of(context).unfocus();
+                      // onPressed: () async {
+                      //   FocusScope.of(context).unfocus();
+                      //
+                      //   if (fromController.text.isEmpty || toController.text.isEmpty) {
+                      //     Get.snackbar("Error", "Please fill both From and To fields", snackPosition: SnackPosition.BOTTOM);
+                      //     return;
+                      //   }
+                      //
+                      //   String from = fromController.text.trim();
+                      //   String to = toController.text.trim();
+                      //
+                      //
+                      //
+                      //   String date;
+                      //   final now = DateTime.now();
+                      //   if (selectedOption == "Today") {
+                      //   date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
+                      //   } else if (selectedOption == "Tomorrow") {
+                      //   final tomorrow = now.add(Duration(days: 1));
+                      //   date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2,'0')}-${tomorrow.day.toString().padLeft(2,'0')}";
+                      //   } else if (selectedDate != null) {
+                      //   date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
+                      //   } else {
+                      //   Get.snackbar("Error", "Please select a date", snackPosition: SnackPosition.BOTTOM);
+                      //   return;
+                      //   }
+                      //
+                      //   // Show Circular Loader
+                      //   Get.dialog(
+                      //   const Center(child: CircularProgressIndicator()),
+                      //   barrierDismissible: false,
+                      //   );
+                      //
+                      //   // Auto hide after 3 seconds in case API takes too long
+                      //   Future.delayed(const Duration(seconds: 3), () {
+                      //   if (Get.isDialogOpen ?? false) Get.back();
+                      //   });
+                      //
+                      //   try {
+                      //   await busController.searchBuses(
+                      //   origin: from,
+                      //   destination: to,
+                      //   date: date,
+                      //   token: authController.token.value,
+                      //   );
+                      //
+                      //   if (Get.isDialogOpen ?? false) Get.back(); // close loader
+                      //
+                      //   if (busController.busList.isNotEmpty) {
+                      //   Get.to(() => const SearchBusScreen());
+                      //   } else {
+                      //   Get.snackbar("No Buses", "No buses found for selected route and date.", snackPosition: SnackPosition.BOTTOM);
+                      //   }
+                      //   } catch (e) {
+                      //   if (Get.isDialogOpen ?? false) Get.back();
+                      //   Get.snackbar("Error", "Something went wrong while searching buses", snackPosition: SnackPosition.BOTTOM);
+                      //   }
+                      // },
 
-                        if (fromController.text.isEmpty || toController.text.isEmpty) {
-                          Get.snackbar("Error", "Please fill both From and To fields", snackPosition: SnackPosition.BOTTOM);
-                          return;
+                        onPressed: () async {
+                          FocusScope.of(context).unfocus();
+
+                          if (fromController.text.trim().isEmpty) {
+                            AppToast.showError(context, "Please enter From location");
+                            return;
+                          }
+
+                          if (toController.text.trim().isEmpty) {
+                            AppToast.showError(context, "Please enter To location");
+                            return;
+                          }
+
+                          String from = fromController.text.trim();
+                          String to = toController.text.trim();
+
+                          String date;
+                          final now = DateTime.now();
+
+                          if (selectedOption == "Today") {
+                            date = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+                          } else if (selectedOption == "Tomorrow") {
+                            final tomorrow = now.add(const Duration(days: 1));
+                            date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+                          } else if (selectedDate != null) {
+                            date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+                          } else {
+                            AppToast.showError(context, "Please select a date");
+                            return;
+                          }
+
+
+                          Get.dialog(
+                            const Center(child: CircularProgressIndicator()),
+                            barrierDismissible: false,
+                          );
+
+                          try {
+                            await busController.searchBuses(
+                              origin: from,
+                              destination: to,
+                              date: date,
+                              token: authController.token.value,
+                            );
+
+                            if (Get.isDialogOpen ?? false) Get.back();
+
+                            if (busController.busList.isNotEmpty) {
+                              AppToast.showSuccess(context, "Buses found ✅");
+                              Get.to(() => const SearchBusScreen());
+                            } else {
+                              AppToast.showInfo(context, "No buses found");
+                            }
+
+                          } catch (e) {
+                            if (Get.isDialogOpen ?? false) Get.back();
+
+                            AppToast.showError(context, e.toString());
+                          }
                         }
-
-                        String from = fromController.text.trim();
-                        String to = toController.text.trim();
-
-
-
-                        String date;
-                        final now = DateTime.now();
-                        if (selectedOption == "Today") {
-                        date = "${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}";
-                        } else if (selectedOption == "Tomorrow") {
-                        final tomorrow = now.add(Duration(days: 1));
-                        date = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2,'0')}-${tomorrow.day.toString().padLeft(2,'0')}";
-                        } else if (selectedDate != null) {
-                        date = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
-                        } else {
-                        Get.snackbar("Error", "Please select a date", snackPosition: SnackPosition.BOTTOM);
-                        return;
-                        }
-
-                        // Show Circular Loader
-                        Get.dialog(
-                        const Center(child: CircularProgressIndicator()),
-                        barrierDismissible: false,
-                        );
-
-                        // Auto hide after 3 seconds in case API takes too long
-                        Future.delayed(const Duration(seconds: 3), () {
-                        if (Get.isDialogOpen ?? false) Get.back();
-                        });
-
-                        try {
-                        await busController.searchBuses(
-                        origin: from,
-                        destination: to,
-                        date: date,
-                        token: authController.token.value,
-                        );
-
-                        if (Get.isDialogOpen ?? false) Get.back(); // close loader
-
-                        if (busController.busList.isNotEmpty) {
-                        Get.to(() => const SearchBusScreen());
-                        } else {
-                        Get.snackbar("No Buses", "No buses found for selected route and date.", snackPosition: SnackPosition.BOTTOM);
-                        }
-                        } catch (e) {
-                        if (Get.isDialogOpen ?? false) Get.back();
-                        Get.snackbar("Error", "Something went wrong while searching buses", snackPosition: SnackPosition.BOTTOM);
-                        }
-                      },
                     ),
 
 

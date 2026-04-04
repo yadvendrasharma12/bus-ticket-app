@@ -1,3 +1,4 @@
+import 'package:bus_booking_app/core/constant/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -14,10 +15,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   @override
   void initState() {
     super.initState();
-    // Simulate loading delay (e.g., fetching from API)
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
-        isLoading = false; // stop loading after delay
+        isLoading = false;
       });
     });
   }
@@ -27,19 +27,20 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back_ios),
+          icon:  Icon(Icons.arrow_back_ios,color: AppColors.textBlack,),
         ),
         automaticallyImplyLeading: false,
         title: Text(
           "Privacy Policy",
           style: GoogleFonts.poppins(
-            color: Colors.indigo.shade900,
+            color: Colors.black,
             fontWeight: FontWeight.w600,
           ),
         ),

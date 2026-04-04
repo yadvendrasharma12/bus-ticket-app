@@ -27,7 +27,7 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
-  bool _isObscure = true; // 👁️ for password visibility
+  bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ),
             contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
 
-            // 👁️ Password visibility icon (only for password fields)
             suffixIcon: widget.isPassword
                 ? IconButton(
               icon: Icon(

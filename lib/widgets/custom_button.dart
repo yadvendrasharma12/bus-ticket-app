@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+
+  final VoidCallback? onPressed;
 
   final Color? backgroundColor;
   final Color? textColor;
@@ -23,15 +24,26 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double buttonWidth = MediaQuery.of(context).size.width * 0.9;
-    final Color effectiveTextColor = textColor ?? Colors.white;
+
+    final bool isDisabled = onPressed == null || isLoading;
+
+    final Color effectiveBgColor = isDisabled
+        ? Colors.yellow.shade900
+        : (backgroundColor ?? Colors.white);
+
+    final Color effectiveTextColor = isDisabled
+        ? Colors.white70
+        : (textColor ?? Colors.white);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       width: buttonWidth,
       height: 45,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isDisabled ? null : onPressed,
+
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.white,
+          backgroundColor: effectiveBgColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
             side: BorderSide(
@@ -39,22 +51,26 @@ class CustomButton extends StatelessWidget {
               width: borderColor != null ? 1 : 0,
             ),
           ),
-          elevation: 2, // optional shadow
+          elevation: 2,
         ),
+
         child: isLoading
             ? const SizedBox(
           height: 20,
           width: 20,
           child: CircularProgressIndicator(
             strokeWidth: 2,
+            color: Colors.white,
           ),
         )
             : Text(
           text,
-          style: TextStyle(color: effectiveTextColor),
+          style: GoogleFonts.poppins(
+            color: effectiveTextColor,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 }
-

@@ -9,6 +9,7 @@ import '../../../../widgets/custom_textfield.dart';
 import '../../../controllers/auth_controllers.dart';
 import '../../../core/constant/app_colors.dart';
 import '../../../core/constant/app_style.dart';
+import '../../../widgets/custom_toast.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -68,7 +69,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return phoneRegex.hasMatch(phone);
   }
 
-  // ✅ Validate fields & call API
   void _validateAndSignUp() {
     FocusScope.of(context).unfocus();
 
@@ -78,51 +78,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    if (name.isEmpty ||
-        email.isEmpty ||
-        phone.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
-      Get.snackbar(
-        "Error",
-        "Please fill in all fields",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-        maxWidth: 330,
-        borderRadius: 8,//
-        snackStyle: SnackStyle.FLOATING,
-      );
+    // ✅ Name
+    if (name.isEmpty) {
+      AppToast.showError(context, "Name is required");
       return;
     }
 
+    // ✅ Email required
+    if (email.isEmpty) {
+      AppToast.showError(context, "Email is required");
+      return;
+    }
+
+    // ✅ Email valid
     if (!_isValidEmail(email)) {
-      Get.snackbar("Error", "Please enter a valid email address.",
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
+      AppToast.showError(context, "Enter a valid email");
       return;
     }
 
+    // ✅ Phone required
+    if (phone.isEmpty) {
+      AppToast.showError(context, "Mobile number is required");
+      return;
+    }
+
+    // ✅ Phone valid
     if (!_isValidPhone(phone)) {
-      Get.snackbar("Error", "Please enter a valid 10-digit phone number.",
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
+      AppToast.showError(context, "Mobile number must be 10 digits");
       return;
     }
 
+    // ✅ Password required
+    if (password.isEmpty) {
+      AppToast.showError(context, "Password is required");
+      return;
+    }
+
+    // ✅ Confirm password
+    if (confirmPassword.isEmpty) {
+      AppToast.showError(context, "Confirm password is required");
+      return;
+    }
+
+    // ✅ Match
     if (password != confirmPassword) {
-      Get.snackbar("Error", "Passwords do not match.",
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
+      AppToast.showError(context, "Passwords do not match");
       return;
     }
 
+    // ✅ Success API call
     authController.registerUser(
       name: name,
       email: email,
       mobile: "+91$phone",
       password: password,
       onSuccess: () {
+        AppToast.showSuccess(context, "Account created successfully ✅");
         Get.offAll(() => const BottomNavBarScreen());
       },
     );
@@ -140,14 +151,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
           onTap: () {
             Get.to(() => const LoginScreen());
           },
-          child: Text(
-            "Sign In",
-            style: AppStyle.appBarText(),
+          child: Align(
+            alignment: Alignment.centerLeft,
+
+            child: Text(
+              "Sign In",
+              style: AppStyle.appBarText(),
+            ),
           ),
         ),
         actions: [
           IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.close, color: Colors.black),
           ),
         ],

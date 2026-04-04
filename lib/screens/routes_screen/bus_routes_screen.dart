@@ -711,7 +711,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                         fare: totalFare,
                         travelDate:
                         widget.travelDate.toIso8601String(),
-                        seats: widget.selectedSeats, // ["FF","JI","JK"...]
+                        seats: widget.selectedSeats,
                       );
                     }
                   },
