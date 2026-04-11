@@ -14,7 +14,6 @@ class ContactService {
     }
 
     try {
-      // Get token from SharedPreferences
       final token = await MySharedPref.getToken();
       if (kDebugMode) {
         print("🟦 Token from SharedPreferences: $token");

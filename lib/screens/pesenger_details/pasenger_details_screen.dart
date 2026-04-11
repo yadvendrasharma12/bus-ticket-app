@@ -8,7 +8,7 @@ import '../../widgets/custom_button.dart';
 class PassengerDetailsScreen extends StatefulWidget {
   final OnboardBus busData;
   final List<String> selectedSeats;
-  final double farePerSeat; // 👈 yahi use karenge
+  final double farePerSeat;
   final DateTime travelDate;
 
   const PassengerDetailsScreen({
@@ -108,7 +108,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
   Widget build(BuildContext context) {
     final bus = widget.busData;
 
-    // Source / Destination resolve (ye sirf display + API ke liye)
+
     final String source =
     bus.searchOrigin.isNotEmpty ? bus.searchOrigin : bus.route.startPoint;
 
@@ -121,8 +121,6 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
     final String safeDestination =
     destination.isNotEmpty ? destination : bus.searchDestination;
 
-    /// ✅ Ab yaha koi distance-based calculation nahi –
-    /// seedha SelectSeatsScreen se aaya hua per seat price use karenge
     final double legFarePerSeat = widget.farePerSeat;
     final double totalFare =
         legFarePerSeat * widget.selectedSeats.length.toDouble();
@@ -131,7 +129,10 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
       appBar: AppBar(
         title: Text(
           "Passenger Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(
+              fontSize: 18,
+              color: Colors.black,
+              fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.indigo),
@@ -144,7 +145,6 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Summary
               Text(
                 "$safeSource → $safeDestination",
                 style: GoogleFonts.poppins(
@@ -178,7 +178,6 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
          ],),
               const SizedBox(height: 20),
 
-              // --- Form fields ---
               TextFormField(
                 controller: nameController,
                 textInputAction: TextInputAction.next,

@@ -15,7 +15,7 @@ class TicketController extends GetxController {
     try {
       isLoading.value = true;
 
-      // 🔥 Token Load
+
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString("token") ?? "";
 

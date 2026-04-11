@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bus_booking_app/widgets/custom_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -7,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CancelBookingController extends GetxController {
   var isLoading = false.obs;
 
-  Future<void> cancelBooking(String bookingId, String reason) async {
+  Future<void> cancelBooking(String bookingId, String reason,context) async {
     isLoading.value = true;
     final url = Uri.parse(
         "https://api.grtourtravels.com/api/bookings/ticket/$bookingId/cancel");
@@ -64,6 +65,7 @@ class CancelBookingController extends GetxController {
         if (kDebugMode) {
           print("✅ Ticket cancelled successfully");
         }
+        AppToast.showSuccess(context, "Ticket cancelled successfully");
         Get.snackbar("Success", "Ticket cancelled successfully",
             snackPosition: SnackPosition.BOTTOM);
       } else {

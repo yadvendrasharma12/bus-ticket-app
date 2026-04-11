@@ -42,6 +42,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.w600,
+            fontSize: 18
           ),
         ),
         centerTitle: true,

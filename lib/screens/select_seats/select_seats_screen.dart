@@ -11,7 +11,7 @@ class SelectSeatsScreen extends StatefulWidget {
   final OnboardBus busData;
   final Map<String, dynamic> rawBusJson;
   final Map<String, dynamic> onboardJson;
-  final double farePerSeat; // 👈 yahi 223 aa raha hai
+  final double farePerSeat;
 
   const SelectSeatsScreen({
     super.key,
@@ -77,7 +77,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
     final int cols = layout['columns'] ?? 0;
     final List<dynamic> map = layout['map'] ?? [];
 
-    final double farePerSeat = widget.farePerSeat; // 👈 yehi aage pass hoga
+    final double farePerSeat = widget.farePerSeat;
 
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +93,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            /// Route Name
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -110,7 +109,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 8),
 
-            /// Fare per seat
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -124,7 +122,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 4),
 
-            /// Selected seats info
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -138,7 +135,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
             ),
             const SizedBox(height: 16),
 
-            /// Seat layout
             Expanded(
               child: ListView.builder(
                 itemCount: rows,
@@ -173,7 +169,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                         if (isBooked) {
                           backgroundColor = Colors.grey.shade400;
                         } else if (isSelected) {
-                          backgroundColor = Colors.green;
+                          backgroundColor = Colors.green.shade200;
                         } else if (!enabled) {
                           backgroundColor = Colors.grey.shade200;
                         } else {
@@ -229,7 +225,6 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
 
             const SizedBox(height: 10),
 
-            /// Continue Button
             CustomButton(
               backgroundColor: Colors.yellow.shade800,
               text: "Continue",

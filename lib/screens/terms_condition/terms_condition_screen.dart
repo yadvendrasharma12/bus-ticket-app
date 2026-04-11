@@ -41,6 +41,7 @@ class _TermsConditionScreenState extends State<TermsConditionScreen> {
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.w600,
+            fontSize: 18
           ),
         ),
         centerTitle: true,

@@ -68,9 +68,78 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
                 const SizedBox(height: 30),
 
-                // 🔴 Logout
+
                 GestureDetector(
-                  onTap: () => authController.logout(),
+                  onTap: () {
+
+                      Get.dialog(
+                        Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          insetPadding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+
+                                Text(
+                                  "Confirm Logout",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 10),
+
+                                Text(
+                                  "Are you sure you want to logout?",
+                                  textAlign: TextAlign.center,
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                Row(
+                                  children: [
+
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          Get.back();
+                                        },
+                                        child: const Text("No"),
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 10),
+
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green, // 👉 green color
+                                        ),
+                                        onPressed: () {
+                                          Get.back();
+                                          authController.logout();
+                                        },
+                                        child: const Text("Yes"),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+
+                  },
                   child: Container(
                     height: 45,
                     width: width * 0.4,

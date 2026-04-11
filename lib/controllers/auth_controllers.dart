@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bus_booking_app/screens/auth/login/login_screen.dart';
 import 'package:bus_booking_app/utils/apis_url.dart';
 import 'package:bus_booking_app/utils/shared_prefs.dart';
 import 'package:bus_booking_app/widgets/custom_toast.dart';
@@ -223,7 +224,7 @@ class AuthController extends GetxController {
           print("⚠️ Token not found in response");
         }
 
-        onSuccess(); // ✅ IMPORTANT (you missed this before)
+        onSuccess();
       } else {
         print("❌ Login Failed");
         print("❌ Message: ${data["message"]}");
@@ -243,7 +244,7 @@ class AuthController extends GetxController {
 
   Future<void> logout() async {
     await MySharedPref.clearToken();
-    Get.offAll(() => const WelcomeScreen());
+    Get.offAll(() => LoginScreen());
   }
 
 

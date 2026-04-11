@@ -30,7 +30,7 @@ class BusListScreen extends StatelessWidget {
         title: Text(
           "Upcoming Buses",
           style: GoogleFonts.poppins(
-            color: Colors.indigo.shade900,
+            color: Colors.black,
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
@@ -141,6 +141,7 @@ class BusListScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       height: 60,
@@ -236,39 +237,41 @@ class BusListScreen extends StatelessWidget {
                                   color: Colors.indigo.shade900,
                                 ),
                               ),
+
                             ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Distance: $totalDistance km",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[700],
+                            ),
                           ),
                         ],
                       ),
                     )
                   ],
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.route, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        stopsText,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Distance: $totalDistance km",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
-                ),
+                // const SizedBox(height: 10),
+                // Row(
+                //   children: [
+                //     const Icon(Icons.route, size: 16, color: Colors.grey),
+                //     const SizedBox(width: 4),
+                //     Expanded(
+                //       child: Text(
+                //         stopsText,
+                //         style: GoogleFonts.poppins(
+                //           fontSize: 12,
+                //           color: Colors.grey[700],
+                //         ),
+                //         maxLines: 2,
+                //         overflow: TextOverflow.ellipsis,
+                //       ),
+                //     ),
+                //   ],
+                // ),
+
               ],
             ),
           ),

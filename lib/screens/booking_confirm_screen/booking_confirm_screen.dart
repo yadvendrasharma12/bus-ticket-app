@@ -20,7 +20,6 @@ class BookingConfirmationScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // ✅ Success Icon
                 Container(
                   width: 120,
                   height: 120,

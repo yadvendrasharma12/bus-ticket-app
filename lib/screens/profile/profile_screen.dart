@@ -239,7 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     // ✅ Success Toast
-    AppToast.showSuccess(context, "Profile updated successfully ✅");
+    AppToast.showSuccess(context, "Profile updated successfully");
   }
   @override
   Widget build(BuildContext context) {
@@ -250,8 +250,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           "Edit Profile",
           style: GoogleFonts.poppins(
             fontSize: 18,
-            color: Colors.indigo[900],
-            fontWeight: FontWeight.w800,
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
@@ -259,7 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
       body: _loading
-          ? const Center(                         // 👈 page load / save dono time
+          ? const Center(
         child: CircularProgressIndicator(
           color: Colors.indigo,
         ),

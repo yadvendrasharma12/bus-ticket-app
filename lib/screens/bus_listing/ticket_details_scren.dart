@@ -61,10 +61,13 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       appBar: AppBar(
         title: Text(
           "Ticket Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(
+              fontSize: 18,
+              color: Colors.black,
+              fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.indigo),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -83,7 +86,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionTitle("🎟 Ticket Information"),
+              _sectionTitle("Ticket Information"),
               _infoText("Booking ID", _formatBookingId(ticket.bookingId)),
               _infoText(
                 "Schedule ID",
@@ -113,7 +116,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
               _infoText("Fare", "₹${ticket.bookingDetails.fare}"),
               const SizedBox(height: 20),
 
-              _sectionTitle("🧍 Passenger Information"),
+              _sectionTitle("Passenger Information"),
               _infoText("Name", ticket.passenger.name),
               _infoText("Age", ticket.passenger.age.toString()),
               _infoText("Gender", ticket.passenger.gender),
@@ -124,7 +127,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
               _infoText("State", ticket.passenger.state),
               const SizedBox(height: 20),
 
-              _sectionTitle("🚌 Bus Information"),
+              _sectionTitle("Bus Information"),
               _infoText("Bus Name", ticket.bus.busName),
               _infoText("Bus Number", ticket.bus.busNumber),
               _infoText(
@@ -132,12 +135,12 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
               _infoText("AC Type", ticket.bus.acType),
               const SizedBox(height: 20),
 
-              _sectionTitle("👨‍✈️ Bus Staff Information"),
+              _sectionTitle("Bus Staff Information"),
               _infoText("Driver", ticket.crew.driverName),
               _infoText("Conductor", ticket.crew.conductorName),
               const SizedBox(height: 20),
 
-              _sectionTitle("🛣 Travel Information"),
+              _sectionTitle("Travel Information"),
               _infoText("From", ticket.travel.source),
               _infoText("To", ticket.travel.destination),
               _infoText("Route", ticket.travel.routeName),

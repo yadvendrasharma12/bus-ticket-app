@@ -55,7 +55,7 @@ class BusRoutesScreen extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.indigo.shade900,
+            color: Colors.black,
           ),
         ),
         backgroundColor: Colors.white,
@@ -222,9 +222,11 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(bus.bus?.busName ?? "Select Seats"),
+        title: Text(bus.bus?.busName ?? "Select Seats",
+          style: TextStyle(color: Colors.black,fontSize: 18),
+        ),
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.indigo),
+        iconTheme:  IconThemeData(color: Colors.indigo),
       ),
       backgroundColor: const Color(0xFFF5F7FA),
       body: Padding(
@@ -308,7 +310,7 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
                         if (isBooked) {
                           bgColor = Colors.grey.shade400;
                         } else if (isSelected) {
-                          bgColor = Colors.green;
+                          bgColor = Colors.green.shade200;
                         } else {
                           bgColor = Colors.white;
                         }
@@ -395,10 +397,9 @@ class _SelectSeatsScreenState extends State<SelectSeatsScreen> {
   }
 }
 
-/// -------------------- PASSENGER DETAILS SCREEN --------------------
 
 class PassengerDetailsScreen extends StatefulWidget {
-  final List<String> selectedSeats; // FF, JK, JII ...
+  final List<String> selectedSeats;
   final UpCommingBus busData;
   final double farePerSeat;
   final DateTime travelDate;
@@ -515,7 +516,10 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
       appBar: AppBar(
         title: Text(
           "Passenger Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(
+              fontSize: 18,
+              color: Colors.black,
+              fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.indigo),
@@ -680,7 +684,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
 
               Obx(
                     () => bookingController.isLoading.value
-                    ? const CircularProgressIndicator()
+                    ?  Center(child: CircularProgressIndicator())
                     : CustomButton(
                   backgroundColor: Colors.yellow.shade800,
                   text: "Confirm Booking",

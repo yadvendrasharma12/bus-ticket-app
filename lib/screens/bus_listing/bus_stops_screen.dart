@@ -23,7 +23,7 @@ class BusStopsScreen extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.indigo.shade900,
+            color: Colors.black,
           ),
         ),
         backgroundColor: Colors.white,
@@ -51,12 +51,14 @@ class BusStopsScreen extends StatelessWidget {
                   ],
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Icon(Icons.location_on, color: Colors.indigo),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
                             stop.name,

@@ -61,9 +61,11 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
         automaticallyImplyLeading: false,
         leading: IconButton(onPressed: (){
           Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back_ios_new_outlined,color: Colors.black,)),
-        title: Text("Contact Support", style: GoogleFonts.poppins(
-          color: Colors.indigo.shade900
+        }, icon: Icon(Icons.arrow_back_ios_new_outlined,
+          color: Colors.black,)),
+        title: Text("Contact Support",
+            style: GoogleFonts.poppins(
+          color: Colors.black
         )),
         backgroundColor: Colors.white,
       ),
@@ -74,14 +76,14 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               padding: const EdgeInsets.all(16),
               child: ListView(
                 children: [
-                  Center(
-                    child: Text(
-                      contactInfo!.businessName,
-                      style: GoogleFonts.poppins(
-                          fontSize: 20, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
+                  // Center(
+                  //   child: Text(
+                  //     contactInfo!.businessName,
+                  //     style: GoogleFonts.poppins(
+                  //         fontSize: 20, fontWeight: FontWeight.w600),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 25),
                   _buildContactRow(
                     title: "Phone",
                     value: contactInfo!.contactNumber,

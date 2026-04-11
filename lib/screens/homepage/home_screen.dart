@@ -43,12 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _saveRecentJourneys() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('recentFrom', recentFrom);
-    await prefs.setStringList('recentTo', recentTo);
-  }
-
   Future<void> _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -417,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             if (Get.isDialogOpen ?? false) Get.back();
 
                             if (busController.busList.isNotEmpty) {
-                              AppToast.showSuccess(context, "Buses found ✅");
+                              AppToast.showSuccess(context, "Buses found");
                               Get.to(() => const SearchBusScreen());
                             } else {
                               AppToast.showInfo(context, "No buses found");
@@ -431,9 +425,58 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                     ),
 
+                    SizedBox(height: 20),
 
+                    Text(
+                      "Popular Routes",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.indigo.shade900,
+                      ),
+                    ),
 
+                    SizedBox(height: 10),
 
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        _routeChip("Delhi", "Jaipur"),
+                        _routeChip("Delhi", "Agra"),
+                        _routeChip("Delhi", "Lucknow"),
+                        _routeChip("Delhi", "Chandigarh"),
+                      ],
+                    ),
+
+                    SizedBox(height: 30),
+
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.orange.shade300, Colors.orange.shade600],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.local_offer, color: Colors.white),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              "Get 10% OFF on your first booking!",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height:20,)
                   ],
                 ),
               ),
@@ -639,5 +682,30 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hour >= 12 && hour < 17) return "Good Afternoon";
     if (hour >= 17 && hour < 21) return "Good Evening";
     return "Good Night";
+  }
+  Widget _routeChip(String from, String to) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          fromController.text = from;
+          toController.text = to;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.indigo.shade50,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.indigo),
+        ),
+        child: Text(
+          "$from → $to",
+          style: GoogleFonts.poppins(
+            color: Colors.indigo.shade900,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
   }
 }

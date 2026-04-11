@@ -55,7 +55,7 @@ class _DriverScreenState extends State<DriverScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.indigo[900],
+            color: Colors.black,
           ),
         ),
       ),

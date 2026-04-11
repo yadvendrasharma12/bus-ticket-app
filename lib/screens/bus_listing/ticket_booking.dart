@@ -1,4 +1,5 @@
 import 'package:bus_booking_app/screens/bus_listing/ticket_details_scren.dart';
+import 'package:bus_booking_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +43,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         title: Text(
           "Available Tickets",
           style: GoogleFonts.poppins(
-            color: Colors.indigo.shade900,
+            color: Colors.black,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -74,7 +76,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             final bool canEditReviewButton = isConfirmed && (ticket.rating ?? 0) > 0;
 
 
-            final bool canShowCancelButton = isActive || isCancelled;
+           // final bool canShowCancelButton = isActive || isCancelled;
+            final bool canShowCancelButton = isActive;
 
             return Card(
               shape: RoundedRectangleBorder(
@@ -184,6 +187,37 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 ),
                               ),
                             ),
+                            SizedBox(width: 5,),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: isCancelled
+                                    ? null
+                                    : () {
+                                  _handleCancelBooking(ticket);
+                                },
+
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isCancelled
+                                      ? Colors.red.shade400
+                                      : Colors.red.shade700,
+
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+
+                                child: Text(
+                                  isCancelled ? "Cancelled" : "Cancel Ticket",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    color:isCancelled ?Colors.black:Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: 8),
 
                             if (canShowPostReviewButton || canEditReviewButton) ...[
@@ -212,32 +246,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                   ),
                                 ),
                               ),
-                            ] else if (canShowCancelButton) ...[
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    _handleCancelBooking(ticket);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red.shade700,
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Cancel Ticket",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ] else
-                              const SizedBox.shrink(),
+                            ],
+
 
                             const SizedBox(width: 8),
 
@@ -249,11 +259,9 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                   if (phoneNumber != null && phoneNumber.isNotEmpty) {
                                     _callBusStaff(phoneNumber);
                                   } else {
-                                    Get.snackbar(
-                                      "Not Available",
-                                      "Driver number not available",
-                                      snackPosition: SnackPosition.BOTTOM,
-                                    );
+
+                                    AppToast.showError(context, "Driver number not available");
+
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -313,8 +321,11 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       ],
     );
   }
+
   void _handleCancelBooking(dynamic ticket) {
     TextEditingController reasonController = TextEditingController();
+
+
 
     showDialog(
       context: context,
@@ -325,7 +336,9 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           ),
           title: Text(
             "Cancel Booking",
+
             style: GoogleFonts.poppins(
+              fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -338,7 +351,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Close"),
+              child:  Text("Close"),
             ),
             Obx(
                   () => cancelController.isLoading.value
@@ -354,17 +367,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 onPressed: () {
                   final reason = reasonController.text.trim();
                   if (reason.length < 5) {
-                    Get.snackbar(
-                      "Error",
-                      "Reason must be at least 5 characters",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
+                    AppToast.showError(context, "Reason must be at least 5 characters");
+
                     return;
                   }
 
-                  cancelController.cancelBooking(ticket.bookingId, reason).then((_) {
+                  cancelController.cancelBooking(ticket.bookingId, reason,context).then((_) {
                     Navigator.pop(context);
-                    controller.fetchTickets(); // refresh list
+                    controller.fetchTickets();
                   });
                 },
                 child: const Text("Confirm"),

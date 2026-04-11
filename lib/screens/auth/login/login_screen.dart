@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
       email: email,
       password: password,
       onSuccess: () {
-        AppToast.showSuccess(context, "Login successful ✅");
+        AppToast.showSuccess(context, "Login successful");
         Get.offAll(() => const BottomNavBarScreen());
       },
     );

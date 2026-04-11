@@ -27,7 +27,6 @@ class _SearchBusScreenState extends State<SearchBusScreen>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     busController.dispose();
   }
@@ -42,7 +41,7 @@ class _SearchBusScreenState extends State<SearchBusScreen>
         title: Text(
           "Available Buses",
           style: GoogleFonts.poppins(
-            color: Colors.indigo.shade900,
+            color: Colors.black,
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
@@ -80,13 +79,13 @@ class _SearchBusScreenState extends State<SearchBusScreen>
         return TabBarView(
           controller: _tabController,
           children: [
-            _buildBusList(buses), // ALL
+            _buildBusList(buses),
             _buildBusList(
               buses.where((b) => (b.bus?.acType.toLowerCase() ?? '') == 'ac').toList(),
-            ), // AC
+            ),
             _buildBusList(
               buses.where((b) => (b.bus?.acType.toLowerCase() ?? '') == 'non-ac').toList(),
-            ), // NON AC
+            ),
           ],
         );
       }),
@@ -162,7 +161,6 @@ class _SearchBusScreenState extends State<SearchBusScreen>
         final route = bus.route;
         final pricing = bus.pricing;
 
-        // ✅ From / To
         final from = (bus.searchOrigin.isNotEmpty)
             ? bus.searchOrigin
             : route.startPoint;
@@ -173,27 +171,23 @@ class _SearchBusScreenState extends State<SearchBusScreen>
             ? bus.searchDestination
             : route.finalDestination;
 
-        // ✅ Departure Time
         final departureTime = bus.originalDepartureTime.isNotEmpty
             ? bus.originalDepartureTime
             : route.originalDepartureTime;
 
-        // ✅ Distance & Duration
         final totalDistance = route.totalDistance;
         final totalMinutes = route.estimatedTravelTime;
         final hours = totalMinutes ~/ 60;
         final minutes = totalMinutes % 60;
         final durationText = "${hours}h ${minutes}m";
 
-        // ✅ Stops summary
+
         final stopNames = route.stops.map((s) => s.name).toList();
         final stopsText = stopNames.join(" • ");
 
-        // ✅ YAHAN NEW FARE LOGIC: baseAmount + distance * perKmRate
         double farePerSeat = 0;
 
         if (pricing != null && route.stops.isNotEmpty) {
-          // 1) Source/destination resolve – same jaisa PassengerDetailsScreen me
           final String source = bus.searchOrigin.isNotEmpty
               ? bus.searchOrigin
               : route.startPoint;
@@ -240,14 +234,12 @@ class _SearchBusScreenState extends State<SearchBusScreen>
 
             farePerSeat = baseAmount + legDistance * perKmRate;
           } else {
-            // fallback: show full route fare
             farePerSeat = (pricing.totalFare).toDouble();
           }
         } else {
           farePerSeat = pricing?.totalFare.toDouble() ?? 0;
         }
 
-        // 👇 yahi se aage tumhara UI same rahega
         return GestureDetector(
           onTap: () => Get.to(
                 () => BusStopsScreen(
@@ -272,7 +264,6 @@ class _SearchBusScreenState extends State<SearchBusScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ... tumhara existing UI as-is ...
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -377,41 +368,21 @@ class _SearchBusScreenState extends State<SearchBusScreen>
                               ),
                             ],
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Distance: $totalDistance km",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[700],
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.route,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        stopsText,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Distance: $totalDistance km",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
-                ),
+
+
               ],
             ),
           ),
